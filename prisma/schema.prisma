@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  createdAt    DateTime      @default(now())
+  topics       Topic[]
+  quizSessions QuizSession[]
+
+  @@map("users")
+}
+
+model Topic {
+  id           String        @id @default(cuid())
+  user         User          @relation(fields: [userId], references: [id])
+  userId       String
+  title        String
+  createdAt    DateTime      @default(now())
+  questions    Question[]
+  quizSessions QuizSession[]
+
+  @@map("topics")
+}
+
+model Question {
+  id               String            @id @default(cuid())
+  topic            Topic             @relation(fields: [topicId], references: [id])
+  topicId          String
+  body             String
+  createdAt        DateTime          @default(now())
+  answerOptions    AnswerOption[]
+  sessionQuestions SessionQuestion[]
+  sessionAnswers   SessionAnswer[]
+
+  @@map("questions")
+}
+
+model AnswerOption {
+  id             String          @id @default(cuid())
+  question       Question        @relation(fields: [questionId], references: [id])
+  questionId     String
+  body           String
+  position       Int
+  isCorrect      Boolean         @default(false)
+  sessionAnswers SessionAnswer[]
+
+  @@map("answer_options")
+}
+
+model QuizSession {
+  id               String            @id @default(cuid())
+  user             User              @relation(fields: [userId], references: [id])
+  userId           String
+  topic            Topic             @relation(fields: [topicId], references: [id])
+  topicId          String
+  status           String            @default("in_progress")
+  createdAt        DateTime          @default(now())
+  sessionQuestions SessionQuestion[]
+  sessionAnswer    SessionAnswer[]
+
+  @@map("quiz_sessions")
+}
+
+model SessionQuestion {
+  id            String      @id @default(cuid())
+  quizSession   QuizSession @relation(fields: [quizSessionId], references: [id])
+  quizSessionId String
+  question      Question    @relation(fields: [questionId], references: [id])
+  questionId    String
+  position      Int
+
+  @@map("session_questions")
+}
+
+model SessionAnswer {
+  id             String       @id @default(cuid())
+  quizSession    QuizSession  @relation(fields: [quizSessionId], references: [id])
+  quizSessionId  String
+  question       Question     @relation(fields: [questionId], references: [id])
+  questionId     String
+  answerOption   AnswerOption @relation(fields: [answerOptionId], references: [id])
+  answerOptionId String
+  isCorrect      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@map("session_answers")
+}
