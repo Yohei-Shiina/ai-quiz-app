@@ -3,6 +3,17 @@ name: Claude Code Review
 on:
   pull_request:
     types: [ready_for_review]
+    paths-ignore:
+      - 'components/ui/**'
+      - '*.lock'
+      - 'prisma/migrations/**'
+      - 'public/**'
+      - '.github/**'
+      - '**/*.md'
+      - 'eslint.config.*'
+      - 'tsconfig.json'
+      - 'postcss.config.*'
+      - 'components.json'
   issue_comment:
     types: [created]
   pull_request_review_comment:
@@ -43,6 +54,10 @@ jobs:
 
             Review ONLY the changed lines in the PR diff.
             Do NOT read files beyond what is shown in the diff.
+            Ignore auto-generated or config-only files: components/ui/,
+            prisma/migrations/, public/, *.lock, *.md, tsconfig.json,
+            eslint.config.*, postcss.config.*, components.json.
+            Focus on how shadcn/ui components are used in application code, not the components themselves.
 
             Evaluate from three perspectives and label each finding clearly:
 
