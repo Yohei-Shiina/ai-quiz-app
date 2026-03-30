@@ -1,0 +1,39 @@
+name: Claude Review
+
+on:
+  pull_request:
+    types: [ready_for_review]
+    paths-ignore:
+      - "components/ui/**"
+      - "*.lock"
+      - "prisma/migrations/**"
+      - "public/**"
+      - ".github/**"
+      - "**/*.md"
+      - "eslint.config.*"
+      - "tsconfig.json"
+      - "postcss.config.*"
+      - "components.json"
+
+jobs:
+  auto-review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          track_progress: true
+          prompt: |
+            Review ONLY the changed lines in the PR diff.
+            Do NOT read files beyond what is shown in the diff.
+            Post inline comments on specific lines where applicable.
+            End with a top-level summary comment grouped by perspective.
+            If a perspective has no issues, state "No issues found" for that section.
