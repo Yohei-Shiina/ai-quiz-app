@@ -70,7 +70,7 @@ export default function LoginPage() {
         </div>
         <Card className="py-6">
           <CardHeader className="px-6">
-            <CardTitle className="font-bold">Welcome</CardTitle>
+            <CardTitle>Welcome</CardTitle>
             <CardDescription>Sign in with Google to continue</CardDescription>
           </CardHeader>
           <CardContent className="px-6">
