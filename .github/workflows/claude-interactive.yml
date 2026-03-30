@@ -19,7 +19,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      issues: write
+      issues:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
