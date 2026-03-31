@@ -29,12 +29,11 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: |
+          claude_args: >-
             --max-turns 10
             --dangerously-skip-permissions-code-review
             --allowed-tools Read,Edit,LS,Find,Bash(git:*),Bash(gh:*)
-            --message 1. Use ONLY tools in '--allowed-tools'. In 'Bash', ONLY 'git' and 'gh' are allowed.
-              2. If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP.
+            --message "Use ONLY tools in '--allowed-tools'. In 'Bash', ONLY 'git' and 'gh' are allowed. If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP."
         env:
           GH_TOKEN: ${{ github.token }}
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
