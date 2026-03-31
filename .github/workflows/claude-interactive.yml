@@ -26,7 +26,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: anthropics/claude-code-action@v1
+      - uses: anthropics/claude-code-action@v1.0.51
+        # v1.0.69以降でexit code 1のバグあり (issue #1013/#947)
+        # 安定確認済みの v1.0.51 に固定
         with:
           base_branch: dev
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
