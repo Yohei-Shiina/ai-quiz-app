@@ -32,7 +32,6 @@ jobs:
           claude_args: |
             --max-turns 10
             --dangerously-skip-permissions-code-review
-            --permission-mode dontAsk
             --allowed-tools Read,Edit,LS,Find,Bash(git:*),Bash(gh:*)
             --message 1. Use ONLY tools in '--allowed-tools'. In 'Bash', ONLY 'git' and 'gh' are allowed.
               2. If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP.
