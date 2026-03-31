@@ -24,16 +24,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - uses: anthropics/claude-code-action@v1
         with:
+          base_branch: dev
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: >-
             --max-turns 10
             --dangerously-skip-permissions-code-review
             --allowed-tools Read,Edit,LS,Find,Bash(git:*),Bash(gh:*)
             --message "Use ONLY tools in '--allowed-tools'. In 'Bash', ONLY 'git' and 'gh' are allowed. If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP."
+          track_progress: true
         env:
           GH_TOKEN: ${{ github.token }}
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
