@@ -37,6 +37,7 @@ jobs:
             --dangerously-skip-permissions-code-review
             --allowed-tools Read,Edit,LS,Find,Bash(git:*),Bash(gh:*)
           track_progress: true
+          show_full_output: true
         env:
           GH_TOKEN: ${{ github.token }}
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
