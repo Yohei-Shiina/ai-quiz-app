@@ -34,15 +34,21 @@ premature or missing abstraction.
 - Quality / Architecture: **MUST** / **SHOULD** / **NICE-TO-HAVE**
 - Security: **CRITICAL** / **HIGH** / **MEDIUM** / **LOW**
 
+# Tool Usage in CI
+
+If a tool call returns a permission error (EACCES), do NOT retry
+the same tool. Immediately fall back to an alternative approach.
+
 # Before Committing Code Changes
 
 When you have edited source files, run these checks before committing:
+
 1. pnpm run lint
-2. pnpm exec tsc --noEmit
+2. pnpm exec tsc --noEmit --skipLibCheck
 
 # Security Constraints
 
-- Do not modify .env or .env.* files
+- Do not modify .env or .env.\* files
 - Do not modify workflow files (.github/)
 - Do not push directly to main
 - Do not install new packages without explicit approval
