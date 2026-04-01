@@ -38,12 +38,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # Fix ripgrep binary losing execute permission after cache restore
-      - name: Fix ripgrep permissions
-        run: |
-          find /home/runner/work/_actions -name "rg" -type f \
-            -exec chmod +x {} \; 2>/dev/null || true
-
       - uses: anthropics/claude-code-action@v1
         with:
           base_branch: dev
