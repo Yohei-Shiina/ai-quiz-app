@@ -75,9 +75,11 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: >-
             --max-turns 20
-            --allowed-tools "Read,Edit,LS,Find,Bash(git:*),Bash(gh:*)"
             --dangerously-skip-permissions
+            --allowed-tools "Read,Edit,LS,Bash(git:*),Bash(gh:*)"
+            --disallowed-tools "Find,Glob,Grep"
           prompt: |
+            Grep, Glob, and Find tools are unavailable. Use Bash(grep) and Bash(find) ONLY for searching.
             After implementing the fix, create a PR automatically.
             - Follow the title convention in docs/pr-convention.md
             - Do not pass --base (already configured)
