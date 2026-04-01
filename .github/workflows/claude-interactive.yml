@@ -26,22 +26,29 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10.28.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.12.0
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
       - uses: anthropics/claude-code-action@v1
         with:
           base_branch: dev
+          branch_prefix: "claude-"
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: >-
-            --max-turns 10
-          # claude_args: >-
-          #   --max-turns 10
-          #   --dangerously-skip-permissions-code-review
-          #   --allowed-tools Read,Edit,LS,Find,Bash(git:*),Bash(gh:*)
-          # prompt: |
-          #   Use ONLY tools in '--allowed-tools'.
-          #   In 'Bash', ONLY 'git' and 'gh' are allowed.
-          #   If any tool/command is denied, DO NOT retry.
-          #   Use other allowed tools or report the blocker and STOP.
+            --max-turns 20
+            --allowed-tools "Read,Edit,LS,Find,Bash(git:*),Bash(gh:*)"
+            --dangerously-skip-permissions
           track_progress: true
+          show_full_output: true
+
         env:
           GH_TOKEN: ${{ github.token }}
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
