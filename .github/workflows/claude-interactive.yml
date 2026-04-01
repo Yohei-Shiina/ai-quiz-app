@@ -31,8 +31,12 @@ jobs:
           base_branch: dev
           branch_prefix: "claude-"
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: "--max-turns 20 --dangerously-skip-permissions-code-review --allowed-tools 'Read,Edit,LS,Find,Bash(git:*),Bash(gh:*)'"
+          claude_args: >-
+            --max-turns 20
+            --allowed-tools "Read,Edit,LS,Find,Bash(git:*),Bash(gh:*)"
+            --dangerously-skip-permissions
           track_progress: true
           show_full_output: true
+
         env:
           GH_TOKEN: ${{ github.token }}
