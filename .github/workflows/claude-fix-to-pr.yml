@@ -61,7 +61,6 @@ jobs:
             Always create a new branch from dev with the name starting with "claude-".
             You are working on issue #${{ github.event.issue.number }}. Read it with gh issue view ${{ github.event.issue.number }}, implement the fix, then create a PR using gh pr create --base dev
             - Reference the issue number in the PR body
-          show_full_output: true
 
         env:
           GH_TOKEN: ${{ github.token }}
