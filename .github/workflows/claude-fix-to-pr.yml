@@ -3,18 +3,14 @@ name: Claude
 on:
   issue_comment:
     types: [created]
-  pull_request_review_comment:
-    types: [created]
 
 jobs:
   claude-fix-to-pr:
     if: |
       github.actor != 'claude[bot]' &&
       github.actor != 'github-actions[bot]' &&
-      (
-        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude-fix-to-pr')) ||
-        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude-fix-to-pr'))
-      )
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '@claude-fix-to-pr')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -61,8 +57,8 @@ jobs:
             --allowed-tools "Read,Edit,LS,Bash(git:*),Bash(gh:*)"
           prompt: |
             If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP.
-            Always create a new branch from dev using the configured branch_prefix. Do not reuse existing branches.
-            Implement the fix described in the issue, then create a PR using gh pr create.
+            Always create a new branch from dev with the name starting with "claude-".
+            You are working on issue #${{ github.event.issue.number }}. Read it with gh issue view ${{ github.event.issue.number }}, implement the fix, then create a PR using gh pr create.
             - Do not pass --base (already configured)
             - Reference the issue number in the PR body
           show_full_output: true
