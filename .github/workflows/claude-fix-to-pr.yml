@@ -50,6 +50,7 @@ jobs:
       - name: 🤖 Claude Code Action
         uses: anthropics/claude-code-action@v1
         with:
+          model: claude-opus-4-6
           base_branch: dev
           branch_prefix: "claude-"
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -60,7 +61,6 @@ jobs:
             If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP.
             Always create a new branch from dev with the name starting with "claude-".
             You are working on issue #${{ github.event.issue.number }}. Read it with gh issue view ${{ github.event.issue.number }}, implement the fix, then create a PR using gh pr create --base dev
-            - Do not pass --base (already configured)
             - Reference the issue number in the PR body
           show_full_output: true
 
