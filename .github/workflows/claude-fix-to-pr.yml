@@ -25,27 +25,31 @@ jobs:
       - name: 🚀 Acknowledge Trigger
         run: |
           gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
-          -f "content=rocket"
+          -f "content=rocket" || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/checkout@v6
+      - name: 🚚 Checkout
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v5
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v5
         with:
           version: 10.28.0
 
-      - uses: actions/setup-node@v6
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v6
         with:
           node-version-file: ".node-version"
           cache: "pnpm"
 
-      - name: Install dependencies
+      - name: 🛠️ Install dependencies
         run: pnpm install
 
-      - uses: anthropics/claude-code-action@v1
+      - name: 🤖 Claude Code Action
+        uses: anthropics/claude-code-action@v1
         with:
           base_branch: dev
           branch_prefix: "claude-"
