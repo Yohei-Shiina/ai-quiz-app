@@ -64,6 +64,7 @@ jobs:
             - PR title and body format: follow CLAUDE.md
             - Do not pass --base (already configured)
             - Reference the issue number in the PR body
+          show_full_output: true
 
         env:
           GH_TOKEN: ${{ github.token }}
