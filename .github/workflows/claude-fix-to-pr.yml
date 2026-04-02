@@ -12,7 +12,7 @@ jobs:
       github.actor != 'claude[bot]' &&
       github.actor != 'github-actions[bot]' &&
       github.event_name == 'issue_comment' &&
-      contains(github.event.comment.body, '@claude-fix-to-pr')
+      contains(github.event.comment.body, '@claude-fix-issue')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -56,7 +56,6 @@ jobs:
           claude_args: >-
             --max-turns 20
             --allowed-tools "Read,Edit,Glob,Bash(gh:*),Bash(git:*),Bash(cat:*),Bash(find:*)"
-            --model claude-opus-4-6
           prompt: |
             If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP.
             Always create a new branch from dev with the name starting with "claude-".
