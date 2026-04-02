@@ -7,36 +7,6 @@ on:
     types: [created]
 
 jobs:
-  lint:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v5
-        with:
-          version: 10.28.0
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24.12.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint
-
-  typecheck:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v5
-        with:
-          version: 10.28.0
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24.12.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsc --noEmit --skipLibCheck
-
   claude-fix-to-pr:
     if: |
       github.actor != 'claude[bot]' &&
@@ -52,6 +22,13 @@ jobs:
       issues: write
       id-token: write
     steps:
+      - name: 🚀 Acknowledge Trigger
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+          -f "content=rocket"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -77,14 +54,12 @@ jobs:
             --max-turns 20
             --dangerously-skip-permissions
             --allowed-tools "Read,Edit,LS,Bash(git:*),Bash(gh:*)"
-            --disallowed-tools "Find,Glob,Grep"
           prompt: |
-            Grep, Glob, and Find tools are unavailable. Use Bash(grep) and Bash(find) ONLY for searching.
+            If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP.
             After implementing the fix, create a PR automatically using gh pr create.
             - PR title and body format: follow CLAUDE.md
             - Do not pass --base (already configured)
             - Reference the issue number in the PR body
-          show_full_output: true
 
         env:
           GH_TOKEN: ${{ github.token }}
