@@ -61,8 +61,8 @@ jobs:
             --allowed-tools "Read,Edit,LS,Bash(git:*),Bash(gh:*)"
           prompt: |
             If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP.
-            After implementing the fix, create a PR automatically using gh pr create.
-            - PR title and body format: follow CLAUDE.md
+            Always create a new branch from dev using the configured branch_prefix. Do not reuse existing branches.
+            Implement the fix described in the issue, then create a PR using gh pr create.
             - Do not pass --base (already configured)
             - Reference the issue number in the PR body
           show_full_output: true
