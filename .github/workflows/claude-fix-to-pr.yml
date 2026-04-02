@@ -53,8 +53,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: >-
             --max-turns 20
-            --dangerously-skip-permissions
-            --allowed-tools "Read,Edit,LS,Bash(git:*),Bash(gh:*)"
+            --allowed-tools "Read,Edit,Glob,Bash(gh:*),Bash(git:*),Bash(cat:*),Bash(find:*)"
           prompt: |
             If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP.
             Always create a new branch from dev with the name starting with "claude-".
