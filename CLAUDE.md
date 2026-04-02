@@ -34,18 +34,6 @@ premature or missing abstraction.
 - Quality / Architecture: **MUST** / **SHOULD** / **NICE-TO-HAVE**
 - Security: **CRITICAL** / **HIGH** / **MEDIUM** / **LOW**
 
-# Tool Usage in CI
-
-If a tool call returns a permission error (EACCES), do NOT retry
-the same tool. Immediately fall back to an alternative approach.
-
-# Before Committing Code Changes
-
-When you have edited source files, run these checks before committing:
-
-1. pnpm run lint
-2. pnpm exec tsc --noEmit --skipLibCheck
-
 # Security Constraints
 
 - Do not modify .env or .env.\* files
@@ -54,3 +42,37 @@ When you have edited source files, run these checks before committing:
 - Do not install new packages without explicit approval
 - Do not expose environment variables or secrets in comments or logs
 - Do not run destructive commands (rm -rf, DROP TABLE, etc.)
+
+# Project Structure
+
+- `docs/` — Project documentation (do NOT read at runtime; conventions are below)
+- `.github/pull_request_template.md` — PR template (do NOT read at runtime; content is below)
+
+# PR Convention
+
+Title format: `<type>: <summary>`
+
+Types: `feat` | `fix` | `refactor` | `chore` | `docs` | `style` | `test`
+
+Summary rules:
+
+- English, lowercase start, imperative mood, no trailing period
+- 50 characters max
+
+# PR Body Template
+
+```
+## What
+<!-- 2-3 sentences -->
+
+## Why
+<!-- Why is this change needed? -->
+
+## Changes
+<!-- Bullet point per changed file or logical unit -->
+
+## Screenshots
+<!-- For UI changes. Remove if not applicable. -->
+
+Closes #<issue_number>
+```

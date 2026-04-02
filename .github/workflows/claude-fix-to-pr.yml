@@ -80,10 +80,9 @@ jobs:
             --disallowed-tools "Find,Glob,Grep"
           prompt: |
             Grep, Glob, and Find tools are unavailable. Use Bash(grep) and Bash(find) ONLY for searching.
-            After implementing the fix, create a PR automatically.
-            - Follow the title convention in docs/pr-convention.md
+            After implementing the fix, create a PR automatically using gh pr create.
+            - PR title and body format: follow CLAUDE.md
             - Do not pass --base (already configured)
-            - Fill in the PR template, do not manually specify --body
             - Reference the issue number in the PR body
           track_progress: true
           show_full_output: true
