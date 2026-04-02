@@ -1,5 +1,7 @@
 name: Claude
 
+run-name: "Claude fix for Issue #${{ github.event.issue.number }} by @${{ github.actor }}"
+
 on:
   issue_comment:
     types: [created]
@@ -57,7 +59,7 @@ jobs:
           prompt: |
             If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP.
             Always create a new branch from dev with the name starting with "claude-".
-            You are working on issue #${{ github.event.issue.number }}. Read it with gh issue view ${{ github.event.issue.number }}, implement the fix, then create a PR using gh pr create.
+            You are working on issue #${{ github.event.issue.number }}. Read it with gh issue view ${{ github.event.issue.number }}, implement the fix, then create a PR using gh pr create --base dev
             - Do not pass --base (already configured)
             - Reference the issue number in the PR body
           show_full_output: true
