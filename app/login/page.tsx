@@ -1,6 +1,7 @@
 import { signIn } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { BrandLogo } from "@/components/shared/logo";
 
 function GoogleIcon() {
   return (
@@ -27,16 +28,6 @@ function GoogleIcon() {
         fill="#EA4335"
       />
     </svg>
-  );
-}
-
-function BrandLogo() {
-  return (
-    <div className="flex size-8 items-center justify-center rounded-lg bg-primary">
-      <span className="text-lg font-bold text-primary-foreground" aria-hidden="true">
-        Q
-      </span>
-    </div>
   );
 }
 
