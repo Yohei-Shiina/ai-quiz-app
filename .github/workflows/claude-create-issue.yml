@@ -10,7 +10,6 @@ jobs:
   create-issue:
     if: |
       github.event.sender.type != 'Bot' &&
-      github.actor != 'github-actions[bot]' &&
       contains(github.event.comment.body, '@claude-create-issue')
     runs-on: ubuntu-latest
     permissions:

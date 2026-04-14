@@ -12,7 +12,6 @@ jobs:
   chat:
     if: |
       github.event.sender.type != 'Bot' &&
-      github.actor != 'github-actions[bot]' &&
       contains(github.event.comment.body, '@claude-chat')
     runs-on: ubuntu-latest
     permissions:

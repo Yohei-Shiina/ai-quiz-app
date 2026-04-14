@@ -10,7 +10,6 @@ jobs:
   claude-fix-to-pr:
     if: |
       github.event.sender.type != 'Bot' &&
-      github.actor != 'github-actions[bot]' &&
       contains(github.event.comment.body, '@claude-fix-issue')
     runs-on: ubuntu-latest
     permissions:
