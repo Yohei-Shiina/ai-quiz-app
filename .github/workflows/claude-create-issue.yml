@@ -26,6 +26,7 @@ jobs:
       - name: 🚚 Checkout
         uses: actions/checkout@v4
         with:
+          ref: dev
           fetch-depth: 1
 
       - name: 🤖 Claude Code Action
@@ -34,16 +35,13 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: >-
             --max-turns 5
-            --allowed-tools "Bash(gh issue create:*),Bash(gh issue comment:*),Bash(gh pr comment:*)"
+            --allowed-tools "Bash(gh issue create:*)"
           prompt: |
             Create a GitHub Issue based on the user's request.
 
             User's comment: "${{ github.event.comment.body }}"
 
-            1. Extract the description from the text after "@claude-create-issue".
-            2. Create a new issue with an appropriate title and body:
-               gh issue create --title "..." --body "..."
-            3. Notify the user by posting the new issue URL as a comment on #${{ github.event.issue.number }}:
-               gh issue comment ${{ github.event.issue.number }} --body "Created: <issue_url>"
+            Extract the description from the text after "@claude-create-issue" and create a new issue with an appropriate title and body:
+            gh issue create --title "..." --body "..."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
