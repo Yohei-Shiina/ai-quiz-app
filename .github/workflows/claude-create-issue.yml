@@ -1,0 +1,49 @@
+name: Claude Create Issue
+
+run-name: "Claude create issue by @${{ github.actor }}"
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  create-issue:
+    if: |
+      github.event.comment.user.type != 'Bot' &&
+      contains(github.event.comment.body, '@claude-create-issue')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: 👀 Acknowledge
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+            -f "content=eyes" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚚 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🤖 Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: >-
+            --max-turns 5
+            --allowed-tools "Bash(gh issue create:*),Bash(gh issue comment:*),Bash(gh pr comment:*)"
+          prompt: |
+            Create a GitHub Issue based on the user's request.
+
+            User's comment: "${{ github.event.comment.body }}"
+
+            1. Extract the description from the text after "@claude-create-issue".
+            2. Create a new issue with an appropriate title and body:
+               gh issue create --title "..." --body "..."
+            3. Notify the user by posting the new issue URL as a comment on #${{ github.event.issue.number }}:
+               gh issue comment ${{ github.event.issue.number }} --body "Created: <issue_url>"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

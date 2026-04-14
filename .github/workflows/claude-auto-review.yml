@@ -17,7 +17,10 @@ on:
 
 jobs:
   auto-review:
-    if: github.event.pull_request.draft == false
+    if: |
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.user.type != 'Bot' &&
+      !startsWith(github.event.pull_request.head.ref, 'claude-')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,6 +34,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           track_progress: true
+          include_fix_links: true
           prompt: |
             Review ONLY the changed lines in the PR diff.
             Do NOT read files beyond what is shown in the diff.

@@ -1,0 +1,58 @@
+name: Claude Ask
+
+run-name: "Claude ask by @${{ github.actor }}"
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  ask:
+    if: |
+      github.event.comment.user.type != 'Bot' &&
+      contains(github.event.comment.body, '@claude ask')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - name: 👀 Acknowledge
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
+            gh api repos/${{ github.repository }}/pulls/comments/${{ github.event.comment.id }}/reactions \
+              -f "content=eyes" || true
+          else
+            gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+              -f "content=eyes" || true
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚚 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🤖 Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: >-
+            --max-turns 5
+            --allowed-tools "Read,Glob,Bash(gh issue comment:*),Bash(gh pr comment:*)"
+          prompt: |
+            Answer the user's question based on the codebase and your knowledge.
+            Do NOT fetch the issue/PR body or comment history — answer only from the question text and code files.
+
+            Question: "${{ github.event.comment.body }}"
+
+            Post your answer as a comment using the appropriate command:
+            - pull_request_review_comment event: gh pr comment ${{ github.event.pull_request.number }} --body "..."
+            - issue_comment event: gh issue comment ${{ github.event.issue.number }} --body "..."
+
+            Current event: ${{ github.event_name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
