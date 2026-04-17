@@ -1,0 +1,60 @@
+name: Claude PR Review
+
+run-name: "Claude review for PR #${{ github.event.issue.number }} by @${{ github.actor }}"
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-review-pr:
+    if: |
+      github.actor != 'claude[bot]' &&
+      github.actor != 'github-actions[bot]' &&
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, '@claude-review')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: 👀 Acknowledge Trigger
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+          -f "content=eyes" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🤖 Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: >-
+            --max-turns 10
+            --allowed-tools "Bash(gh:*)"
+          prompt: |
+            If any tool/command is denied, DO NOT retry. Report the blocker and STOP.
+            You are reviewing PR #${{ github.event.issue.number }}.
+
+            Steps:
+            1. Run: gh pr view ${{ github.event.issue.number }}
+            2. Run: gh pr diff ${{ github.event.issue.number }}
+            3. Analyze the changes for: bugs, security issues, code quality, and improvements
+            4. Post a review comment in English with your findings using:
+               gh pr review ${{ github.event.issue.number }} --comment -b "<your review>"
+
+            Structure your review as:
+            ## Summary
+            Brief overview of the changes.
+
+            ## Issues
+            List any bugs, security concerns, or problems found. If none, say "No issues found."
+
+            ## Suggestions
+            List improvement suggestions. If none, say "No suggestions."
+
+        env:
+          GH_TOKEN: ${{ github.token }}
