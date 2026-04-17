@@ -7,12 +7,6 @@ import { ActionState } from "@/lib/types";
 import { requireAuth } from "@/features/auth/service";
 import { createQuizSession, createTopic } from "@/features/quiz/services";
 
-/**
- *
- * @param _prevState
- * @param formData
- * @returns
- */
 export async function createQuizTopic(
   _prevState: ActionState,
   formData: FormData,
