@@ -52,25 +52,21 @@ jobs:
             You are reviewing PR #${{ github.event.issue.number }}.
 
             Steps:
-            1. Run: gh pr view ${{ github.event.issue.number }}
-            2. Run: gh pr diff ${{ github.event.issue.number }}
-            3. If you need more context (e.g. callers, type definitions, related tests),
+            1. Read the review guidelines: Read .claude/skills/code-review/SKILL.md
+            2. Run: gh pr view ${{ github.event.issue.number }}
+            3. Run: gh pr diff ${{ github.event.issue.number }}
+            4. If you need more context (e.g. callers, type definitions, related tests),
                use Read/Glob/Grep to look up relevant files in the checked-out repo.
-            4. Analyze the changes for: bugs, security issues, code quality, and improvements.
-               Follow the project guidelines in CLAUDE.md when assessing code quality.
-            5. Post a review comment in English using:
+            5. Analyze the changes following the guidelines in SKILL.md.
+            6. Post a review comment in English using:
                gh pr review ${{ github.event.issue.number }} --comment -b "<your review>"
 
-            Structure your review as:
-            ## Summary
-            Brief overview of the changes.
-
-            ## Issues
-            Critical bugs or security concerns. If none, say "No issues found."
-            Limit to actual problems, not style preferences.
-
-            ## Suggestions
-            Improvement suggestions (max 5). If none, say "No suggestions."
+            Structure your review using the three perspectives from SKILL.md:
+            ## [Code Quality]
+            ## [Security]
+            ## [Architecture]
+            Label each finding with the severity defined in SKILL.md.
+            If a section has no findings, write "No issues found."
 
         env:
           GH_TOKEN: ${{ github.token }}
