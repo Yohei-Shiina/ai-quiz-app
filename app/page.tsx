@@ -1,10 +1,18 @@
+import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Item, ItemContent, ItemGroup, ItemTitle } from "@/components/ui/item";
 import { Logo } from "@/components/shared/logo";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TopicForm } from "@/app/topic-form";
 
-export default function Home() {
+import { getQuizTopics } from "@/features/quiz/actions";
+
+export default async function Home() {
+  const topics = await getQuizTopics();
   return (
     <>
       <header className="sticky top-0 z-50">
@@ -21,22 +29,57 @@ export default function Home() {
         </div>
         <Separator />
       </header>
-      {/* Hero */}
-      <main className="flex flex-col px-4 gap-2">
+      <main className="flex flex-col gap-6 px-4 pt-8">
+        {/* Hero */}
         <div className="flex flex-col gap-2">
-          <h1 className="text-lg font-bold">What do you want to learn today?</h1>
-          <p className="text-sm">Type any topic and get an AI-generated quiz in seconds.</p>
+          <h1 className="text-2xl font-bold tracking-tight">Quiz yourself on anything</h1>
+          <p className="text-sm text-muted-foreground">
+            Type a topic. We&apos;ll build a quiz in seconds.
+          </p>
         </div>
-        <Card>
+        {/* Topic Card */}
+        <Card className="mt-4">
           <CardHeader>
-            <CardTitle>Quiz topic</CardTitle>
-            <CardDescription>
-              Enter any subject and we&apos;ll generate a quiz for you.
-            </CardDescription>
-            <TopicForm />
+            <CardTitle className="text-sm font-bold">What&apos;s your topic?</CardTitle>
           </CardHeader>
-          <CardContent></CardContent>
+          <CardContent>
+            <TopicForm />
+          </CardContent>
         </Card>
+
+        {/* Past Quizzes */}
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold">Past Quizzes</h2>
+            <Badge className="tabular-nums" variant={"secondary"}>
+              {topics.length}
+            </Badge>
+          </div>
+          {topics.length > 0 && (
+            <ItemGroup>
+              {topics.map((quiz, index) => {
+                return (
+                  <Item size={"sm"} variant={"outline"} asChild key={index}>
+                    <Link href="">
+                      <ItemContent>
+                        <ItemTitle>{quiz.title}</ItemTitle>
+                      </ItemContent>
+                      {/* 
+                        suppressHydrationWarning is intentional.
+                        new Date() runs a few milliseconds later on the client than on the server,
+                        but formatDistanceToNow outputs coarse units (minutes, hours, days),
+                        so the mismatch has no visible impact.
+                      */}
+                      <span className="text-sm text-muted-foreground" suppressHydrationWarning>
+                        {formatDistanceToNow(quiz.createdAt, { addSuffix: true })}
+                      </span>
+                    </Link>
+                  </Item>
+                );
+              })}
+            </ItemGroup>
+          )}
+        </div>
       </main>
     </>
   );
