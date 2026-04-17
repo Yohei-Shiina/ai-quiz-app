@@ -1,11 +1,12 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { validateTitleTopic } from "@/features/quiz/validations";
 import { redirect } from "next/navigation";
+
+import { requireAuth } from "@/features/auth/services";
+import { validateTitleTopic } from "@/features/quiz/validations";
+import { createQuizSession } from "@/lib/dal/quizSession";
+import { createTopic, getTopicsByUserId } from "@/lib/dal/topic";
 import { ActionState } from "@/lib/types";
-import { requireAuth } from "@/features/auth/service";
-import { createQuizSession, createTopic } from "@/features/quiz/services";
 
 export async function createQuizTopic(
   _prevState: ActionState,
@@ -26,10 +27,5 @@ export async function createQuizTopic(
 
 export async function getQuizTopics() {
   const user = await requireAuth();
-
-  const topics = await prisma.topic.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-  });
-  return topics;
+  return getTopicsByUserId(user.id);
 }
