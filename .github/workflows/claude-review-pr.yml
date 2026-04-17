@@ -1,0 +1,73 @@
+name: Claude PR Review
+
+run-name: "Claude review for PR #${{ github.event.issue.number }} by @${{ github.actor }}"
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-review-pr:
+    if: |
+      github.actor != 'claude[bot]' &&
+      github.actor != 'github-actions[bot]' &&
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, '@claude-review')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: 👀 Acknowledge Trigger
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+          -f "content=eyes" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔍 Get PR branch
+        id: pr-info
+        run: |
+          echo "branch=$(gh pr view ${{ github.event.issue.number }} --json headRefName -q .headRefName)" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚚 Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr-info.outputs.branch }}
+          fetch-depth: 1
+
+      - name: 🤖 Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          show_full_output: true
+          claude_args: >-
+            --max-turns 10
+            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*),Read,Glob,Grep"
+          prompt: |
+            If any tool/command is denied, DO NOT retry. Report the blocker and STOP.
+            You are reviewing PR #${{ github.event.issue.number }}.
+
+            Steps:
+            1. Read the review guidelines: Read .claude/skills/code-review/SKILL.md
+            2. Run: gh pr view ${{ github.event.issue.number }}
+            3. Run: gh pr diff ${{ github.event.issue.number }}
+            4. If you need more context (e.g. callers, type definitions, related tests),
+               use Read/Glob/Grep to look up relevant files in the checked-out repo.
+            5. Analyze the changes following the guidelines in SKILL.md.
+            6. Post a review comment in English using:
+               gh pr review ${{ github.event.issue.number }} --comment -b "<your review>"
+
+            Structure your review using the three perspectives from SKILL.md:
+            ## [Code Quality]
+            ## [Security]
+            ## [Architecture]
+            Label each finding with the severity defined in SKILL.md.
+            If a section has no findings, write "No issues found."
+
+        env:
+          GH_TOKEN: ${{ github.token }}
