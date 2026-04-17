@@ -19,7 +19,6 @@ jobs:
       contents: read
       pull-requests: write
       issues: write
-      id-token: write
     steps:
       - name: 👀 Acknowledge Trigger
         run: |
@@ -28,13 +27,26 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 🔍 Get PR branch
+        id: pr-info
+        run: |
+          echo "branch=$(gh pr view ${{ github.event.issue.number }} --json headRefName -q .headRefName)" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚚 Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr-info.outputs.branch }}
+          fetch-depth: 1
+
       - name: 🤖 Claude Code Action
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: >-
             --max-turns 10
-            --allowed-tools "Bash(gh:*)"
+            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*),Read,Glob,Grep"
           prompt: |
             If any tool/command is denied, DO NOT retry. Report the blocker and STOP.
             You are reviewing PR #${{ github.event.issue.number }}.
@@ -42,8 +54,11 @@ jobs:
             Steps:
             1. Run: gh pr view ${{ github.event.issue.number }}
             2. Run: gh pr diff ${{ github.event.issue.number }}
-            3. Analyze the changes for: bugs, security issues, code quality, and improvements
-            4. Post a review comment in English with your findings using:
+            3. If you need more context (e.g. callers, type definitions, related tests),
+               use Read/Glob/Grep to look up relevant files in the checked-out repo.
+            4. Analyze the changes for: bugs, security issues, code quality, and improvements.
+               Follow the project guidelines in CLAUDE.md when assessing code quality.
+            5. Post a review comment in English using:
                gh pr review ${{ github.event.issue.number }} --comment -b "<your review>"
 
             Structure your review as:
@@ -51,10 +66,11 @@ jobs:
             Brief overview of the changes.
 
             ## Issues
-            List any bugs, security concerns, or problems found. If none, say "No issues found."
+            Critical bugs or security concerns. If none, say "No issues found."
+            Limit to actual problems, not style preferences.
 
             ## Suggestions
-            List improvement suggestions. If none, say "No suggestions."
+            Improvement suggestions (max 5). If none, say "No suggestions."
 
         env:
           GH_TOKEN: ${{ github.token }}
