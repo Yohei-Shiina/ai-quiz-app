@@ -12,13 +12,14 @@ jobs:
       github.actor != 'claude[bot]' &&
       github.actor != 'github-actions[bot]' &&
       github.event_name == 'issue_comment' &&
-      github.event.issue.pull_request != null &&
+      github.event.issue.pull_request.url != '' &&
       contains(github.event.comment.body, '@claude-review')
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
       issues: write
+      id-token: write
     steps:
       - name: 👀 Acknowledge Trigger
         run: |
@@ -30,7 +31,7 @@ jobs:
       - name: 🔍 Get PR branch
         id: pr-info
         run: |
-          echo "branch=$(gh pr view ${{ github.event.issue.number }} --json headRefName -q .headRefName)" >> $GITHUB_OUTPUT
+          echo "branch=$(gh pr view ${{ github.event.issue.number }} --repo ${{ github.repository }} --json headRefName -q .headRefName)" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
