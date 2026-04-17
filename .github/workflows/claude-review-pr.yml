@@ -11,8 +11,7 @@ jobs:
     if: |
       github.actor != 'claude[bot]' &&
       github.actor != 'github-actions[bot]' &&
-      github.event_name == 'issue_comment' &&
-      github.event.issue.pull_request.url != '' &&
+      github.event.issue.pull_request != '' &&
       contains(github.event.comment.body, '@claude-review')
     runs-on: ubuntu-latest
     permissions:
@@ -28,18 +27,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🔍 Get PR branch
-        id: pr-info
-        run: |
-          echo "branch=$(gh pr view ${{ github.event.issue.number }} --repo ${{ github.repository }} --json headRefName -q .headRefName)" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: 🚚 Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.pr-info.outputs.branch }}
-          fetch-depth: 1
+
+      - name: 🔀 Checkout PR merge commit
+        run: git fetch origin +refs/pull/${{ github.event.issue.number }}/merge && git checkout FETCH_HEAD
 
       - name: 🤖 Claude Code Action
         uses: anthropics/claude-code-action@v1
