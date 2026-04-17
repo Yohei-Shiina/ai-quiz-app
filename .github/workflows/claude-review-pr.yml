@@ -11,7 +11,7 @@ jobs:
     if: |
       github.actor != 'claude[bot]' &&
       github.actor != 'github-actions[bot]' &&
-      github.event.issue.pull_request != '' &&
+      github.event.issue.pull_request &&
       contains(github.event.comment.body, '@claude-review')
     runs-on: ubuntu-latest
     permissions:
@@ -27,11 +27,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🚚 Checkout
+      - name: 🚚 Checkout PR branch
         uses: actions/checkout@v4
-
-      - name: 🔀 Checkout PR merge commit
-        run: git fetch origin +refs/pull/${{ github.event.issue.number }}/merge && git checkout FETCH_HEAD
+        with:
+          ref: refs/pull/${{ github.event.issue.number }}/head
 
       - name: 🤖 Claude Code Action
         uses: anthropics/claude-code-action@v1
@@ -40,7 +39,7 @@ jobs:
           show_full_output: true
           claude_args: >-
             --max-turns 10
-            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*),Read,Glob,Grep"
+            --allowedTools "Bash(gh pr view *),Bash(gh pr diff *),Bash(gh pr review *),Read,Glob,Grep"
           prompt: |
             If any tool/command is denied, DO NOT retry. Report the blocker and STOP.
             You are reviewing PR #${{ github.event.issue.number }}.
