@@ -1,7 +1,7 @@
 import { signIn } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { BrandLogo } from "@/components/shared/logo";
+import { Logo } from "@/components/shared/logo";
 
 function GoogleIcon() {
   return (
@@ -41,7 +41,7 @@ export default function LoginPage() {
     <main className="h-dvh flex flex-col justify-center items-center px-4">
       <div className="flex flex-col w-full max-w-md gap-8">
         <div className="flex flex-col items-center gap-2.5">
-          <BrandLogo />
+          <Logo />
           <h1 className="text-2xl font-bold text-foreground">AI Quiz App</h1>
           <p className="text-sm text-muted-foreground">
             Test your knowledge with AI-generated quizzes
