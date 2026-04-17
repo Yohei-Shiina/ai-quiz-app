@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { createQuizTopic } from "@/app/actions";
+import { createQuizTopic } from "@/features/quiz/actions";
 
 export function TopicForm() {
   const [state, action, isPending] = useActionState(createQuizTopic, { error: null });
@@ -16,18 +16,18 @@ export function TopicForm() {
           type="text"
           name="title"
           className="placeholder:text-xs"
-          placeholder="e.g. 90s Hip Pop or Quantum Physics"
+          placeholder="e.g. World War II, Quantum Physics, 90s Hip Hop..."
+          aria-invalid={!!state.error}
         ></Input>
-        <Button
-          type="submit"
-          className="bg-primary font-bold text-primary-foreground"
-          variant="outline"
-        >
-          Generate
+        <Button size={"lg"} type="submit" className="font-bold" disabled={isPending}>
+          {isPending ? "Generating" : "Start Quiz"}
         </Button>
       </Field>
-      {isPending && <p className="mt-text-sm text-destructive">Loading mate</p>}
-      {state.error && <p className="mt-text-sm text-destructive">{state.error}</p>}
+      {state.error && (
+        <p className="mt-2 text-sm text-destructive" role="alert">
+          {state.error}
+        </p>
+      )}
     </form>
   );
 }
