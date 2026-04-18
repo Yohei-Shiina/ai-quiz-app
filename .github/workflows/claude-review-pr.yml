@@ -78,11 +78,9 @@ jobs:
                This contains only the delta from the merge base (where the branch diverged).
                Auto-generated files have already been excluded to save tokens.
                Base your entire review on this diff. Do NOT browse the repo speculatively.
-            5. Before flagging any finding about framework-specific behavior (Next.js, Auth.js,
-               Prisma), verify it applies to the exact version from step 2 using WebFetch.
-               Only fetch official docs (nextjs.org, authjs.dev, prisma.io). Fetch once per
-               framework, not per finding. Do NOT fetch speculatively — only when about to flag
-               something version-sensitive.
+            5. Before flagging any CRITICAL or HIGH finding, you MUST verify it using WebFetch
+               against official docs. Only fetch official docs (nextjs.org, authjs.dev, prisma.io).
+               Do NOT fetch for MEDIUM or LOW findings.
             6. Only if you cannot assess a finding without additional context (e.g. a type
                definition is not visible in the diff, or a called function's behavior is
                unclear), use Read/Glob/Grep to look up that specific file or symbol.
