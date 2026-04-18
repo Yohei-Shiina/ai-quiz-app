@@ -9,7 +9,7 @@
 # Security Constraints
 
 - Do not modify .env or .env.\* files
-- Do not modify workflow files (.github/)
+- Confirm before modifying workflow files (.github/)
 - Do not push directly to main
 - Do not install new packages without explicit approval
 - Do not expose environment variables or secrets in comments or logs

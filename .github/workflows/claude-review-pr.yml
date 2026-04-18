@@ -32,26 +32,62 @@ jobs:
         with:
           ref: refs/pull/${{ github.event.issue.number }}/head
 
+      - name: 📝 Generate filtered diff
+        run: |
+          gh pr diff ${{ github.event.issue.number }} | python3 -c "
+          import sys
+          EXCLUDE = [
+            'app/generated/',
+            'components/ui/',
+            'pnpm-lock.yaml',
+            'package-lock.json',
+            'bun.lockb',
+            'next-env.d.ts',
+            'tsconfig.tsbuildinfo',
+            'public/',
+          ]
+          skip = False
+          for line in sys.stdin:
+              if line.startswith('diff --git'):
+                  skip = any(p in line for p in EXCLUDE)
+              if not skip:
+                  sys.stdout.write(line)
+          " > pr_diff.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: 🤖 Claude Code Action
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
           claude_args: >-
-            --max-turns 10
-            --allowedTools "Bash(gh pr view *),Bash(gh pr diff *),Bash(gh pr review *),Read,Glob,Grep"
+            --max-turns 7
+            --allowedTools "Bash(gh pr view *),Bash(gh pr review *),Bash(cat package.json),Read,Glob,Grep"
           prompt: |
             If any tool/command is denied, DO NOT retry. Report the blocker and STOP.
             You are reviewing PR #${{ github.event.issue.number }}.
 
             Steps:
             1. Read the review guidelines: Read .claude/skills/code-review/SKILL.md
-            2. Run: gh pr view ${{ github.event.issue.number }}
-            3. Run: gh pr diff ${{ github.event.issue.number }}
-            4. If you need more context (e.g. callers, type definitions, related tests),
-               use Read/Glob/Grep to look up relevant files in the checked-out repo.
-            5. Analyze the changes following the guidelines in SKILL.md.
-            6. Post a review comment in English using:
+            2. Run: cat package.json and note the exact versions of key dependencies
+               (Next.js, React, Auth.js, Prisma, etc.)
+            3. Run: gh pr view ${{ github.event.issue.number }} --json baseRefName,headRefName,title,body
+               Note the baseRefName — this is the branch the PR targets.
+            4. Read the pre-filtered diff: Read pr_diff.txt
+               This contains only the delta from the merge base (where the branch diverged).
+               Auto-generated files have already been excluded to save tokens.
+               Base your entire review on this diff. Do NOT browse the repo speculatively.
+            5. If a finding depends on version-specific framework behavior (e.g. Next.js
+               routing, Auth.js config, Prisma API), cross-check it against the version
+               identified in step 2. If you are not confident the behavior applies to that
+               exact version, flag it as "requires verification" rather than asserting.
+            6. Only if you cannot assess a finding without additional context (e.g. a type
+               definition is not visible in the diff, or a called function's behavior is
+               unclear), use Read/Glob/Grep to look up that specific file or symbol.
+               Do NOT use these tools to browse the codebase broadly.
+            7. Analyze the changes following the guidelines in SKILL.md.
+            8. Post a review comment in English using:
                gh pr review ${{ github.event.issue.number }} --comment -b "<your review>"
 
             Structure your review using the three perspectives from SKILL.md:
