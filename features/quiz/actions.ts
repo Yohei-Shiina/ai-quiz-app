@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { Topic } from "@/app/generated/prisma/client";
 import { requireAuth } from "@/features/auth/services";
-import { validateTitleTopic } from "@/features/quiz/validations";
+import { validateTitleTopic, validateRetryQuiz } from "@/features/quiz/validations";
 import { createQuizSession } from "@/lib/dal/quizSession";
 import {
   createTopic,
@@ -35,11 +35,12 @@ export async function getTopicsWithLatestSession() {
   return getTopicsWithLatestSessionFromDB(user.id);
 }
 
-export async function retryQuizWithNewSession(topicId: Topic["id"]) {
+export async function retryQuizWithNewSession(formData: FormData) {
   const user = await requireAuth();
-  const topic = await getTopicById(topicId);
+  const formTopicId = validateRetryQuiz(formData);
+  const topic = await getTopicById(formTopicId);
   if (!topic || topic.userId !== user.id) throw new Error("Topic not found");
-  const session = await createQuizSession(user.id, topicId);
+  const session = await createQuizSession(user.id, topic.id);
 
   redirect(`/quiz/${session.id}`);
 }

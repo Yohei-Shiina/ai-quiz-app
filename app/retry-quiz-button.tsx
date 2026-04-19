@@ -9,16 +9,11 @@ export function RetryQuizButton({
   topicId,
   children,
   ...props
-}: { topicId: Topic["id"]; children: ReactNode } & ComponentProps<"button">) {
+}: { topicId: Topic["id"]; children: ReactNode } & Omit<ComponentProps<"form">, "action">) {
   return (
-    <button
-      type="button"
-      onClick={async () => {
-        await retryQuizWithNewSession(topicId);
-      }}
-      {...props}
-    >
+    <form action={retryQuizWithNewSession} {...props}>
+      <input type="hidden" name="topicId" value={topicId} />
       {children}
-    </button>
+    </form>
   );
 }

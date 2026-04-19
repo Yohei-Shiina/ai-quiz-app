@@ -13,3 +13,13 @@ export function validateTitleTopic(formData: FormData) {
   }
   return { error: null, data: result.data };
 }
+
+const retryQuizSchema = z.object({
+  topicId: z.string().min(1),
+});
+
+export const validateRetryQuiz = (formData: FormData) => {
+  const result = retryQuizSchema.safeParse({ topicId: formData.get("topicId") });
+  if (!result.success) throw new Error("Invalid topicId");
+  return result.data.topicId;
+};
