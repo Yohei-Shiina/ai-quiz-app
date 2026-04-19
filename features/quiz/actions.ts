@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 
-import { Topic } from "@/app/generated/prisma/client";
 import { requireAuth } from "@/features/auth/services";
 import { validateTitleTopic, validateRetryQuiz } from "@/features/quiz/validations";
 import { createQuizSession } from "@/lib/dal/quizSession";
