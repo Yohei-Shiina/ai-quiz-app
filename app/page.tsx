@@ -48,38 +48,40 @@ export default async function Home() {
         </Card>
 
         {/* Past Quizzes */}
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold">Past Quizzes</h2>
-            <Badge className="tabular-nums" variant={"secondary"}>
-              {topics.length}
-            </Badge>
-          </div>
-          {topics.length > 0 && (
-            <ItemGroup>
-              {topics.map((topic) => {
-                return (
-                  <Item size={"sm"} variant={"outline"} asChild key={topic.id}>
-                    <Link href={`quiz/${topic.latestQuizSession}`}>
-                      <ItemContent>
-                        <ItemTitle>{topic.title}</ItemTitle>
-                      </ItemContent>
-                      {/* 
+        {topics.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold">Past Quizzes</h2>
+              <Badge className="tabular-nums" variant={"secondary"}>
+                {topics.length}
+              </Badge>
+            </div>
+            {topics.length > 0 && (
+              <ItemGroup>
+                {topics.map((topic) => {
+                  return (
+                    <Item size={"sm"} variant={"outline"} asChild key={topic.id}>
+                      <Link href={`quiz/${topic.latestQuizSession}`}>
+                        <ItemContent>
+                          <ItemTitle>{topic.title}</ItemTitle>
+                        </ItemContent>
+                        {/* 
                         suppressHydrationWarning is intentional.
                         new Date() runs a few milliseconds later on the client than on the server,
                         but formatDistanceToNow outputs coarse units (minutes, hours, days),
                         so the mismatch has no visible impact.
                       */}
-                      <span className="text-sm text-muted-foreground" suppressHydrationWarning>
-                        {formatDistanceToNow(topic.createdAt, { addSuffix: true })}
-                      </span>
-                    </Link>
-                  </Item>
-                );
-              })}
-            </ItemGroup>
-          )}
-        </div>
+                        <span className="text-sm text-muted-foreground" suppressHydrationWarning>
+                          {formatDistanceToNow(topic.createdAt, { addSuffix: true })}
+                        </span>
+                      </Link>
+                    </Item>
+                  );
+                })}
+              </ItemGroup>
+            )}
+          </div>
+        )}
       </main>
     </>
   );
