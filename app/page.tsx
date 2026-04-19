@@ -1,15 +1,15 @@
-import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
+import Link from 'next/link';
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Item, ItemContent, ItemGroup, ItemTitle } from "@/components/ui/item";
-import { Logo } from "@/components/shared/logo";
-import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TopicForm } from "@/app/topic-form";
+import { formatDistanceToNow } from 'date-fns';
 
-import { getTopicsWithLatestSession, retryQuizWithNewSession } from "@/features/quiz/actions";
+import { TopicForm } from '@/app/topic-form';
+import { Logo } from '@/components/shared/logo';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Item, ItemContent, ItemGroup, ItemTitle } from '@/components/ui/item';
+import { Separator } from '@/components/ui/separator';
+import { getTopicsWithLatestSession, retryQuizWithNewSession } from '@/features/quiz/actions';
 
 export default async function Home() {
   const topics = await getTopicsWithLatestSession();
@@ -52,7 +52,7 @@ export default async function Home() {
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold">Past Quizzes</h2>
-              <Badge className="tabular-nums" variant={"secondary"}>
+              <Badge className="tabular-nums" variant={'secondary'}>
                 {topics.length}
               </Badge>
             </div>
@@ -75,8 +75,8 @@ export default async function Home() {
                   </>
                 );
                 return (
-                  <Item size={"sm"} variant={"outline"} asChild key={topic.id}>
-                    {topic.latestQuizSession.status === "in_progress" ? (
+                  <Item size={'sm'} variant={'outline'} asChild key={topic.id}>
+                    {topic.latestQuizSession.status === 'in_progress' ? (
                       <Link href={`/quiz/${topic.latestQuizSession.id}`}>{content}</Link>
                     ) : (
                       <form action={retryQuizWithNewSession}>
