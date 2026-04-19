@@ -1,9 +1,6 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { createQuizTopic } from "@/features/quiz/actions";
 
 export function TopicForm() {
@@ -11,20 +8,26 @@ export function TopicForm() {
 
   return (
     <form action={action}>
-      <Field orientation="horizontal">
-        <Input
+      <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3 shadow-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200">
+        <span className="text-primary text-lg select-none">+</span>
+        <input
           type="text"
           name="title"
-          className="placeholder:text-xs"
-          placeholder="e.g. World War II, Quantum Physics, 90s Hip Hop..."
+          className="flex-1 min-w-0 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          placeholder="Add a topic..."
           aria-invalid={!!state.error}
-        ></Input>
-        <Button size={"lg"} type="submit" className="font-bold" disabled={isPending}>
-          {isPending ? "Generating" : "Start Quiz"}
-        </Button>
-      </Field>
+          autoComplete="off"
+        />
+        <button
+          type="submit"
+          disabled={isPending}
+          className="shrink-0 text-xs font-medium text-primary hover:text-primary/70 transition-colors disabled:opacity-40"
+        >
+          {isPending ? "···" : "Go"}
+        </button>
+      </div>
       {state.error && (
-        <p className="mt-2 text-sm text-destructive" role="alert">
+        <p className="mt-2 text-xs text-destructive px-1" role="alert">
           {state.error}
         </p>
       )}
