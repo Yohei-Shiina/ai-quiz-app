@@ -7,7 +7,7 @@ import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { createQuizTopic } from '@/features/quiz/actions';
 
-export function TopicForm() {
+export const TopicForm = () => {
   const [state, action, isPending] = useActionState(createQuizTopic, { error: null });
 
   return (
@@ -31,4 +31,4 @@ export function TopicForm() {
       )}
     </form>
   );
-}
+};

@@ -1,13 +1,13 @@
 import type { User, Topic } from '@/app/generated/prisma/client';
 import { prisma } from '@/lib/prisma';
 
-export async function createTopic(userId: User['id'], title: Topic['title']) {
+export const createTopic = async (userId: User['id'], title: Topic['title']) => {
   return prisma.topic.create({
     data: { userId, title },
   });
-}
+};
 
-export async function getTopicsWithLatestSession(userId: User['id']) {
+export const getTopicsWithLatestSession = async (userId: User['id']) => {
   const topics = await prisma.topic.findMany({
     where: { userId },
     orderBy: { createdAt: 'desc' },
@@ -26,7 +26,7 @@ export async function getTopicsWithLatestSession(userId: User['id']) {
       ...topic,
       latestQuizSession: quizSessions[0],
     }));
-}
+};
 
 export const getTopicById = async (id: Topic['id']) => {
   return prisma.topic.findUnique({
