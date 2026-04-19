@@ -6,3 +6,11 @@ export async function getUserByEmail(email: User["email"]) {
     where: { email },
   });
 }
+
+export async function upsertUserFromOAuth(email: string, name?: string) {
+  await prisma.user.upsert({
+    where: { email },
+    update: { name },
+    create: { email, name },
+  });
+}
