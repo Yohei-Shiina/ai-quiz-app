@@ -9,10 +9,10 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TopicForm } from "@/app/topic-form";
 
-import { getQuizTopics } from "@/features/quiz/actions";
+import { getTopicsWithLatestSession } from "@/features/quiz/actions";
 
 export default async function Home() {
-  const topics = await getQuizTopics();
+  const topics = await getTopicsWithLatestSession();
   return (
     <>
       <header className="sticky top-0 z-50">
@@ -57,12 +57,12 @@ export default async function Home() {
           </div>
           {topics.length > 0 && (
             <ItemGroup>
-              {topics.map((quiz) => {
+              {topics.map((topic) => {
                 return (
-                  <Item size={"sm"} variant={"outline"} asChild key={quiz.id}>
-                    <Link href="">
+                  <Item size={"sm"} variant={"outline"} asChild key={topic.id}>
+                    <Link href={`quiz/${topic.latestQuizSession}`}>
                       <ItemContent>
-                        <ItemTitle>{quiz.title}</ItemTitle>
+                        <ItemTitle>{topic.title}</ItemTitle>
                       </ItemContent>
                       {/* 
                         suppressHydrationWarning is intentional.
@@ -71,7 +71,7 @@ export default async function Home() {
                         so the mismatch has no visible impact.
                       */}
                       <span className="text-sm text-muted-foreground" suppressHydrationWarning>
-                        {formatDistanceToNow(quiz.createdAt, { addSuffix: true })}
+                        {formatDistanceToNow(topic.createdAt, { addSuffix: true })}
                       </span>
                     </Link>
                   </Item>

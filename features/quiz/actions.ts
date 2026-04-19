@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAuth } from "@/features/auth/services";
 import { validateTitleTopic } from "@/features/quiz/validations";
 import { createQuizSession } from "@/lib/dal/quizSession";
-import { createTopic, getTopicsByUserId } from "@/lib/dal/topic";
+import { createTopic, getTopicsWithLatestSession as getTopicsWithLatestSessionFromDB } from "@/lib/dal/topic";
 import { ActionState } from "@/lib/types";
 
 export async function createQuizTopic(
@@ -25,7 +25,7 @@ export async function createQuizTopic(
   redirect(`/quiz/${session.id}`);
 }
 
-export async function getQuizTopics() {
+export async function getTopicsWithLatestSession() {
   const user = await requireAuth();
-  return getTopicsByUserId(user.id);
+  return getTopicsWithLatestSessionFromDB(user.id);
 }

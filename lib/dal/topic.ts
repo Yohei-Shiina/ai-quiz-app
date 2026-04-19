@@ -7,10 +7,23 @@ export async function createTopic(userId: User["id"], title: Topic["title"]) {
   });
 }
 
-export async function getTopicsByUserId(userId: User["id"]) {
-  return prisma.topic.findMany({
-    where: { userId: userId },
+export async function getTopicsWithLatestSession(userId: User["id"]) {
+  const topics = await prisma.topic.findMany({
+    where: { userId },
     orderBy: { createdAt: "desc" },
     take: 30, // placeholder
+    include: {
+      quizSessions: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { id: true, status: true },
+      },
+    },
   });
+  return topics
+    .filter((topic) => topic.quizSessions.length > 0)
+    .map(({ quizSessions, ...topic }) => ({
+      ...topic,
+      latestQuizSession: quizSessions[0],
+    }));
 }
