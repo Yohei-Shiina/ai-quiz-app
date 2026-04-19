@@ -78,7 +78,7 @@ export default async function Home() {
                 return (
                   <Item size={"sm"} variant={"outline"} asChild key={topic.id}>
                     {topic.latestQuizSession.status === "in_progress" ? (
-                      <Link href={`quiz/${topic.latestQuizSession.id}`}>{content}</Link>
+                      <Link href={`/quiz/${topic.latestQuizSession.id}`}>{content}</Link>
                     ) : (
                       <RetryQuizButton topicId={topic.id}>{content}</RetryQuizButton>
                     )}
