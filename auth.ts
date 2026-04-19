@@ -15,7 +15,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (!user.email) return false;
       try {
         await upsertUserFromOAuth(user.email, user.name ?? undefined);
-      return true;
+        return true;
       } catch (e) {
         console.error(e);
         return false;
