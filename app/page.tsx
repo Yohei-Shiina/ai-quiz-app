@@ -49,7 +49,7 @@ export default async function Home() {
 
         {/* Past Quizzes */}
         {topics.length > 0 && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold">Past Quizzes</h2>
               <Badge className="tabular-nums" variant={"secondary"}>
@@ -61,7 +61,7 @@ export default async function Home() {
                 {topics.map((topic) => {
                   return (
                     <Item size={"sm"} variant={"outline"} asChild key={topic.id}>
-                      <Link href={`quiz/${topic.latestQuizSession}`}>
+                      <Link href={`quiz/${topic.latestQuizSession.id}`}>
                         <ItemContent>
                           <ItemTitle>{topic.title}</ItemTitle>
                         </ItemContent>
