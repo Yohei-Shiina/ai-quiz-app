@@ -1,7 +1,7 @@
-import { signIn } from "@/auth";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Logo } from "@/components/shared/logo";
+import { signIn } from '@/auth';
+import { Logo } from '@/components/shared/logo';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 function GoogleIcon() {
   return (
@@ -32,8 +32,8 @@ function GoogleIcon() {
 }
 
 async function handleSignIn() {
-  "use server";
-  await signIn("google", { redirectTo: "/" });
+  'use server';
+  await signIn('google', { redirectTo: '/' });
 }
 
 export default function LoginPage() {
