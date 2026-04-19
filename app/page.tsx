@@ -57,9 +57,9 @@ export default async function Home() {
           </div>
           {topics.length > 0 && (
             <ItemGroup>
-              {topics.map((quiz, index) => {
+              {topics.map((quiz) => {
                 return (
-                  <Item size={"sm"} variant={"outline"} asChild key={index}>
+                  <Item size={"sm"} variant={"outline"} asChild key={quiz.id}>
                     <Link href="">
                       <ItemContent>
                         <ItemTitle>{quiz.title}</ItemTitle>
