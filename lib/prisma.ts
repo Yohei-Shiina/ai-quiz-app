@@ -4,10 +4,10 @@ import { PrismaClient } from '@/app/generated/prisma/client';
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-function createPrismaClient() {
+const createPrismaClient = () => {
   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
   return new PrismaClient({ adapter });
-}
+};
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 

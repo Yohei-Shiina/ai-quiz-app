@@ -12,10 +12,10 @@ import {
 } from '@/lib/dal/topic';
 import { ActionState } from '@/lib/types';
 
-export async function createQuizTopic(
+export const createQuizTopic = async (
   _prevState: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<ActionState> => {
   const user = await requireAuth();
 
   const result = validateTitleTopic(formData);
@@ -27,14 +27,14 @@ export async function createQuizTopic(
   const session = await createQuizSession(user.id, topic.id);
 
   redirect(`/quiz/${session.id}`);
-}
+};
 
-export async function getTopicsWithLatestSession() {
+export const getTopicsWithLatestSession = async () => {
   const user = await requireAuth();
   return getTopicsWithLatestSessionFromDB(user.id);
-}
+};
 
-export async function retryQuizWithNewSession(formData: FormData) {
+export const retryQuizWithNewSession = async (formData: FormData) => {
   const user = await requireAuth();
   const formTopicId = validateRetryQuiz(formData);
   const topic = await getTopicById(formTopicId);
@@ -42,4 +42,4 @@ export async function retryQuizWithNewSession(formData: FormData) {
   const session = await createQuizSession(user.id, topic.id);
 
   redirect(`/quiz/${session.id}`);
-}
+};

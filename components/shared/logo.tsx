@@ -1,4 +1,4 @@
-export function Logo() {
+export const Logo = () => {
   return (
     <div className="flex size-8 items-center justify-center rounded-lg bg-primary">
       <span className="font-bold text-primary-foreground" aria-hidden="true">
@@ -6,4 +6,4 @@ export function Logo() {
       </span>
     </div>
   );
-}
+};
