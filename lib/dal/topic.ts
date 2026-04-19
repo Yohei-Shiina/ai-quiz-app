@@ -11,5 +11,6 @@ export async function getTopicsByUserId(userId: User["id"]) {
   return prisma.topic.findMany({
     where: { userId: userId },
     orderBy: { createdAt: "desc" },
+    take: 30, // placeholder
   });
 }
