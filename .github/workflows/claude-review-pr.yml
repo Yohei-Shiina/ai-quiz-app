@@ -1,0 +1,108 @@
+name: Claude PR Review
+
+run-name: "Claude review for PR #${{ github.event.issue.number }} by @${{ github.actor }}"
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-review-pr:
+    if: |
+      github.actor != 'claude[bot]' &&
+      github.actor != 'github-actions[bot]' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@claude-review')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: 👀 Acknowledge Trigger
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+          -f "content=eyes" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚚 Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.issue.number }}/head
+
+      - name: 📝 Generate filtered diff
+        run: |
+          gh pr diff ${{ github.event.issue.number }} | python3 -c "
+          import sys
+          EXCLUDE = [
+            'app/generated/',
+            'components/ui/',
+            'pnpm-lock.yaml',
+            'package-lock.json',
+            'bun.lockb',
+            'next-env.d.ts',
+            'tsconfig.tsbuildinfo',
+            'public/',
+          ]
+          skip = False
+          for line in sys.stdin:
+              if line.startswith('diff --git'):
+                  skip = any(p in line for p in EXCLUDE)
+              if not skip:
+                  sys.stdout.write(line)
+          " > pr_diff.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: 🤖 Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          show_full_output: true
+          claude_args: >-
+            --max-turns 10
+            --allowedTools "Bash(gh pr view *),Bash(gh pr review *),Bash(cat package.json),Read,Glob,Grep,WebFetch"
+          prompt: |
+            If any tool/command is denied, DO NOT retry. Report the blocker and STOP.
+            You are reviewing PR #${{ github.event.issue.number }}.
+
+            Steps:
+            1. Read the review guidelines: Read .claude/skills/code-review/SKILL.md
+            2. Run: cat package.json and note the exact versions of key dependencies
+               (Next.js, React, Auth.js, Prisma, etc.)
+            3. Run: gh pr view ${{ github.event.issue.number }} --json baseRefName,headRefName,title,body
+               Note the baseRefName — this is the branch the PR targets.
+            4. Read the pre-filtered diff: Read pr_diff.txt
+               This contains only the delta from the merge base (where the branch diverged).
+               Auto-generated files have already been excluded to save tokens.
+               Base your entire review on this diff. Do NOT browse the repo speculatively.
+            5. Before flagging any CRITICAL or HIGH finding, you MUST verify it using WebFetch
+               against official docs. Only fetch official docs (nextjs.org, authjs.dev, prisma.io).
+               Do NOT fetch for MEDIUM or LOW findings.
+            6. Only if you cannot assess a finding without additional context (e.g. a type
+               definition is not visible in the diff, or a called function's behavior is
+               unclear), use Read/Glob/Grep to look up that specific file or symbol.
+               Do NOT use these tools to browse the codebase broadly.
+            7. Analyze the changes following the guidelines in SKILL.md.
+            8. Post a review comment in English using:
+               gh pr review ${{ github.event.issue.number }} --comment -b "<your review>"
+
+            Structure your review using the three perspectives from SKILL.md:
+            ## [Code Quality]
+            ## [Security]
+            ## [Architecture]
+            Label each finding with the severity defined in SKILL.md.
+            If a section has no findings, write "No issues found."
+
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: 🎉 Mark review complete
+        if: always()
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+          -f "content=hooray" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

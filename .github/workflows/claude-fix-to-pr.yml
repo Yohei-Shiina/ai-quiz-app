@@ -9,9 +9,7 @@ on:
 jobs:
   claude-fix-to-pr:
     if: |
-      github.actor != 'claude[bot]' &&
-      github.actor != 'github-actions[bot]' &&
-      github.event_name == 'issue_comment' &&
+      github.event.sender.type != 'Bot' &&
       contains(github.event.comment.body, '@claude-fix-issue')
     runs-on: ubuntu-latest
     permissions:
@@ -55,7 +53,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: >-
             --max-turns 20
-            --allowed-tools "Read,Edit,Glob,Bash(gh:*),Bash(git:*),Bash(cat:*),Bash(find:*)"
+            --allowedTools "Read,Edit,Glob,Bash(gh:*),Bash(git:*),Bash(cat:*),Bash(find:*)"
           prompt: |
             If any tool/command is denied, DO NOT retry. Use other allowed tools or report the blocker and STOP.
             Always create a new branch from dev with the name starting with "claude-".
