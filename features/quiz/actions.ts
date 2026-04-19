@@ -8,6 +8,7 @@ import { validateTitleTopic } from "@/features/quiz/validations";
 import { createQuizSession } from "@/lib/dal/quizSession";
 import {
   createTopic,
+  getTopicById,
   getTopicsWithLatestSession as getTopicsWithLatestSessionFromDB,
 } from "@/lib/dal/topic";
 import { ActionState } from "@/lib/types";
@@ -36,6 +37,8 @@ export async function getTopicsWithLatestSession() {
 
 export async function retryQuizWithNewSession(topicId: Topic["id"]) {
   const user = await requireAuth();
+  const topic = await getTopicById(topicId);
+  if (!topic || topic.userId !== user.id) throw new Error("Topic not found");
   const session = await createQuizSession(user.id, topicId);
 
   redirect(`/quiz/${session.id}`);

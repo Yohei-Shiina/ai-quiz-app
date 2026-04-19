@@ -27,3 +27,9 @@ export async function getTopicsWithLatestSession(userId: User["id"]) {
       latestQuizSession: quizSessions[0],
     }));
 }
+
+export const getTopicById = async (id: Topic["id"]) => {
+  return prisma.topic.findUnique({
+    where: { id },
+  });
+};
