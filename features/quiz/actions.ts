@@ -2,10 +2,14 @@
 
 import { redirect } from "next/navigation";
 
+import { Topic } from "@/app/generated/prisma/client";
 import { requireAuth } from "@/features/auth/services";
 import { validateTitleTopic } from "@/features/quiz/validations";
 import { createQuizSession } from "@/lib/dal/quizSession";
-import { createTopic, getTopicsWithLatestSession as getTopicsWithLatestSessionFromDB } from "@/lib/dal/topic";
+import {
+  createTopic,
+  getTopicsWithLatestSession as getTopicsWithLatestSessionFromDB,
+} from "@/lib/dal/topic";
 import { ActionState } from "@/lib/types";
 
 export async function createQuizTopic(
@@ -28,4 +32,11 @@ export async function createQuizTopic(
 export async function getTopicsWithLatestSession() {
   const user = await requireAuth();
   return getTopicsWithLatestSessionFromDB(user.id);
+}
+
+export async function retryQuizWithNewSession(topicId: Topic["id"]) {
+  const user = await requireAuth();
+  const session = await createQuizSession(user.id, topicId);
+
+  redirect(`/quiz/${session.id}`);
 }

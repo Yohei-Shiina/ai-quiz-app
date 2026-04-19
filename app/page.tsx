@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TopicForm } from "@/app/topic-form";
 
 import { getTopicsWithLatestSession } from "@/features/quiz/actions";
+import { RetryQuizButton } from "@/app/retry-quiz-button";
 
 export default async function Home() {
   const topics = await getTopicsWithLatestSession();
@@ -56,30 +57,35 @@ export default async function Home() {
                 {topics.length}
               </Badge>
             </div>
-            {topics.length > 0 && (
-              <ItemGroup>
-                {topics.map((topic) => {
-                  return (
-                    <Item size={"sm"} variant={"outline"} asChild key={topic.id}>
-                      <Link href={`quiz/${topic.latestQuizSession.id}`}>
-                        <ItemContent>
-                          <ItemTitle>{topic.title}</ItemTitle>
-                        </ItemContent>
-                        {/* 
+            <ItemGroup>
+              {topics.map((topic) => {
+                const content = (
+                  <>
+                    <ItemContent>
+                      <ItemTitle>{topic.title}</ItemTitle>
+                    </ItemContent>
+                    {/* 
                         suppressHydrationWarning is intentional.
                         new Date() runs a few milliseconds later on the client than on the server,
                         but formatDistanceToNow outputs coarse units (minutes, hours, days),
                         so the mismatch has no visible impact.
                       */}
-                        <span className="text-sm text-muted-foreground" suppressHydrationWarning>
-                          {formatDistanceToNow(topic.createdAt, { addSuffix: true })}
-                        </span>
-                      </Link>
-                    </Item>
-                  );
-                })}
-              </ItemGroup>
-            )}
+                    <span className="text-sm text-muted-foreground" suppressHydrationWarning>
+                      {formatDistanceToNow(topic.createdAt, { addSuffix: true })}
+                    </span>
+                  </>
+                );
+                return (
+                  <Item size={"sm"} variant={"outline"} asChild key={topic.id}>
+                    {topic.latestQuizSession.status === "in_progress" ? (
+                      <Link href={`quiz/${topic.latestQuizSession.id}`}>{content}</Link>
+                    ) : (
+                      <RetryQuizButton topicId={topic.id}>{content}</RetryQuizButton>
+                    )}
+                  </Item>
+                );
+              })}
+            </ItemGroup>
           </div>
         )}
       </main>
