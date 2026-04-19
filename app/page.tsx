@@ -9,8 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TopicForm } from "@/app/topic-form";
 
-import { getTopicsWithLatestSession } from "@/features/quiz/actions";
-import { RetryQuizButton } from "@/app/retry-quiz-button";
+import { getTopicsWithLatestSession, retryQuizWithNewSession } from "@/features/quiz/actions";
 
 export default async function Home() {
   const topics = await getTopicsWithLatestSession();
@@ -80,7 +79,10 @@ export default async function Home() {
                     {topic.latestQuizSession.status === "in_progress" ? (
                       <Link href={`/quiz/${topic.latestQuizSession.id}`}>{content}</Link>
                     ) : (
-                      <RetryQuizButton topicId={topic.id}>{content}</RetryQuizButton>
+                      <form action={retryQuizWithNewSession}>
+                        <input type="hidden" name="topicId" value={topic.id} />
+                        {content}
+                      </form>
                     )}
                   </Item>
                 );
