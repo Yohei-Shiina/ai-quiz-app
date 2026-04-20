@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 
 import { TopicForm } from '@/app/topic-form';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { getTopicsWithLatestSession, retryQuizWithNewSession } from '@/features/quiz/actions';
 
