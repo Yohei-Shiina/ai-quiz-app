@@ -6,3 +6,10 @@ export const createQuizSession = async (userId: User['id'], topicId: Topic['id']
     data: { userId, topicId },
   });
 };
+
+export const getLatestQuizSession = async (userId: User['id'], topicId: Topic['id']) => {
+  return prisma.quizSession.findFirst({
+    where: { userId, topicId },
+    orderBy: { createdAt: 'desc' },
+  });
+};

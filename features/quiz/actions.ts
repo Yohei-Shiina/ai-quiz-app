@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 
 import { requireAuth } from '@/features/auth/services';
+import { getOrCreateLatestQuizSession } from '@/features/quiz/services';
 import { validateTitleTopic, validateRetryQuiz } from '@/features/quiz/validations';
 import { createQuizSession } from '@/lib/dal/quizSession';
 import {
@@ -39,7 +40,7 @@ export const retryQuizWithNewSession = async (formData: FormData) => {
   const formTopicId = validateRetryQuiz(formData);
   const topic = await getTopicById(formTopicId);
   if (!topic || topic.userId !== user.id) throw new Error('Topic not found');
-  const session = await createQuizSession(user.id, topic.id);
+  const session = await getOrCreateLatestQuizSession(user.id, topic.id);
 
   redirect(`/quiz/${session.id}`);
 };
