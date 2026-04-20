@@ -57,8 +57,9 @@ Closes #<issue_number>
 ## gh Command
 
 ```bash
-gh pr create --title "<type>: <summary>" --body "..."
+gh pr create --title "<type>: <summary>" --base <base-branch> --body "..."
 ```
 
-- Do not pass `--base` (already configured in the workflow)
+- Always pass `--base` set to the branch this branch was cut from (i.e. the parent branch, not necessarily `main`)
+- To find the base branch, run: `git log --oneline main..HEAD` and check the merge-base with candidate branches
 - Always include the issue number in the body
