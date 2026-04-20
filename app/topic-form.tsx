@@ -1,34 +1,61 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Field } from '@/components/ui/field';
+import { FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { createQuizTopic } from '@/features/quiz/actions';
 
 export const TopicForm = () => {
   const [state, action, isPending] = useActionState(createQuizTopic, { error: null });
+  const [bottomOffset, setBottomOffset] = useState(0);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const handler = () => {
+      const kb = window.innerHeight - vv.height - vv.offsetTop;
+      setBottomOffset(Math.max(0, kb));
+    };
+    vv.addEventListener('resize', handler);
+    vv.addEventListener('scroll', handler);
+    return () => {
+      vv.removeEventListener('resize', handler);
+      vv.removeEventListener('scroll', handler);
+    };
+  }, []);
 
   return (
-    <form action={action}>
-      <Field orientation="horizontal">
-        <Input
-          type="text"
-          name="title"
-          className="placeholder:text-xs"
-          placeholder="e.g. World War II, Quantum Physics, 90s Hip Hop..."
-          aria-invalid={!!state.error}
-        ></Input>
-        <Button size={'lg'} type="submit" className="font-bold" disabled={isPending}>
-          {isPending ? 'Generating' : 'Start Quiz'}
-        </Button>
-      </Field>
-      {state.error && (
-        <p className="mt-2 text-sm text-destructive" role="alert">
-          {state.error}
-        </p>
-      )}
-    </form>
+    <div
+      className="fixed left-0 right-0 px-4 pb-[env(safe-area-inset-bottom)]"
+      style={{ bottom: bottomOffset }}
+    >
+      <div className="max-w-md mx-auto">
+        <FieldError className="mb-2 text-xs px-1">{state.error}</FieldError>
+        <form action={action}>
+          <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3 shadow-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200">
+            <span className="text-primary text-lg select-none">+</span>
+            <Input
+              type="text"
+              name="title"
+              className="flex-1 min-w-0 border-none bg-transparent shadow-none focus-visible:ring-0 text-sm p-0 h-auto placeholder:text-muted-foreground"
+              placeholder="Add a topic..."
+              autoComplete="off"
+              aria-invalid={!!state.error}
+            />
+            <Button
+              type="submit"
+              variant="ghost"
+              size="sm"
+              className="shrink-0 h-auto p-0 text-xs font-medium text-primary hover:text-primary/70 hover:bg-transparent disabled:opacity-40"
+              disabled={isPending}
+            >
+              {isPending ? '...' : 'Go'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
