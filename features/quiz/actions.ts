@@ -35,7 +35,7 @@ export const getTopicsWithLatestSession = async () => {
   return getTopicsWithLatestSessionFromDB(user.id);
 };
 
-export const retryQuizWithNewSession = async (formData: FormData) => {
+export const resumeOrStartQuizSession = async (formData: FormData) => {
   const user = await requireAuth();
   const formTopicId = validateRetryQuiz(formData);
   const topic = await getTopicById(formTopicId);

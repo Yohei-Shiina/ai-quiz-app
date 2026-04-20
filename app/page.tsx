@@ -4,7 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 import { TopicForm } from '@/app/topic-form';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
-import { getTopicsWithLatestSession, retryQuizWithNewSession } from '@/features/quiz/actions';
+import { getTopicsWithLatestSession, resumeOrStartQuizSession } from '@/features/quiz/actions';
 
 export default async function Home() {
   const topics = await getTopicsWithLatestSession();
@@ -77,7 +77,7 @@ export default async function Home() {
                   {card}
                 </Link>
               ) : (
-                <form action={retryQuizWithNewSession} key={topic.id}>
+                <form action={resumeOrStartQuizSession} key={topic.id}>
                   <input type="hidden" name="topicId" value={topic.id} />
                   <button type="submit" className="block w-full text-left">
                     {card}
