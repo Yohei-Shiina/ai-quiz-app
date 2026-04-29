@@ -40,6 +40,7 @@
 [screen_flow.mdから該当ページの前後部分]
 
 今回設計するWhat:
+（what.md のうち `[tech]` タグが付いていないものだけを番号付きで列挙する）
 1. [What1]
 2. [What2]
 ...
@@ -65,7 +66,10 @@
 
 ## Step 3: Moderator R1
 
-moderator AgentにStep 2の4つの出力をすべて渡してください。
+moderator Agentに以下を渡してください。
+
+- プロダクトビジョン（product_vision.mdの内容）
+- Step 2の4つの出力すべて
 
 以下を受け取ります。
 - 各Whatの暫定案（採用How・採用理由・却下理由）
@@ -104,6 +108,7 @@ R2対象テーブルを確認してください。
 
 moderator Agentに以下のみを渡してください。
 
+- プロダクトビジョン（product_vision.mdの内容）
 - 「R2へ」と判定された What の Step 3 暫定仕様（確定 What は含めない）
 - Step 5 の Specialist R2 全出力
 
