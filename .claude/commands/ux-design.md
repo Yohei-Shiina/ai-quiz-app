@@ -24,7 +24,6 @@
 以下のファイルを読んでください。
 
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/product_vision.md
-- /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/_index.md
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/{PAGE_NAME}/what.md
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/screen_flow.md
 
@@ -103,14 +102,22 @@ R2対象テーブルを確認してください。
 
 ## Step 6: Moderator R2
 
-moderator AgentにStep 3のModerator R1全出力とStep 5のSpecialist R2全出力をすべて渡してください。
+moderator Agentに以下のみを渡してください。
 
-全Whatの最終Howを受け取ります（R1確定分 + R2更新分の統合）。
+- 「R2へ」と判定された What の Step 3 暫定仕様（確定 What は含めない）
+- Step 5 の Specialist R2 全出力
+
+競合 What の最終 How を受け取ります。
 
 ---
 
 ## Step 7: how.mdに書き出す
 
-以下のパスにModerator最終出力を上書き保存してください。
+以下を合成して上書き保存してください。
+
+- Step 3 で「確定」となった What の暫定案（R1 最終）
+- Step 6 で更新された What の最終案（R2 最終）
+
+保存先：
 
 /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/{PAGE_NAME}/how.md
