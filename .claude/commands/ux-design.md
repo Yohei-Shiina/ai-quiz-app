@@ -24,7 +24,6 @@
 以下のファイルを読んでください。
 
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/product_vision.md
-- /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/_index.md
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/{PAGE_NAME}/what.md
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/screen_flow.md
 
@@ -41,6 +40,7 @@
 [screen_flow.mdから該当ページの前後部分]
 
 今回設計するWhat:
+（what.md のうち `[tech]` タグが付いていないものだけを番号付きで列挙する）
 1. [What1]
 2. [What2]
 ...
@@ -66,7 +66,10 @@
 
 ## Step 3: Moderator R1
 
-moderator AgentにStep 2の4つの出力をすべて渡してください。
+moderator Agentに以下を渡してください。
+
+- プロダクトビジョン（product_vision.mdの内容）
+- Step 2の4つの出力すべて
 
 以下を受け取ります。
 - 各Whatの暫定案（採用How・採用理由・却下理由）
@@ -88,6 +91,7 @@ R2対象テーブルを確認してください。
 「R2へ」と判定されたWhatのみを対象に、4つのAgentを**並列**で呼んでください。
 
 各Agentに渡す情報：
+- プロダクトビジョン（product_vision.mdの内容）
 - 競合WhatのStep 3暫定仕様
 - R2対象テーブルの争点（1行）
 
@@ -103,14 +107,41 @@ R2対象テーブルを確認してください。
 
 ## Step 6: Moderator R2
 
-moderator AgentにStep 3のModerator R1全出力とStep 5のSpecialist R2全出力をすべて渡してください。
+moderator Agentに以下のみを渡してください。
 
-全Whatの最終Howを受け取ります（R1確定分 + R2更新分の統合）。
+- プロダクトビジョン（product_vision.mdの内容）
+- 「R2へ」と判定された What の Step 3 暫定仕様（確定 What は含めない）
+- Step 5 の Specialist R2 全出力
+
+競合 What の最終 How を受け取ります。
 
 ---
 
 ## Step 7: how.mdに書き出す
 
-以下のパスにModerator最終出力を上書き保存してください。
+以下を合成して上書き保存してください。
+
+- Step 3 で「確定」となった What の暫定案（R1 最終）
+- Step 6 で更新された What の最終案（R2 最終）
+
+保存先：
 
 /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/{PAGE_NAME}/how.md
+
+### how.md の出力フォーマット
+
+```
+# How — [ページ名] ([route])
+
+---
+
+## What[N]: [実装者向けに意訳した見出し]
+
+**仕様:**
+- [箇条書き。数値・文言・アニメーション時間など具体的に]
+
+**確定理由:**
+[R1全員合意 / R2で確定 など経緯を1行。採用理由を2文以内（引用は `著者名(年)` + 結論1行のみ）。却下した選択肢がある場合は末尾に「〇〇案（却下）：[理由1行]」を追記]
+
+---
+```
