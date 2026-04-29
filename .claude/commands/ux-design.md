@@ -4,8 +4,18 @@
 
 ## 使い方
 
-/ux-design [ページ名]
-例: /ux-design loading
+/ux-design
+
+---
+
+## Step 0: ページ選択
+
+以下のファイルを読んでください。
+
+- /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/_index.md
+
+ページ一覧を番号付きリストで表示し、「どのページを設計しますか？」とユーザーに聞いてください。
+ユーザーの返答（番号・ページ名・別名どれでも可）から正規のページディレクトリ名を特定し、それを PAGE_NAME として以降のステップで使ってください。
 
 ---
 
@@ -15,7 +25,7 @@
 
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/product_vision.md
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/_index.md
-- /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/$ARGUMENTS/what.md
+- /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/{PAGE_NAME}/what.md
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/screen_flow.md
 
 読み終えたら以下のフォーマットでinputパッケージを作成し、内部で保持してください（出力不要）。
@@ -103,4 +113,4 @@ moderator AgentにStep 3のModerator R1全出力とStep 5のSpecialist R2全出�
 
 以下のパスにModerator最終出力を上書き保存してください。
 
-/Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/$ARGUMENTS/how.md
+/Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/{PAGE_NAME}/how.md
