@@ -11,7 +11,6 @@
 ## Step 0: ページ選択
 
 以下のファイルを読んでください。
-
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/_index.md
 
 ページ一覧を番号付きリストで表示し、「どのページを設計しますか？」とユーザーに聞いてください。
@@ -19,10 +18,9 @@
 
 ---
 
-## Step 1: Routerとしてinputパッケージを生成する
+## Step 1: inputパッケージを生成する
 
 以下のファイルを読んでください。
-
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/product_vision.md
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/{PAGE_NAME}/what.md
 - /Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/screen_flow.md
@@ -31,7 +29,6 @@
 
 ```
 タスク: [ページ名]のUXデザイン
-ラウンド: 1
 
 プロダクトビジョン:
 [product_vision.mdの内容]
@@ -39,14 +36,24 @@
 対象ページの前後:
 [screen_flow.mdから該当ページの前後部分]
 
-今回設計するWhat:
+今回のUX設計ゴール:
 （what.md のうち `[tech]` タグが付いていないものだけを番号付きで列挙する）
-1. [What1]
-2. [What2]
+1. [ゴール1]
+2. [ゴール2]
 ...
 
 依頼:
-このWhatに対して、あなたの専門領域の知見から最も効果的なHowを提案してください。提案には実在する研究・データを根拠として示してください。
+あなたはモバイルアプリのUX設計プロジェクトに参加する専門家の一人です。上記に示すのは「[ページ名]」ページで実現したいユーザー体験のゴール一覧です。各ゴールについて、あなたの専門領域の知見から最善のHowを提案してください。
+
+各ゴールについて以下のフォーマットで回答してください。
+
+## [N]. [ゴールの内容]
+## 採用したHow
+[あなたの領域の知見から最も効果的なアプローチを1〜2文で述べる]
+## 仕様
+- [具体的な見た目・動き・文言を箇条書き、5行以内]
+## 根拠
+[採用したHowを支える研究・原則の主張を1文。研究名・著者は括弧内に簡潔に]
 ```
 
 ---
@@ -64,84 +71,77 @@
 
 ---
 
-## Step 3: Moderator R1
+## Step 3: 競合の有無を判断する
 
-moderator Agentに以下を渡してください。
+4つの出力を読み、Whatごとに専門家間で見解が対立しているか判断してください。
 
-- プロダクトビジョン（product_vision.mdの内容）
-- Step 2の4つの出力すべて
+```
+全Whatで対立なし
+  → Step 4をスキップしてStep 5へ進む
 
-以下を受け取ります。
-- 各Whatの暫定案（採用How・採用理由・却下理由）
-- R2対象テーブル（各WhatがR2へ / 確定 のどちらか）
-
----
-
-## Step 4: 分岐の判断
-
-R2対象テーブルを確認してください。
-
-- 全WhatがR2対象テーブルで「確定」→ Step 5・6をスキップしてStep 7へ進む
-- 「R2へ」が1つでもある → Step 5・6を実行する
+対立あり
+  → 対立しているWhatと争点を特定する
+  → Step 4を実行する
+```
 
 ---
 
-## Step 5: Specialist R2（並列・競合Whatのみ）
+## Step 4: Specialist R2（対立Whatがある場合のみ）
 
-「R2へ」と判定されたWhatのみを対象に、4つのAgentを**並列**で呼んでください。
+最も対立している2専門家を選んで**並列**で呼ぶ。
+- 判断できない場合は specialist-perception-ux と specialist-behavior-habit をデフォルトとする
 
-各Agentに渡す情報：
-- プロダクトビジョン（product_vision.mdの内容）
-- 競合WhatのStep 3暫定仕様
-- R2対象テーブルの争点（1行）
+各Agentに以下を渡してください。
 
-呼ぶAgent：
-- specialist-learning-memory
-- specialist-behavior-habit
-- specialist-motivation
-- specialist-perception-ux
+```
+プロダクトビジョン: [...]
+対象ページの前後: [...]
+対立What: [What内容]
+争点: [1行]
+R1出力（4人分）: [各専門家の出力]
 
-4つのR2出力をすべて保持してください。
+依頼:
+争点を踏まえ、以下のフォーマットで回答してください。
+
+## What[N]
+## 立場
+[R1提案を支持 / 修正案を提案]
+## 推奨仕様
+- [具体的な要素を3行以内]
+## 根拠
+[1文]
+```
+
+2つの出力を保持してください。
 
 ---
 
-## Step 6: Moderator R2
+## Step 5: how.mdを作成する
 
-moderator Agentに以下のみを渡してください。
+R1（対立なしの場合）またはR1とR2（対立ありの場合）の出力をすべて読み、Whatごとに最終仕様を確定してください。
 
-- プロダクトビジョン（product_vision.mdの内容）
-- 「R2へ」と判定された What の Step 3 暫定仕様（確定 What は含めない）
-- Step 5 の Specialist R2 全出力
+判断軸はプロダクトビジョンへの貢献度とします。複数の提案が対立する場合は、ビジョンにより直結する案を採用してください。
 
-競合 What の最終 How を受け取ります。
+各Whatの**採用理由:**末尾に以下のタグを1つ付けてください。
+- `（R1確定）`：R1で対立がなかったWhat
+- `（R2確定）`：R2を経て確定したWhat
 
----
+以下のフォーマットで保存先に上書き保存してください。
 
-## Step 7: how.mdに書き出す
-
-以下を合成して上書き保存してください。
-
-- Step 3 で「確定」となった What の暫定案（R1 最終）
-- Step 6 で更新された What の最終案（R2 最終）
-
-保存先：
-
-/Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/{PAGE_NAME}/how.md
-
-### how.md の出力フォーマット
+保存先：/Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/pages/{PAGE_NAME}/how.md
 
 ```
 # How — [ページ名] ([route])
 
 ---
 
-## What[N]: [実装者向けに意訳した見出し]
+## What[N]: [実装者向けの見出し]
 
 **仕様:**
-- [箇条書き。数値・文言・アニメーション時間など具体的に]
+- [箇条書き。数値・文言・時間など具体的に]
 
-**確定理由:**
-[R1全員合意 / R2で確定 など経緯を1行。採用理由を2文以内（引用は `著者名(年)` + 結論1行のみ）。却下した選択肢がある場合は末尾に「〇〇案（却下）：[理由1行]」を追記]
+**採用理由:** 著者(年) — [結論1行] / [なぜこの案か1行]（R1確定 または R2確定）
+**却下案:** [案名：理由1行]（なければ省略）
 
 ---
 ```
