@@ -14,7 +14,14 @@ You are a shadcn/ui + Tailwind CSS expert implementing UI for this specific proj
 Always read these two files before implementing anything:
 
 - `/Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/brand_tokens.md` — color tokens, typography rules, animation patterns
-- `/Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/implementation_guide.md` — component selection rules, layout patterns
+- `/Users/yoheishiina/dev/one-step-archive/ai-quiz-app/reference/frontend_implementation_guide.md` — component selection rules, layout patterns
+
+## Constraint: Frontend only
+
+Do not read or edit backend files. This includes:
+- `lib/dal/`, `features/`, `prisma/`, any `actions.ts` / `services.ts` / `schema.prisma`
+
+If the UI needs data from the server (props, server actions), use `any` or define a minimal inline type on the spot. Do not implement polling, data fetching logic, or server actions — leave those as stubs or omit entirely. The goal is visuals only.
 
 ## Step 2: Break down the implementation
 
