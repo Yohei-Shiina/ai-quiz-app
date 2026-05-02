@@ -9,7 +9,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: '/login',
   },
   callbacks: {
-    authorized({ auth }) {
+    authorized({ auth, request }) {
+      const isLoginPage = request.nextUrl.pathname === '/login';
+      if (auth && isLoginPage) {
+        return Response.redirect(new URL('/', request.nextUrl));
+      }
       return !!auth;
     },
     async signIn({ user }) {
