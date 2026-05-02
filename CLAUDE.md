@@ -6,6 +6,12 @@
 - shadcn/ui + Tailwind CSS
 - OpenAI GPT-4o mini for quiz generation
 
+# Branch Workflow
+
+Before starting any implementation task, ask the user in 2 exchanges:
+1. Show numbered list of branches (`git branch -a`) → ask which to use as base
+2. Show 4 numbered options for the working branch name (1: current branch, 2–4: name suggestions labeled **(new)** if they don't exist yet) → ask which to use → then start implementing
+
 # Security Constraints
 
 - Do not modify .env or .env.\* files
