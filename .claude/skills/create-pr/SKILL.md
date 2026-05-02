@@ -38,6 +38,8 @@ refactor: extract auth logic into hook
 
 ## PR Body Template
 
+All body content must be written in **English**.
+
 ```
 ## What
 <!-- 2-3 sentences -->
