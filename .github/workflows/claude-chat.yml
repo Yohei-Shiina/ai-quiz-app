@@ -1,6 +1,6 @@
 name: Claude Chat
 
-run-name: "Claude chat by @${{ github.actor }}"
+run-name: 'Claude chat by @${{ github.actor }}'
 
 on:
   issue_comment:
