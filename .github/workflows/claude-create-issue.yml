@@ -1,6 +1,6 @@
 name: Claude Create Issue
 
-run-name: "Claude create issue by @${{ github.actor }}"
+run-name: 'Claude create issue by @${{ github.actor }}'
 
 on:
   issue_comment:

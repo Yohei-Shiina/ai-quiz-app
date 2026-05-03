@@ -1,6 +1,6 @@
 name: Claude PR Review
 
-run-name: "Claude review for PR #${{ github.event.issue.number }} by @${{ github.actor }}"
+run-name: 'Claude review for PR #${{ github.event.issue.number }} by @${{ github.actor }}'
 
 on:
   issue_comment:
