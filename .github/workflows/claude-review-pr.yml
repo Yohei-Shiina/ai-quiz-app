@@ -64,7 +64,7 @@ jobs:
           show_full_output: true
           claude_args: >-
             --max-turns 10
-            --allowedTools "Bash(gh pr view *),Bash(gh pr review *),Bash(cat package.json),Read,Glob,Grep,WebFetch,Write"
+            --allowedTools "Bash(gh pr view *),Bash(cat package.json),Read,Glob,Grep,WebFetch"
           prompt: |
             If any tool/command is denied, DO NOT retry. Report the blocker and STOP.
             You are reviewing PR #${{ github.event.issue.number }}.
@@ -87,15 +87,13 @@ jobs:
                unclear), use Read/Glob/Grep to look up that specific file or symbol.
                Do NOT use these tools to browse the codebase broadly.
             7. Analyze the changes following the guidelines in SKILL.md.
-            8. Write your review to pr-review.md using the Write tool.
-               Structure the review using the three perspectives from SKILL.md:
+            8. Post your review as a PR comment on PR #${{ github.event.issue.number }}.
+               Structure it using the three perspectives from SKILL.md:
                ## [Code Quality]
                ## [Security]
                ## [Architecture]
                Label each finding with the severity defined in SKILL.md.
                If a section has no findings, write "No issues found."
-            9. Post the review using:
-               gh pr review ${{ github.event.issue.number }} --comment --body-file pr-review.md
 
         env:
           GH_TOKEN: ${{ github.token }}
