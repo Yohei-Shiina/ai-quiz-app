@@ -1,16 +1,17 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 
+import { ROUTES } from './lib/constants';
 import { upsertUserFromOAuth } from './lib/dal/user';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [Google],
   pages: {
-    signIn: '/login',
+    signIn: ROUTES.signIn,
   },
   callbacks: {
     authorized({ auth, request }) {
-      const isLoginPage = request.nextUrl.pathname === '/login';
+      const isLoginPage = request.nextUrl.pathname === ROUTES.signIn;
       if (auth && isLoginPage) {
         return Response.redirect(new URL('/', request.nextUrl));
       }
