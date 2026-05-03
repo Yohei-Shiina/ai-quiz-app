@@ -20,12 +20,27 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
+      - name: 👀 Acknowledge Trigger
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+          -f "content=eyes" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚚 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: 🤖 Claude Code Action
         uses: anthropics/claude-code-action@v1
         with:
           trigger_phrase: '@claude-chat'
           show_full_output: true
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          system_prompt: |
+            Only do what you are asked to do.
+            Read only the files necessary to answer the question.
           claude_args: >-
             --max-turns 5
             --allowedTools "Read,Glob,Bash(gh issue view:*),Bash(gh pr view:*),Bash(gh pr diff:*)"
