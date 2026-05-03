@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+out/
+
+# Auto-generated
+pnpm-lock.yaml
+tsconfig.tsbuildinfo
+next-env.d.ts
+prisma/migrations/
+
+# Environment
+.env*
+
+# Assets
+public/
+
+# Config files (not manually edited)
+postcss.config.mjs
+package.json
+
+# GitHub Actions & templates
+.github/
+
+# Claude commands & docs (read by Claude, not rendered)
+.claude/
+CLAUDE.md

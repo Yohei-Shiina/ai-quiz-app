@@ -4,16 +4,16 @@ on:
   pull_request:
     types: [ready_for_review]
     paths-ignore:
-      - "components/ui/**"
-      - "*.lock"
-      - "prisma/migrations/**"
-      - "public/**"
-      - ".github/**"
-      - "**/*.md"
-      - "eslint.config.*"
-      - "tsconfig.json"
-      - "postcss.config.*"
-      - "components.json"
+      - 'components/ui/**'
+      - '*.lock'
+      - 'prisma/migrations/**'
+      - 'public/**'
+      - '.github/**'
+      - '**/*.md'
+      - 'eslint.config.*'
+      - 'tsconfig.json'
+      - 'postcss.config.*'
+      - 'components.json'
 
 jobs:
   auto-review:
