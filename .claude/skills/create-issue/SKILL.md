@@ -37,6 +37,9 @@ As a developer, I can read functions written in consistent arrow function style
 ## Body Template
 
 ```
+## Background
+<Why this issue exists. What problem it solves or what decision was made.>
+
 ## Tasks
 - [ ] Task 1
 - [ ] Task 2
@@ -47,6 +50,7 @@ As a developer, I can read functions written in consistent arrow function style
 ```
 
 - English only
+- Background = optional for simple issues, required for refactors and architecture decisions
 - Tasks = concrete implementation steps (one checkbox per unit)
 - Definition of Done = observable outcome, not a task list
 
