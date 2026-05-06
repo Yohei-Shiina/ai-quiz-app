@@ -1,11 +1,20 @@
+import { cache } from 'react';
+
 import { redirect } from 'next/navigation';
 
-import type { User } from '@/app/generated/prisma/client';
+import { User } from '@/app/generated/prisma/client';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/constants';
-import { getUserByEmail } from '@/lib/dal/user';
+import { prisma } from '@/lib/prisma';
 
-export const requireAuth = async (): Promise<User> => {
+// only used in requireAuth()
+const getUserByEmail = async (email: User['email']) => {
+  return prisma.user.findUnique({
+    where: { email },
+  });
+};
+
+export const requireAuth = cache(async (): Promise<User> => {
   const session = await auth();
   if (!session?.user?.email) redirect(ROUTES.signIn);
 
@@ -13,4 +22,4 @@ export const requireAuth = async (): Promise<User> => {
   if (!user) redirect(ROUTES.signIn);
 
   return user;
-};
+});

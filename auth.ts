@@ -2,7 +2,8 @@ import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 
 import { ROUTES } from './lib/constants';
-import { upsertUserFromOAuth } from './lib/dal/user';
+
+import { upsertUserFromOAuth } from '@/features/user/data';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [Google],

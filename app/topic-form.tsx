@@ -5,10 +5,10 @@ import { useActionState, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { createQuizTopic } from '@/features/quiz/actions';
+import { startQuizAction } from '@/features/quiz/actions';
 
 export const TopicForm = () => {
-  const [state, action, isPending] = useActionState(createQuizTopic, { error: null });
+  const [state, action, isPending] = useActionState(startQuizAction, { error: null });
   const [bottomOffset, setBottomOffset] = useState(0);
 
   useEffect(() => {

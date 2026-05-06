@@ -1,22 +1,15 @@
-import type { QuizSession, Topic, User } from '@/app/generated/prisma/client';
-import { requireAuth } from '@/features/auth/services';
-import {
-  getLatestQuizSession,
-  createQuizSession,
-  getQuizSessionWithTopicById,
-} from '@/lib/dal/quizSession';
+import type { Topic } from '@/app/generated/prisma/client';
+import { getLatestQuizSessionOrThrow, createQuizSession } from '@/features/quiz/data';
+import { createTopic } from '@/features/topic/data';
 
-export const getOrCreateLatestQuizSession = async (userId: User['id'], topicId: Topic['id']) => {
-  const latestSession = await getLatestQuizSession(userId, topicId);
-  if (!latestSession) throw new Error('QuizSession not found');
+export const resumeOrRestartQuiz = async (topicId: Topic['id']) => {
+  const latestSession = await getLatestQuizSessionOrThrow(topicId);
   if (latestSession.status === 'in_progress') return latestSession;
-  return createQuizSession(userId, topicId);
+  return createQuizSession(topicId);
 };
 
-export const getQuizSessionWithTopic = async (sessionId: QuizSession['id']) => {
-  const user = await requireAuth();
-  const session = await getQuizSessionWithTopicById(sessionId);
-  if (!session || !session.topic) throw new Error('QuizSession or topic not found');
-  if (user.id !== session.userId) throw new Error('Forbidden');
+export const createTopicAndSession = async (title: Topic['title']) => {
+  const topic = await createTopic(title);
+  const session = await createQuizSession(topic.id);
   return session;
 };
