@@ -1,6 +1,6 @@
 ---
 name: create-pr
-description: Creates pull requests following project conventions. Use when creating a PR, running gh pr create, or when the user asks to open, submit, or push a PR. Automatically applies the correct title format and body template.
+description: Creates pull requests following project conventions. Use when the user intends to create a PR — including any Japanese phrasing that means opening, submitting, or pushing a pull request. Automatically applies the correct title format and body template.
 ---
 
 # Create PR
