@@ -1,9 +1,15 @@
-import type { Topic, User } from '@/app/generated/prisma/client';
-import { getLatestQuizSession, createQuizSession } from '@/lib/dal/quizSession';
+import type { Topic } from '@/app/generated/prisma/client';
+import { getLatestQuizSessionOrThrow, createQuizSession } from '@/features/quiz/data';
+import { createTopic } from '@/features/topic/data';
 
-export const getOrCreateLatestQuizSession = async (userId: User['id'], topicId: Topic['id']) => {
-  const latestSession = await getLatestQuizSession(userId, topicId);
-  if (!latestSession) throw new Error('QuizSession not found');
+export const resumeOrRestartQuiz = async (topicId: Topic['id']) => {
+  const latestSession = await getLatestQuizSessionOrThrow(topicId);
   if (latestSession.status === 'in_progress') return latestSession;
-  return createQuizSession(userId, topicId);
+  return createQuizSession(topicId);
+};
+
+export const createTopicAndSession = async (title: Topic['title']) => {
+  const topic = await createTopic(title);
+  const session = await createQuizSession(topic.id);
+  return session;
 };
