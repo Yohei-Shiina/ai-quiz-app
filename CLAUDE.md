@@ -29,7 +29,7 @@ Before starting any implementation task (including all file modifications such a
 
 - Do not modify .env or .env.\* files
 - Confirm before modifying workflow files (.github/)
-- Do not push directly to main without explicit confirmation; when pushing to main, present the changes clearly and wait for the user's approval before executing.
+- Do not push directly to main without explicit confirmation; when pushing to main, present the branch name and push target clearly and wait for the user's approval before executing.
 - Do not install new packages without explicit approval
 - Do not expose environment variables or secrets in comments or logs
 - Do not run destructive commands (rm -rf, DROP TABLE, etc.)
