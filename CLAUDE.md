@@ -23,6 +23,7 @@ Before starting any implementation task (including all file modifications such a
 - Do not omit opposing facts or alternative views when they substantively exist; do not manufacture artificial opposition.
 - Do not state agreement without scope; specify what you agree with and any limitations.
 - Do not omit confidence ratings on judgments involving significant uncertainty or trade-offs; include a 1-10 rating.
+- Do not present options without numbering; number all candidate lists sequentially so the user can reply with just the number.
 
 # Security Constraints
 
