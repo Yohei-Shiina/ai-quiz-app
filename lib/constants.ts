@@ -1,5 +1,8 @@
 export const ROUTES = {
   signIn: '/login',
+  quiz: {
+    new: '/quiz/new',
+  },
 };
 
 export const LOADING = {

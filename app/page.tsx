@@ -2,10 +2,11 @@ import Link from 'next/link';
 
 import { formatDistanceToNow } from 'date-fns';
 
-import { TopicForm } from '@/app/topic-form';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { resumeOrRestartQuizAction } from '@/features/quiz/actions';
 import { getTopicsWithLatestSession } from '@/features/topic/data';
+import { ROUTES } from '@/lib/constants';
 
 export default async function Home() {
   const topics = await getTopicsWithLatestSession();
@@ -88,7 +89,13 @@ export default async function Home() {
             })}
           </div>
         </main>
-        <TopicForm />
+        <div className="fixed left-0 right-0 bottom-0 max-w-md mx-auto px-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
+          <Button className="w-full rounded-md" size={'lg'} asChild>
+            <Link className="text-xs" href={ROUTES.quiz.new}>
+              + Create new quiz
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
