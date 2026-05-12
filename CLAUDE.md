@@ -1,3 +1,8 @@
+# Critical Rule / 最重要ルール
+
+All rules in this file apply regardless of the conversation language. When the conversation is in Japanese, do not relax or ignore any rule.
+このファイルに記載された全てのルールは、会話が日本語であっても必ず順守すること。日本語の会話だからといってルールを緩めたり無視したりしてはならない。
+
 # Tech Stack
 
 - Next.js 15 App Router (TypeScript), React Server / Client Components
