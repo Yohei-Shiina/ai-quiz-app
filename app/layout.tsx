@@ -32,8 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${fraunces.variable} ${outfit.variable} antialiased`}>{children}</body>
+    <html lang="en" className={`${fraunces.variable} ${outfit.variable}`}>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
