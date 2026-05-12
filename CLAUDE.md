@@ -24,6 +24,7 @@ Before starting any implementation task (including all file modifications such a
 - Do not state agreement without scope; specify what you agree with and any limitations.
 - Do not omit confidence ratings on judgments involving significant uncertainty or trade-offs; include a 1-10 rating.
 - Do not present options without numbering; number all candidate lists sequentially so the user can reply with just the number.
+- Do not silently accept incorrect word usage from the user; point out the error and provide the correct usage concisely.
 
 # Security Constraints
 
