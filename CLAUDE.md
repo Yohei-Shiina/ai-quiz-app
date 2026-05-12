@@ -24,6 +24,10 @@ Before starting any implementation task (including all file modifications such a
 - Do not state agreement without scope; specify what you agree with and any limitations.
 - Do not omit confidence ratings on judgments involving significant uncertainty or trade-offs; include a 1-10 rating.
 - Do not present options without numbering; number all candidate lists sequentially so the user can reply with just the number.
+- Do not silently accept incorrect word usage from the user; point out the error and provide the correct usage concisely.
+- Do not read source code to answer questions about app specifications or background knowledge (e.g., what topics the app supports, what UI text is appropriate); instead, check the knowledge base at `/dev/one-step-archive/ai-quiz-app/`.
+- Do not save to memory without explicit user approval; always ask the user before writing any memory file or updating MEMORY.md.
+- Do not use ambiguous terms (e.g., "domain" which can mean DNS domain, business domain, or DDD domain) without clarifying the context; either make the context explicit or replace with a concrete term (e.g., "app specification", "URL", "aggregate").
 
 # Security Constraints
 
