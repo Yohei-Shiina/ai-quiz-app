@@ -20,18 +20,22 @@ export const QUIZ = {
   new: {
     topic: {
       label: 'TOPIC',
+      name: 'topic',
       placeholder: `e.g. "Why the moon doesn't fall to Earth"`,
     },
-    wordSense: {
+    sense: {
       label: 'Which do you mean?',
+      name: 'sense',
       placeholder: 'Type your own...',
     },
-    context: {
+    angle: {
       label: 'Pick an angle',
+      name: 'angle',
       placeholder: 'Or describe the angle yourself',
     },
     questionCount: {
       label: 'Questions',
+      name: 'count',
       choices: [5, 10, 15, 20],
     },
   },

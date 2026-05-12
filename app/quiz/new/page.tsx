@@ -28,6 +28,7 @@ export default async function CreateQuiz() {
                   {QUIZ.new.topic.label}
                 </FieldLabel>
                 <Input
+                  name={QUIZ.new.topic.name}
                   className="placeholder:text-sm placeholder:text-muted-foreground"
                   placeholder={QUIZ.new.topic.placeholder}
                   required
@@ -36,7 +37,7 @@ export default async function CreateQuiz() {
               {/* Word sense */}
               <Field>
                 <FieldLabel className="text-xs text-muted-foreground">
-                  {QUIZ.new.wordSense.label}
+                  {QUIZ.new.sense.label}
                 </FieldLabel>
                 <ToggleGroup
                   type="single"
@@ -47,6 +48,7 @@ export default async function CreateQuiz() {
                   {['top', 'bottom', 'right', 'left', 'other'].map((i) => (
                     <ToggleGroupItem
                       key={i}
+                      name={QUIZ.new.sense.name}
                       value={i}
                       aria-label={i}
                       className="font-normal rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-transparent"
@@ -58,13 +60,13 @@ export default async function CreateQuiz() {
                 <Input
                   hidden // show when other selected
                   className="placeholder:text-sm placeholder:text-muted-foreground"
-                  placeholder={QUIZ.new.wordSense.placeholder}
+                  placeholder={QUIZ.new.sense.placeholder}
                 />
               </Field>
-              {/* Context */}
+              {/* Angle */}
               <Field>
                 <FieldLabel className="text-xs text-muted-foreground">
-                  {QUIZ.new.context.label}
+                  {QUIZ.new.angle.label}
                 </FieldLabel>
                 <ToggleGroup
                   type="multiple"
@@ -75,6 +77,7 @@ export default async function CreateQuiz() {
                   {['top', 'bottom', 'right', 'left', 'other'].map((i) => (
                     <ToggleGroupItem
                       key={i}
+                      name={QUIZ.new.angle.name}
                       value={i}
                       aria-label={i}
                       className="font-normal rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-transparent"
@@ -86,7 +89,7 @@ export default async function CreateQuiz() {
                 <Input
                   hidden // show when other selected
                   className="placeholder:text-sm placeholder:text-muted-foreground"
-                  placeholder={QUIZ.new.context.placeholder}
+                  placeholder={QUIZ.new.angle.placeholder}
                 />
               </Field>
             </FieldGroup>
@@ -104,6 +107,7 @@ export default async function CreateQuiz() {
                     return (
                       <ToggleGroupItem
                         key={count}
+                        name={QUIZ.new.questionCount.name}
                         value={count}
                         aria-label={count}
                         className="flex-1 h-14 rounded-xl font-normal text-sm data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-transparent"
