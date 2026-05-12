@@ -1,3 +1,6 @@
+'use client';
+import { useState } from 'react';
+
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -6,7 +9,9 @@ import { Input } from '@/components/ui/input';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { QUIZ, ROUTES } from '@/lib/constants';
 
-export default async function CreateQuiz() {
+export default function CreateQuiz() {
+  const [showInputInput, setShowSenseInput] = useState(false);
+  const [showAngleInput, setShowAngleInput] = useState(false);
   return (
     <>
       <header className="sticky top-0 z-10 bg-background py-5">
@@ -41,6 +46,7 @@ export default async function CreateQuiz() {
                 </FieldLabel>
                 <ToggleGroup
                   type="single"
+                  onValueChange={(v) => setShowSenseInput(v === 'other')}
                   variant="outline"
                   spacing={2}
                   className="w-full flex-wrap"
@@ -58,7 +64,7 @@ export default async function CreateQuiz() {
                   ))}
                 </ToggleGroup>
                 <Input
-                  hidden // show when other selected
+                  hidden={!showInputInput}
                   className="placeholder:text-sm placeholder:text-muted-foreground"
                   placeholder={QUIZ.new.sense.placeholder}
                 />
@@ -70,6 +76,7 @@ export default async function CreateQuiz() {
                 </FieldLabel>
                 <ToggleGroup
                   type="multiple"
+                  onValueChange={(v) => setShowAngleInput(v.includes('other'))}
                   variant="outline"
                   spacing={2}
                   className="w-full flex-wrap"
@@ -87,7 +94,7 @@ export default async function CreateQuiz() {
                   ))}
                 </ToggleGroup>
                 <Input
-                  hidden // show when other selected
+                  hidden={!showAngleInput}
                   className="placeholder:text-sm placeholder:text-muted-foreground"
                   placeholder={QUIZ.new.angle.placeholder}
                 />
@@ -120,19 +127,13 @@ export default async function CreateQuiz() {
               </Field>
             </FieldGroup>
           </FieldSet>
+          <div className="fixed left-0 right-0 bottom-0 max-w-md mx-auto px-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
+            <Button type="submit" className="w-full rounded-md" size={'lg'}>
+              <span className="text-xs">+ Create new quiz</span>
+            </Button>
+          </div>
         </form>
       </main>
-      <footer className="fixed bottom-0 inset-x-0 bg-background">
-        <div className="max-w-md mx-auto px-4 pb-8 pt-4">
-          <Button
-            form="create-quiz-form"
-            type="submit"
-            className="w-full h-14 rounded-xl text-base"
-          >
-            Create quiz
-          </Button>
-        </div>
-      </footer>
     </>
   );
 }
