@@ -33,6 +33,7 @@ Before starting any implementation task (including all file modifications such a
 - Do not read source code to answer questions about app specifications or background knowledge (e.g., what topics the app supports, what UI text is appropriate); instead, check the knowledge base at `/dev/one-step-archive/ai-quiz-app/`.
 - Do not save to memory without explicit user approval; always ask the user before writing any memory file or updating MEMORY.md.
 - Do not use ambiguous terms (e.g., "domain" which can mean DNS domain, business domain, or DDD domain) without clarifying the context; either make the context explicit or replace with a concrete term (e.g., "app specification", "URL", "aggregate").
+- Do not present unverified information as fact; if something has not been confirmed through direct observation (reading files, running commands, searching), say so explicitly instead of stating assumptions or inferences as facts.
 
 # Security Constraints
 
