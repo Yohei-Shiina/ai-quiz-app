@@ -29,12 +29,12 @@ export const QUIZ = {
       placeholder: 'Type your own...',
     },
     angle: {
-      label: 'Pick an angle',
+      label: 'What do you want to explore?',
       name: 'angle',
       placeholder: 'Or describe the angle yourself',
     },
     questionCount: {
-      label: 'Questions',
+      label: 'How many questions?',
       name: 'count',
       choices: [5, 10, 15, 20],
     },
