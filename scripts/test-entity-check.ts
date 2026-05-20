@@ -1,7 +1,7 @@
 import { zodResponseFormat } from 'openai/helpers/zod';
 
-import { SENSE_CHECK_PROMPT } from '@/features/quiz/prompts';
-import { SenseCheckResponseSchema } from '@/features/quiz/validations';
+import { ENTITY_CHECK_PROMPT } from '@/features/quiz/prompts';
+import { EntityCheckResponseSchema } from '@/features/quiz/validations';
 import { openai } from '@/lib/openai';
 
 const TEST_INPUTS = [
@@ -19,10 +19,10 @@ const run = async () => {
     const completion = await openai.chat.completions.parse({
       model: 'gpt-5.4-nano',
       messages: [
-        { role: 'system', content: SENSE_CHECK_PROMPT },
+        { role: 'system', content: ENTITY_CHECK_PROMPT },
         { role: 'user', content: `<<<USER_INPUT>>>\n${input}\n<<<END_USER_INPUT>>>` },
       ],
-      response_format: zodResponseFormat(SenseCheckResponseSchema, 'sense_check'),
+      response_format: zodResponseFormat(EntityCheckResponseSchema, 'entity_check'),
       temperature: 0,
     });
 

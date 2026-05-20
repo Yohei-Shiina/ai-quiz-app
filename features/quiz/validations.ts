@@ -24,13 +24,13 @@ export const validateResumeOrRestartQuiz = (formData: FormData) => {
   return result.data.topicId;
 };
 
-export const SenseCheckInputSchema = z
+export const EntityCheckInputSchema = z
   .string()
   .trim()
   .min(1, 'Input is required')
   .max(200, 'Input is too long');
 
-export const SenseCheckResponseSchema = z.object({
+export const EntityCheckResponseSchema = z.object({
   entityAmbiguous: z.boolean(),
   angleAmbiguous: z.boolean(),
   entityCandidates: z.array(z.string()).max(5),

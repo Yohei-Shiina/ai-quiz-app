@@ -1,4 +1,4 @@
-export const SENSE_CHECK_PROMPT = `# Role
+export const ENTITY_CHECK_PROMPT = `# Role
 You are a highly precise data parser for a quiz application.
 
 # Task
