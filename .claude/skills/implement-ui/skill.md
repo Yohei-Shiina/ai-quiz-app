@@ -36,14 +36,7 @@ For each UI element:
 3. If YES but NOT in `components/ui/` → propose installing it with `pnpm dlx shadcn add <name>` before implementing
 4. If NO → implement with Tailwind only
 
-**Rule: shadcn components take priority. Design differences are resolved with Tailwind overrides, not by avoiding the component.**
-
-**Exception — use plain HTML instead when BOTH conditions are met:**
-1. The number of classes that only undo shadcn defaults (not add design) is **3 or more**
-2. The component's built-in behavior (focus ring, ARIA, keyboard interaction) is **not needed**
-
-Example: `<Button>` as a full-width card wrapper needs `block p-0 h-auto hover:bg-transparent` (4 undo classes) and provides no needed behavior → use `<button>` instead.
-Counter-example: `<Button>` for a submit "Go" needs 3 undo classes but provides `disabled` state + focus ring → keep shadcn.
+**Rule: shadcn components take priority. Design differences are resolved with Tailwind overrides, not by avoiding the component. Use plain HTML only when using the shadcn component would not improve the code.**
 
 ## Step 4: Read relevant component files
 
