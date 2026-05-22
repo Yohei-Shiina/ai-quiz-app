@@ -12,6 +12,8 @@ const TEST_INPUTS = [
   '水はなんで透明なのか',
   'Why is the sun so bright?',
   'useStateの使い方',
+  'What is はし?',
+  'react について',
 ];
 
 const run = async () => {

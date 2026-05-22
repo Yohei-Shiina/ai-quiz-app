@@ -35,12 +35,3 @@ export const EntityCheckResponseSchema = z.object({
   angleAmbiguous: z.boolean(),
   entityCandidates: z.array(z.string()).max(5),
 });
-
-export const OutlineGenerationInputSchema = z.object({
-  input: z.string().trim().min(1, 'Input is required').max(200, 'Input is too long'),
-  entity: z.string().trim().min(1).max(100).optional(),
-});
-
-export const OutlineGenerationResponseSchema = z.object({
-  outlines: z.array(z.string()).length(4),
-});
