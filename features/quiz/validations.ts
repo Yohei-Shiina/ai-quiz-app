@@ -32,6 +32,5 @@ export const EntityCheckInputSchema = z
 
 export const EntityCheckResponseSchema = z.object({
   entityAmbiguous: z.boolean(),
-  angleAmbiguous: z.boolean(),
   entityCandidates: z.array(z.string()).max(5),
 });
