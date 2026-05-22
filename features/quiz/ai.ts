@@ -7,7 +7,7 @@ import { ENTITY_CHECK_PROMPT } from '@/features/quiz/prompts';
 import { EntityCheckInputSchema, EntityCheckResponseSchema } from '@/features/quiz/validations';
 import { openai } from '@/lib/openai';
 
-export const checkEntityAndAngle = async (input: string) => {
+export const checkEntity = async (input: string) => {
   const validated = EntityCheckInputSchema.parse(input);
 
   await requireAuth();
