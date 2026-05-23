@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 
+import { requireAuth } from '@/features/auth/services';
 import { createTopicAndSession, resumeOrRestartQuiz } from '@/features/quiz/services';
 import { validateTitleTopic, validateResumeOrRestartQuiz } from '@/features/quiz/validations';
 import { ActionState } from '@/lib/types';
@@ -13,6 +14,12 @@ export const startQuizAction = async (
   const result = validateTitleTopic(formData);
   if (result.error) return { error: result.error };
   const session = await createTopicAndSession(result.data!.title);
+  redirect(`/quiz/${session.id}`);
+};
+
+export const createQuizFromTopicAction = async (topic: string) => {
+  await requireAuth();
+  const session = await createTopicAndSession(topic);
   redirect(`/quiz/${session.id}`);
 };
 

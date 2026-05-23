@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 
 import Link from 'next/link';
 
@@ -8,53 +8,39 @@ import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { createQuizFromTopicAction } from '@/features/quiz/actions';
+import { checkEntity } from '@/features/quiz/ai';
 import { QUIZ, ROUTES } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-
-// TODO: replace with server-side topic classification (see features/quiz/ai)
-const AMBIGUOUS_SAMPLE: Record<string, string[]> = {
-  python: ['Programming language', 'Snake (animal)', 'Monty Python'],
-  mercury: ['The planet', 'The element', 'The Roman god', 'Freddie Mercury'],
-  java: ['Programming language', 'The island', 'Coffee'],
-  apple: ['The fruit', 'The company'],
-};
-
-async function classifyTopic(raw: string): Promise<string[] | null> {
-  // TODO: replace with real sense-check API call
-  await new Promise((r) => setTimeout(r, 500));
-  const t = raw.trim().toLowerCase();
-  return AMBIGUOUS_SAMPLE[t] ?? null;
-}
 
 export default function NewQuizPage() {
   const [topic, setTopic] = useState('');
   const [disambigOptions, setDisambigOptions] = useState<string[] | null>(null);
-  const [checking, setChecking] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const canSubmit = topic.trim().length > 0 && !checking && !disambigOptions;
+  const canSubmit = topic.trim().length > 0 && !isPending && !disambigOptions;
 
-  const updateTopic = (topic: string) => {
-    setTopic(topic);
+  const updateTopic = (v: string) => {
+    setTopic(v);
     if (disambigOptions) setDisambigOptions(null);
   };
 
-  const handleMake = async () => {
+  const handleMake = () => {
     if (!canSubmit) return;
-    setChecking(true);
-    const opts = await classifyTopic(topic);
-    if (opts) {
-      setDisambigOptions(opts);
-      setChecking(false);
-      return;
-    }
-    // TODO: navigate to /quiz/[sessionId] with the topic for generation.
-    // Keep `checking=true` until navigation lands the user on the next screen.
+    startTransition(async () => {
+      const result = await checkEntity(topic);
+      if (result.entityAmbiguous) {
+        setDisambigOptions(result.entityCandidates);
+        return;
+      }
+      await createQuizFromTopicAction(topic);
+    });
   };
 
   const handleChip = (label: string) => {
-    const composed = `${topic.trim()} · ${label}`;
-    // TODO: navigate to /quiz/[sessionId] with `composed` for generation.
-    void composed;
+    startTransition(async () => {
+      await createQuizFromTopicAction(`${topic.trim()} · ${label}`);
+    });
   };
 
   return (
@@ -93,20 +79,20 @@ export default function NewQuizPage() {
                 if (e.nativeEvent.isComposing) return;
                 if (e.key === 'Enter' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
                   e.preventDefault();
-                  void handleMake();
+                  handleMake();
                 }
               }}
-              readOnly={checking}
+              readOnly={isPending}
               placeholder={QUIZ.new.topic.placeholder}
               rows={3}
               className={cn(
                 'min-h-[88px] resize-none rounded-xl border-border bg-card px-4 py-3.5 text-base leading-relaxed shadow-sm transition-all duration-200 md:text-base',
                 'focus-visible:border-primary focus-visible:ring-primary/20',
-                checking && 'opacity-70',
+                isPending && 'opacity-70',
               )}
             />
 
-            {disambigOptions && !checking && (
+            {disambigOptions && !isPending && (
               <div
                 className="flex flex-col gap-2.5 rounded-xl border border-dashed border-primary bg-card px-3.5 py-3"
                 style={{ animation: 'fade-up 0.35s ease-out both' }}
@@ -121,6 +107,7 @@ export default function NewQuizPage() {
                       type="button"
                       variant="outline"
                       className="h-auto rounded-full px-3.5 py-2 text-sm font-medium"
+                      disabled={isPending}
                       onClick={() => handleChip(label)}
                     >
                       {label}
@@ -134,9 +121,9 @@ export default function NewQuizPage() {
               type="button"
               className="mt-0.5 h-12 w-full rounded-xl text-base font-medium shadow-md"
               disabled={!canSubmit}
-              onClick={() => void handleMake()}
+              onClick={handleMake}
             >
-              {checking ? (
+              {isPending ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
                   <span className="opacity-90">Checking…</span>
