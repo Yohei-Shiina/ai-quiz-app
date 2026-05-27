@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 
-import { createTopicAndSession, resumeOrRestartQuiz } from '@/features/quiz/services';
+import { createTopicAndSession, resumeOrRestartQuiz, submitAnswer } from '@/features/quiz/services';
 import { validateTitleTopic, validateResumeOrRestartQuiz } from '@/features/quiz/validations';
 import { ActionState } from '@/lib/types';
 
@@ -20,4 +20,18 @@ export const resumeOrRestartQuizAction = async (formData: FormData) => {
   const formTopicId = validateResumeOrRestartQuiz(formData);
   const session = await resumeOrRestartQuiz(formTopicId);
   redirect(`/quiz/${session.id}`);
+};
+
+export const submitSessionAnswerAction = async ({
+  quizSessionId,
+  questionId,
+  answerOptionId,
+  isCorrect,
+}: {
+  quizSessionId: string;
+  questionId: string;
+  answerOptionId: string;
+  isCorrect: boolean;
+}): Promise<void> => {
+  await submitAnswer({ quizSessionId, questionId, answerOptionId, isCorrect });
 };

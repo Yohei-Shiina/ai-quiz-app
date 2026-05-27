@@ -2,11 +2,14 @@ import { Output, streamText } from 'ai';
 
 import type { QuizSession, Topic } from '@/app/generated/prisma/client';
 import {
+  countSessionAnswers,
   countSessionQuestions,
   createQuestionWithOptions,
   createQuizSession,
+  createSessionAnswer,
   getLatestQuizSessionOrThrow,
   getQuizSessionWithTopicByIdOrThrow,
+  markSessionCompletedOrThrow,
 } from '@/features/quiz/data';
 import { buildQuizGenerationPrompt } from '@/features/quiz/prompts';
 import {
@@ -22,6 +25,19 @@ export const resumeOrRestartQuiz = async (topicId: Topic['id']) => {
   const latestSession = await getLatestQuizSessionOrThrow(topicId);
   if (latestSession.status === 'in_progress') return latestSession;
   return createQuizSession(topicId);
+};
+
+export const submitAnswer = async (params: {
+  quizSessionId: QuizSession['id'];
+  questionId: string;
+  answerOptionId: string;
+  isCorrect: boolean;
+}) => {
+  await createSessionAnswer(params);
+  const answeredCount = await countSessionAnswers(params.quizSessionId);
+  if (answeredCount >= QUIZ_QUESTION_COUNT) {
+    await markSessionCompletedOrThrow(params.quizSessionId);
+  }
 };
 
 export const createTopicAndSession = async (title: Topic['title']) => {
