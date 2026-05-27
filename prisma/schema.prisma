@@ -66,7 +66,7 @@ model QuizSession {
   userId           String
   topic            Topic             @relation(fields: [topicId], references: [id])
   topicId          String
-  status           String            @default("in_progress")
+  status           QuizSessionStatus @default(in_progress)
   createdAt        DateTime          @default(now())
   sessionQuestions SessionQuestion[]
   sessionAnswer    SessionAnswer[]
@@ -97,4 +97,9 @@ model SessionAnswer {
   createdAt      DateTime     @default(now())
 
   @@map("session_answers")
+}
+
+enum QuizSessionStatus {
+  in_progress
+  completed
 }

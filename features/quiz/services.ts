@@ -1,6 +1,6 @@
 import { Output, streamText } from 'ai';
 
-import type { QuizSession, Topic } from '@/app/generated/prisma/client';
+import { QuizSessionStatus, type QuizSession, type Topic } from '@/app/generated/prisma/client';
 import {
   countSessionQuestions,
   createQuestionWithOptions,
@@ -20,7 +20,7 @@ import { quizModel } from '@/lib/openai';
 
 export const resumeOrRestartQuiz = async (topicId: Topic['id']) => {
   const latestSession = await getLatestQuizSessionOrThrow(topicId);
-  if (latestSession.status === 'in_progress') return latestSession;
+  if (latestSession.status === QuizSessionStatus.in_progress) return latestSession;
   return createQuizSession(topicId);
 };
 
