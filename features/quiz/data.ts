@@ -35,6 +35,58 @@ export const countSessionQuestions = async (quizSessionId: QuizSession['id']) =>
   });
 };
 
+export const getSessionQuestionsWithOptions = async (quizSessionId: QuizSession['id']) => {
+  const user = await requireAuth();
+  const sessionQuestions = await prisma.sessionQuestion.findMany({
+    where: { quizSessionId, quizSession: { userId: user.id } },
+    orderBy: { position: 'asc' },
+    include: {
+      question: {
+        include: { answerOptions: { orderBy: { position: 'asc' } } },
+      },
+    },
+  });
+  return sessionQuestions.map(({ question }) => question);
+};
+
+export const createSessionAnswer = async ({
+  quizSessionId,
+  questionId,
+  answerOptionId,
+  isCorrect,
+}: {
+  quizSessionId: QuizSession['id'];
+  questionId: string;
+  answerOptionId: string;
+  isCorrect: boolean;
+}) => {
+  const user = await requireAuth();
+  await prisma.quizSession.findFirstOrThrow({
+    where: { id: quizSessionId, userId: user.id },
+  });
+  return prisma.sessionAnswer.create({
+    data: { quizSessionId, questionId, answerOptionId, isCorrect },
+  });
+};
+
+export const countSessionAnswers = async (quizSessionId: QuizSession['id']) => {
+  const user = await requireAuth();
+  return prisma.sessionAnswer.count({
+    where: { quizSessionId, quizSession: { userId: user.id } },
+  });
+};
+
+export const markSessionCompletedOrThrow = async (id: QuizSession['id']) => {
+  const user = await requireAuth();
+  await prisma.quizSession.findFirstOrThrow({
+    where: { id, userId: user.id },
+  });
+  return prisma.quizSession.update({
+    where: { id },
+    data: { status: 'completed' },
+  });
+};
+
 export const createQuestionWithOptions = async ({
   topicId,
   quizSessionId,
