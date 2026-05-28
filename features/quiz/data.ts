@@ -54,14 +54,13 @@ export const createQuestionWithOptions = async ({
       topicId,
       body: question.body,
       answerOptions: {
-        create: question.options.map((option, index) => ({
+        create: question.options.map((option) => ({
           body: option.body,
-          position: index,
           isCorrect: option.isCorrect,
         })),
       },
     },
-    include: { answerOptions: { orderBy: { position: 'asc' } } },
+    include: { answerOptions: true },
   });
 };
 
