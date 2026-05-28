@@ -13,7 +13,6 @@ import { buildQuizGenerationPrompt } from '@/features/quiz/prompts';
 import {
   generatedQuestionSchema,
   generatedQuizSchema,
-  QUIZ_QUESTION_COUNT,
   type GeneratedQuestion,
 } from '@/features/quiz/schemas';
 import { createTopic } from '@/features/topic/data';
@@ -39,7 +38,7 @@ export const generateQuizForSession = async function* (sessionId: QuizSession['i
   const session = await getQuizSessionWithTopicByIdOrThrow(sessionId);
 
   const existing = await countSessionQuestions(sessionId);
-  if (existing >= QUIZ_QUESTION_COUNT) return;
+  if (existing >= session.questionCount) return;
 
   const { partialOutputStream } = streamText({
     model: quizModel(),
@@ -50,7 +49,7 @@ export const generateQuizForSession = async function* (sessionId: QuizSession['i
   let emittedCount = existing;
   for await (const partial of partialOutputStream) {
     const questions = partial?.questions ?? [];
-    while (emittedCount < questions.length && emittedCount < QUIZ_QUESTION_COUNT) {
+    while (emittedCount < questions.length && emittedCount < session.questionCount) {
       const candidate = questions[emittedCount];
       if (!isCompleteQuestion(candidate)) break;
       const saved = await createQuestionWithOptions({

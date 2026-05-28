@@ -1,6 +1,6 @@
 import type { Topic, QuizSession } from '@/app/generated/prisma/client';
 import { requireAuth } from '@/features/auth/services';
-import type { GeneratedQuestion } from '@/features/quiz/schemas';
+import { QUIZ_QUESTION_COUNT, type GeneratedQuestion } from '@/features/quiz/schemas';
 import { prisma } from '@/lib/prisma';
 
 export const createQuizSession = async (topicId: Topic['id']) => {
@@ -9,7 +9,7 @@ export const createQuizSession = async (topicId: Topic['id']) => {
     where: { id: topicId, userId: user.id },
   });
   return prisma.quizSession.create({
-    data: { topicId, userId: user.id },
+    data: { topicId, userId: user.id, questionCount: QUIZ_QUESTION_COUNT },
   });
 };
 

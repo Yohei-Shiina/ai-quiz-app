@@ -67,6 +67,7 @@ model QuizSession {
   topic            Topic             @relation(fields: [topicId], references: [id])
   topicId          String
   status           QuizSessionStatus @default(in_progress)
+  questionCount    Int               @default(5)
   createdAt        DateTime          @default(now())
   sessionQuestions SessionQuestion[]
   sessionAnswer    SessionAnswer[]
