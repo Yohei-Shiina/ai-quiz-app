@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma';
 
 export const createQuizSession = async (topicId: Topic['id']) => {
   const user = await requireAuth();
+  await prisma.topic.findFirstOrThrow({
+    where: { id: topicId, userId: user.id },
+  });
   return prisma.quizSession.create({
     data: { topicId, userId: user.id },
   });
@@ -72,13 +75,15 @@ export const createSessionQuestion = async ({
   position: number;
 }) => {
   const user = await requireAuth();
-  // ownership: session belongs to the user, and the question's topic belongs to the user
-  // (the second guards against linking someone else's question into your own session).
   await prisma.quizSession.findFirstOrThrow({
-    where: { id: quizSessionId, userId: user.id },
-  });
-  await prisma.question.findFirstOrThrow({
-    where: { id: questionId, topic: { userId: user.id } },
+    where: {
+      id: quizSessionId,
+      userId: user.id,
+      topic: {
+        userId: user.id,
+        questions: { some: { id: questionId } },
+      },
+    },
   });
   return prisma.sessionQuestion.create({
     data: { quizSessionId, questionId, position },
