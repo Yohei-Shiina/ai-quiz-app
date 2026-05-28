@@ -19,6 +19,9 @@ export const generatedQuestionSchema = z.object({
 });
 
 export const generatedQuizSchema = z.object({
+  detectedLanguage: z
+    .string()
+    .describe('The language the user wrote the topic in, e.g. "English" or "Japanese"'),
   questions: z
     .array(generatedQuestionSchema)
     .length(QUIZ_QUESTION_COUNT)
