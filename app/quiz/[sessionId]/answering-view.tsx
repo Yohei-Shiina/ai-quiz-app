@@ -15,7 +15,6 @@ import {
 } from '@/app/quiz/[sessionId]/use-question-stream';
 import { Button } from '@/components/ui/button';
 import { submitSessionAnswerAction } from '@/features/quiz/actions';
-import { QUIZ_QUESTION_COUNT } from '@/features/quiz/schemas';
 import { cn } from '@/lib/utils';
 
 const PLACEHOLDER_EXPLANATION = 'Explanation will be available once the backend is implemented.';
@@ -23,6 +22,7 @@ const PLACEHOLDER_EXPLANATION = 'Explanation will be available once the backend 
 type Props = {
   sessionId: QuizSession['id'];
   topic: string;
+  questionCount: number;
   initialQuestions: QuestionWithOptions[];
   initialIdx: number;
 };
@@ -35,13 +35,19 @@ type AnswerPhase = 'idle' | 'correct' | 'wrong';
 // Duolingo / Quizlet など類似アプリも 1.0–2.0s の範囲。
 const AUTO_ADVANCE_MS = 1000;
 
-export const AnsweringView = ({ sessionId, topic, initialQuestions, initialIdx }: Props) => {
+export const AnsweringView = ({
+  sessionId,
+  topic,
+  questionCount,
+  initialQuestions,
+  initialIdx,
+}: Props) => {
   const router = useRouter();
   const [questions, setQuestions] = useState(initialQuestions);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(initialIdx);
   const [selectedOptionIdx, setSelectedOptionIdx] = useState<number | null>(null);
 
-  const totalQuestions = QUIZ_QUESTION_COUNT;
+  const totalQuestions = questionCount;
   const currentQuestion = questions[currentQuestionIdx];
   const correctOptionIdx = currentQuestion?.answerOptions.findIndex((o) => o.isCorrect) ?? -1;
   const answerPhase: AnswerPhase =
@@ -56,8 +62,9 @@ export const AnsweringView = ({ sessionId, topic, initialQuestions, initialIdx }
   const { streamError } = useQuestionStream({
     sessionId,
     initialCount: initialQuestions.length,
+    totalCount: totalQuestions,
     onQuestionReceived: (q) =>
-      setQuestions((prev) => (prev.length >= QUIZ_QUESTION_COUNT ? prev : [...prev, q])),
+      setQuestions((prev) => (prev.length >= totalQuestions ? prev : [...prev, q])),
   });
 
   const goToNextQuestion = useCallback(() => {

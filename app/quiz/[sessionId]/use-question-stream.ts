@@ -3,13 +3,13 @@
 import { useEffect, useEffectEvent, useState } from 'react';
 
 import type { AnswerOption, Question, QuizSession } from '@/app/generated/prisma/client';
-import { QUIZ_QUESTION_COUNT } from '@/features/quiz/schemas';
 
 export type QuestionWithOptions = Question & { answerOptions: AnswerOption[] };
 
 type Params = {
   sessionId: QuizSession['id'];
   initialCount: number;
+  totalCount: number;
   onQuestionReceived: (question: QuestionWithOptions) => void;
 };
 
@@ -18,12 +18,17 @@ type Params = {
 // doesn't re-run the effect; the stream depends only on the session and its
 // starting count. In dev StrictMode the cleanup briefly aborts the first
 // attempt; the re-mount starts fresh.
-export const useQuestionStream = ({ sessionId, initialCount, onQuestionReceived }: Params) => {
+export const useQuestionStream = ({
+  sessionId,
+  initialCount,
+  totalCount,
+  onQuestionReceived,
+}: Params) => {
   const [streamError, setStreamError] = useState<string | null>(null);
   const emitQuestion = useEffectEvent(onQuestionReceived);
 
   useEffect(() => {
-    if (initialCount >= QUIZ_QUESTION_COUNT) return;
+    if (initialCount >= totalCount) return;
 
     const controller = new AbortController();
 
@@ -102,7 +107,7 @@ export const useQuestionStream = ({ sessionId, initialCount, onQuestionReceived 
     })();
 
     return () => controller.abort();
-  }, [sessionId, initialCount]);
+  }, [sessionId, initialCount, totalCount]);
 
   return { streamError };
 };

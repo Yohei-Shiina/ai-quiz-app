@@ -27,6 +27,7 @@ export default async function QuizPage({ params }: { params: Props }) {
     <AnsweringView
       sessionId={sessionId}
       topic={session.topic.title}
+      questionCount={session.questionCount}
       initialQuestions={initialQuestions}
       initialIdx={initialIdx}
     />
