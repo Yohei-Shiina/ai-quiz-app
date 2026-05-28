@@ -5,6 +5,7 @@ import {
   countSessionQuestions,
   createQuestionWithOptions,
   createQuizSession,
+  createSessionQuestion,
   getLatestQuizSessionOrThrow,
   getQuizSessionWithTopicByIdOrThrow,
 } from '@/features/quiz/data';
@@ -54,9 +55,12 @@ export const generateQuizForSession = async function* (sessionId: QuizSession['i
       if (!isCompleteQuestion(candidate)) break;
       const saved = await createQuestionWithOptions({
         topicId: session.topicId,
-        quizSessionId: sessionId,
-        position: emittedCount,
         question: candidate,
+      });
+      await createSessionQuestion({
+        quizSessionId: sessionId,
+        questionId: saved.id,
+        position: emittedCount,
       });
       yield { position: emittedCount, question: saved };
       emittedCount++;

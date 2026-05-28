@@ -37,18 +37,14 @@ export const countSessionQuestions = async (quizSessionId: QuizSession['id']) =>
 
 export const createQuestionWithOptions = async ({
   topicId,
-  quizSessionId,
-  position,
   question,
 }: {
   topicId: Topic['id'];
-  quizSessionId: QuizSession['id'];
-  position: number;
   question: GeneratedQuestion;
 }) => {
   const user = await requireAuth();
-  await prisma.quizSession.findFirstOrThrow({
-    where: { id: quizSessionId, userId: user.id, topicId },
+  await prisma.topic.findFirstOrThrow({
+    where: { id: topicId, userId: user.id },
   });
   return prisma.question.create({
     data: {
@@ -61,10 +57,30 @@ export const createQuestionWithOptions = async ({
           isCorrect: option.isCorrect,
         })),
       },
-      sessionQuestions: {
-        create: { quizSessionId, position },
-      },
     },
     include: { answerOptions: { orderBy: { position: 'asc' } } },
+  });
+};
+
+export const createSessionQuestion = async ({
+  quizSessionId,
+  questionId,
+  position,
+}: {
+  quizSessionId: QuizSession['id'];
+  questionId: string;
+  position: number;
+}) => {
+  const user = await requireAuth();
+  // ownership: session belongs to the user, and the question's topic belongs to the user
+  // (the second guards against linking someone else's question into your own session).
+  await prisma.quizSession.findFirstOrThrow({
+    where: { id: quizSessionId, userId: user.id },
+  });
+  await prisma.question.findFirstOrThrow({
+    where: { id: questionId, topic: { userId: user.id } },
+  });
+  return prisma.sessionQuestion.create({
+    data: { quizSessionId, questionId, position },
   });
 };
