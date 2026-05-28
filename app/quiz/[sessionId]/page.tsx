@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import type { QuizSession } from '@/app/generated/prisma/client';
+import { QuizSessionStatus, type QuizSession } from '@/app/generated/prisma/client';
 import { AnsweringView } from '@/app/quiz/[sessionId]/answering-view';
 import {
   countSessionAnswers,
@@ -17,7 +17,7 @@ export default async function QuizPage({ params }: { params: Props }) {
     countSessionAnswers(sessionId),
   ]);
 
-  if (session.status === 'completed') {
+  if (session.status === QuizSessionStatus.completed) {
     redirect(`/quiz/${sessionId}/result`);
   }
 
