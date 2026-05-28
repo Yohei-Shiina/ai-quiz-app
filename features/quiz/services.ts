@@ -1,12 +1,13 @@
 import { Output, streamText } from 'ai';
 
-import type { QuizSession, Topic } from '@/app/generated/prisma/client';
+import { QuizSessionStatus, type QuizSession, type Topic } from '@/app/generated/prisma/client';
 import {
   countSessionAnswers,
   countSessionQuestions,
   createQuestionWithOptions,
   createQuizSession,
   createSessionAnswer,
+  createSessionQuestion,
   getLatestQuizSessionOrThrow,
   getQuizSessionWithTopicByIdOrThrow,
   markSessionCompletedOrThrow,
@@ -15,7 +16,6 @@ import { buildQuizGenerationPrompt } from '@/features/quiz/prompts';
 import {
   generatedQuestionSchema,
   generatedQuizSchema,
-  QUIZ_QUESTION_COUNT,
   type GeneratedQuestion,
 } from '@/features/quiz/schemas';
 import { createTopic } from '@/features/topic/data';
@@ -23,7 +23,7 @@ import { quizModel } from '@/lib/openai';
 
 export const resumeOrRestartQuiz = async (topicId: Topic['id']) => {
   const latestSession = await getLatestQuizSessionOrThrow(topicId);
-  if (latestSession.status === 'in_progress') return latestSession;
+  if (latestSession.status === QuizSessionStatus.in_progress) return latestSession;
   return createQuizSession(topicId);
 };
 
@@ -33,9 +33,10 @@ export const submitAnswer = async (params: {
   answerOptionId: string;
   isCorrect: boolean;
 }) => {
+  const session = await getQuizSessionWithTopicByIdOrThrow(params.quizSessionId);
   await createSessionAnswer(params);
   const answeredCount = await countSessionAnswers(params.quizSessionId);
-  if (answeredCount >= QUIZ_QUESTION_COUNT) {
+  if (answeredCount >= session.questionCount) {
     await markSessionCompletedOrThrow(params.quizSessionId);
   }
 };
@@ -54,7 +55,7 @@ export const generateQuizForSession = async function* (sessionId: QuizSession['i
   const session = await getQuizSessionWithTopicByIdOrThrow(sessionId);
 
   const existing = await countSessionQuestions(sessionId);
-  if (existing >= QUIZ_QUESTION_COUNT) return;
+  if (existing >= session.questionCount) return;
 
   const { partialOutputStream } = streamText({
     model: quizModel(),
@@ -65,14 +66,17 @@ export const generateQuizForSession = async function* (sessionId: QuizSession['i
   let emittedCount = existing;
   for await (const partial of partialOutputStream) {
     const questions = partial?.questions ?? [];
-    while (emittedCount < questions.length && emittedCount < QUIZ_QUESTION_COUNT) {
+    while (emittedCount < questions.length && emittedCount < session.questionCount) {
       const candidate = questions[emittedCount];
       if (!isCompleteQuestion(candidate)) break;
       const saved = await createQuestionWithOptions({
         topicId: session.topicId,
-        quizSessionId: sessionId,
-        position: emittedCount,
         question: candidate,
+      });
+      await createSessionQuestion({
+        quizSessionId: sessionId,
+        questionId: saved.id,
+        position: emittedCount,
       });
       yield { position: emittedCount, question: saved };
       emittedCount++;

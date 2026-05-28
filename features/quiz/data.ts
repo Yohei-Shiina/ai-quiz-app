@@ -1,12 +1,15 @@
-import type { Topic, QuizSession } from '@/app/generated/prisma/client';
+import { QuizSessionStatus, type Topic, type QuizSession } from '@/app/generated/prisma/client';
 import { requireAuth } from '@/features/auth/services';
-import type { GeneratedQuestion } from '@/features/quiz/schemas';
+import { QUIZ_QUESTION_COUNT, type GeneratedQuestion } from '@/features/quiz/schemas';
 import { prisma } from '@/lib/prisma';
 
 export const createQuizSession = async (topicId: Topic['id']) => {
   const user = await requireAuth();
+  await prisma.topic.findFirstOrThrow({
+    where: { id: topicId, userId: user.id },
+  });
   return prisma.quizSession.create({
-    data: { topicId, userId: user.id },
+    data: { topicId, userId: user.id, questionCount: QUIZ_QUESTION_COUNT },
   });
 };
 
@@ -42,7 +45,7 @@ export const getSessionQuestionsWithOptions = async (quizSessionId: QuizSession[
     orderBy: { position: 'asc' },
     include: {
       question: {
-        include: { answerOptions: { orderBy: { position: 'asc' } } },
+        include: { answerOptions: true },
       },
     },
   });
@@ -83,40 +86,57 @@ export const markSessionCompletedOrThrow = async (id: QuizSession['id']) => {
   });
   return prisma.quizSession.update({
     where: { id },
-    data: { status: 'completed' },
+    data: { status: QuizSessionStatus.completed },
   });
 };
 
 export const createQuestionWithOptions = async ({
   topicId,
-  quizSessionId,
-  position,
   question,
 }: {
   topicId: Topic['id'];
-  quizSessionId: QuizSession['id'];
-  position: number;
   question: GeneratedQuestion;
 }) => {
   const user = await requireAuth();
-  await prisma.quizSession.findFirstOrThrow({
-    where: { id: quizSessionId, userId: user.id, topicId },
+  await prisma.topic.findFirstOrThrow({
+    where: { id: topicId, userId: user.id },
   });
   return prisma.question.create({
     data: {
       topicId,
       body: question.body,
       answerOptions: {
-        create: question.options.map((option, index) => ({
+        create: question.options.map((option) => ({
           body: option.body,
-          position: index,
           isCorrect: option.isCorrect,
         })),
       },
-      sessionQuestions: {
-        create: { quizSessionId, position },
+    },
+    include: { answerOptions: true },
+  });
+};
+
+export const createSessionQuestion = async ({
+  quizSessionId,
+  questionId,
+  position,
+}: {
+  quizSessionId: QuizSession['id'];
+  questionId: string;
+  position: number;
+}) => {
+  const user = await requireAuth();
+  await prisma.quizSession.findFirstOrThrow({
+    where: {
+      id: quizSessionId,
+      userId: user.id,
+      topic: {
+        userId: user.id,
+        questions: { some: { id: questionId } },
       },
     },
-    include: { answerOptions: { orderBy: { position: 'asc' } } },
+  });
+  return prisma.sessionQuestion.create({
+    data: { quizSessionId, questionId, position },
   });
 };
