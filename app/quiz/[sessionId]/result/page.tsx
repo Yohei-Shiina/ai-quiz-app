@@ -1,17 +1,19 @@
-import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-import { Button } from '@/components/ui/button';
+import { QuizSessionStatus, type QuizSession } from '@/app/generated/prisma/client';
+import { ResultView } from '@/app/quiz/[sessionId]/result/result-view';
+import { getSessionResultOrThrow } from '@/features/quiz/data';
 
-export default function ResultPage() {
-  return (
-    <main className="min-h-dvh bg-background flex flex-col">
-      <div className="mx-auto max-w-md w-full px-4 pt-20 pb-8 flex flex-col items-center gap-6 flex-1">
-        <div className="mt-12 w-full flex flex-col gap-3">
-          <Button asChild className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm">
-            <Link href="/">Back to home</Link>
-          </Button>
-        </div>
-      </div>
-    </main>
-  );
+// FIXME: Next.js 15+ delivers params as Promise<{...}>; align type to Promise<Props>
+// across all dynamic routes (the answering page has the same pattern).
+type Props = { sessionId: QuizSession['id'] };
+export default async function ResultPage({ params }: { params: Props }) {
+  const { sessionId } = await params;
+  const result = await getSessionResultOrThrow(sessionId);
+
+  if (result.status !== QuizSessionStatus.completed) {
+    redirect(`/quiz/${sessionId}`);
+  }
+
+  return <ResultView result={result} />;
 }
