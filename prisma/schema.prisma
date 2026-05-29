@@ -40,6 +40,7 @@ model Question {
   topic            Topic             @relation(fields: [topicId], references: [id])
   topicId          String
   body             String
+  explanation      String
   createdAt        DateTime          @default(now())
   answerOptions    AnswerOption[]
   sessionQuestions SessionQuestion[]

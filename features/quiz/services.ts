@@ -2,12 +2,18 @@ import { Output, streamText } from 'ai';
 
 import { QuizSessionStatus, type QuizSession, type Topic } from '@/app/generated/prisma/client';
 import {
+  countSessionAnswers,
   countSessionQuestions,
   createQuestionWithOptions,
   createQuizSession,
+  createSessionAnswer,
   createSessionQuestion,
+  createSessionQuestions,
   getLatestQuizSessionOrThrow,
   getQuizSessionWithTopicByIdOrThrow,
+  getSessionQuestionsWithOptions,
+  getTopicQuestions,
+  markSessionCompletedOrThrow,
 } from '@/features/quiz/data';
 import { buildQuizGenerationPrompt } from '@/features/quiz/prompts';
 import {
@@ -24,10 +30,41 @@ export const resumeOrRestartQuiz = async (topicId: Topic['id']) => {
   return createQuizSession(topicId);
 };
 
+export const submitAnswer = async (params: {
+  quizSessionId: QuizSession['id'];
+  questionId: string;
+  answerOptionId: string;
+  isCorrect: boolean;
+}) => {
+  const session = await getQuizSessionWithTopicByIdOrThrow(params.quizSessionId);
+  await createSessionAnswer(params);
+  const answeredCount = await countSessionAnswers(params.quizSessionId);
+  if (answeredCount >= session.questionCount) {
+    await markSessionCompletedOrThrow(params.quizSessionId);
+  }
+};
+
 export const createTopicAndSession = async (title: Topic['title']) => {
   const topic = await createTopic(title);
   const session = await createQuizSession(topic.id);
   return session;
+};
+
+const linkExistingTopicQuestionsIfRetry = async (sessionId: QuizSession['id']) => {
+  const linkedCount = await countSessionQuestions(sessionId);
+  if (linkedCount > 0) return;
+  const session = await getQuizSessionWithTopicByIdOrThrow(sessionId);
+  const topicQuestions = await getTopicQuestions(session.topicId);
+  if (topicQuestions.length === 0) return;
+  await createSessionQuestions({
+    quizSessionId: sessionId,
+    questionIds: topicQuestions.map((q) => q.id),
+  });
+};
+
+export const prepareSessionQuestions = async (sessionId: QuizSession['id']) => {
+  await linkExistingTopicQuestionsIfRetry(sessionId);
+  return getSessionQuestionsWithOptions(sessionId);
 };
 
 const isCompleteQuestion = (value: unknown): value is GeneratedQuestion => {
