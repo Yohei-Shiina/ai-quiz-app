@@ -17,8 +17,6 @@ import { Button } from '@/components/ui/button';
 import { submitSessionAnswerAction } from '@/features/quiz/actions';
 import { cn } from '@/lib/utils';
 
-const PLACEHOLDER_EXPLANATION = 'Explanation will be available once the backend is implemented.';
-
 type Props = {
   sessionId: QuizSession['id'];
   topic: string;
@@ -207,7 +205,7 @@ export const AnsweringView = ({
                   {currentQuestion.answerOptions[correctOptionIdx]?.body}
                 </p>
                 <p className="font-sans text-[13px] text-muted-foreground mt-1 leading-relaxed m-0">
-                  {PLACEHOLDER_EXPLANATION}
+                  {currentQuestion.explanation}
                 </p>
               </div>
               <Button

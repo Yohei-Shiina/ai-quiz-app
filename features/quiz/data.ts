@@ -105,6 +105,7 @@ export const createQuestionWithOptions = async ({
     data: {
       topicId,
       body: question.body,
+      explanation: question.explanation,
       answerOptions: {
         create: question.options.map((option) => ({
           body: option.body,
