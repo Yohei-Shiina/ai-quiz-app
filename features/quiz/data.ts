@@ -1,4 +1,9 @@
-import { QuizSessionStatus, type Topic, type QuizSession } from '@/app/generated/prisma/client';
+import {
+  QuizSessionStatus,
+  type Topic,
+  type QuizSession,
+  type Question,
+} from '@/app/generated/prisma/client';
 import { requireAuth } from '@/features/auth/services';
 import { QUIZ_QUESTION_COUNT, type GeneratedQuestion } from '@/features/quiz/schemas';
 import { prisma } from '@/lib/prisma';
@@ -140,4 +145,40 @@ export const createSessionQuestion = async ({
   return prisma.sessionQuestion.create({
     data: { quizSessionId, questionId, position },
   });
+};
+
+export const createSessionQuestions = async ({
+  quizSessionId,
+  questionIds,
+}: {
+  quizSessionId: QuizSession['id'];
+  questionIds: Question['id'][];
+}) => {
+  const user = await requireAuth();
+  const session = await prisma.quizSession.findFirstOrThrow({
+    where: { id: quizSessionId, userId: user.id },
+    select: { topicId: true },
+  });
+  const validCount = await prisma.question.count({
+    where: { topicId: session.topicId, id: { in: questionIds } },
+  });
+  if (validCount !== questionIds.length) {
+    throw new Error('Some questionIds do not belong to the session topic');
+  }
+  return prisma.sessionQuestion.createManyAndReturn({
+    data: questionIds.map((questionId, position) => ({
+      quizSessionId,
+      questionId,
+      position,
+    })),
+  });
+};
+
+export const getTopicQuestions = async (topicId: Topic['id']) => {
+  const user = await requireAuth();
+  const topic = await prisma.topic.findFirstOrThrow({
+    where: { id: topicId, userId: user.id },
+    include: { questions: { orderBy: { createdAt: 'asc' } } },
+  });
+  return topic.questions;
 };
