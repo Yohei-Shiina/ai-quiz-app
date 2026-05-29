@@ -2,18 +2,15 @@ import { redirect } from 'next/navigation';
 
 import { QuizSessionStatus, type QuizSession } from '@/app/generated/prisma/client';
 import { AnsweringView } from '@/app/quiz/[sessionId]/answering-view';
-import {
-  countSessionAnswers,
-  getQuizSessionWithTopicByIdOrThrow,
-  getSessionQuestionsWithOptions,
-} from '@/features/quiz/data';
+import { countSessionAnswers, getQuizSessionWithTopicByIdOrThrow } from '@/features/quiz/data';
+import { prepareSessionQuestions } from '@/features/quiz/services';
 
 type Props = { sessionId: QuizSession['id'] };
 export default async function QuizPage({ params }: { params: Props }) {
   const { sessionId } = await params;
   const [session, initialQuestions, answeredCount] = await Promise.all([
     getQuizSessionWithTopicByIdOrThrow(sessionId),
-    getSessionQuestionsWithOptions(sessionId),
+    prepareSessionQuestions(sessionId),
     countSessionAnswers(sessionId),
   ]);
 

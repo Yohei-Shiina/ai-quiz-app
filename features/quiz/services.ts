@@ -8,8 +8,11 @@ import {
   createQuizSession,
   createSessionAnswer,
   createSessionQuestion,
+  createSessionQuestions,
   getLatestQuizSessionOrThrow,
   getQuizSessionWithTopicByIdOrThrow,
+  getSessionQuestionsWithOptions,
+  getTopicQuestions,
   markSessionCompletedOrThrow,
 } from '@/features/quiz/data';
 import { buildQuizGenerationPrompt } from '@/features/quiz/prompts';
@@ -45,6 +48,23 @@ export const createTopicAndSession = async (title: Topic['title']) => {
   const topic = await createTopic(title);
   const session = await createQuizSession(topic.id);
   return session;
+};
+
+const linkExistingTopicQuestionsIfRetry = async (sessionId: QuizSession['id']) => {
+  const linkedCount = await countSessionQuestions(sessionId);
+  if (linkedCount > 0) return;
+  const session = await getQuizSessionWithTopicByIdOrThrow(sessionId);
+  const topicQuestions = await getTopicQuestions(session.topicId);
+  if (topicQuestions.length === 0) return;
+  await createSessionQuestions({
+    quizSessionId: sessionId,
+    questionIds: topicQuestions.map((q) => q.id),
+  });
+};
+
+export const prepareSessionQuestions = async (sessionId: QuizSession['id']) => {
+  await linkExistingTopicQuestionsIfRetry(sessionId);
+  return getSessionQuestionsWithOptions(sessionId);
 };
 
 const isCompleteQuestion = (value: unknown): value is GeneratedQuestion => {
