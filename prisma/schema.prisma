@@ -53,7 +53,6 @@ model AnswerOption {
   question       Question        @relation(fields: [questionId], references: [id])
   questionId     String
   body           String
-  position       Int
   isCorrect      Boolean         @default(false)
   sessionAnswers SessionAnswer[]
 
@@ -66,7 +65,8 @@ model QuizSession {
   userId           String
   topic            Topic             @relation(fields: [topicId], references: [id])
   topicId          String
-  status           String            @default("in_progress")
+  status           QuizSessionStatus @default(in_progress)
+  questionCount    Int               @default(5)
   createdAt        DateTime          @default(now())
   sessionQuestions SessionQuestion[]
   sessionAnswer    SessionAnswer[]
@@ -97,4 +97,9 @@ model SessionAnswer {
   createdAt      DateTime     @default(now())
 
   @@map("session_answers")
+}
+
+enum QuizSessionStatus {
+  in_progress
+  completed
 }

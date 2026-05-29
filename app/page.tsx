@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { formatDistanceToNow } from 'date-fns';
 
+import { QuizSessionStatus } from '@/app/generated/prisma/client';
 import { TopicForm } from '@/app/topic-form';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { resumeOrRestartQuizAction } from '@/features/quiz/actions';
@@ -44,7 +45,8 @@ export default async function Home() {
 
           <div className="flex flex-col gap-3">
             {topics.map((topic, i) => {
-              const isInProgress = topic.latestQuizSession.status === 'in_progress';
+              const isInProgress =
+                topic.latestQuizSession.status === QuizSessionStatus.in_progress;
               const card = (
                 <Card
                   className="group shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
