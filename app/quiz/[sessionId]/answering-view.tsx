@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -29,10 +29,6 @@ type Props = {
 
 type AnswerPhase = 'idle' | 'correct' | 'wrong';
 
-// 正答時に次の問題へ自動で進むまでの時間。
-// 900ms だと「Right」表示を認知する前に画面が切り替わってしまい、
-// 正答のピーク感（peak-end rule）が体験として残らないため 1500ms に。
-// Duolingo / Quizlet など類似アプリも 1.0–2.0s の範囲。
 const AUTO_ADVANCE_MS = 1000;
 
 export const AnsweringView = ({
@@ -46,6 +42,9 @@ export const AnsweringView = ({
   const [questions, setQuestions] = useState(initialQuestions);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(initialIdx);
   const [selectedOptionIdx, setSelectedOptionIdx] = useState<number | null>(null);
+  // Awaited before navigating to /result so status='completed' lands first;
+  // otherwise any return to the session URL re-shows the last question.
+  const pendingSubmitsRef = useRef<Promise<unknown>[]>([]);
 
   const totalQuestions = questionCount;
   const currentQuestion = questions[currentQuestionIdx];
@@ -72,7 +71,9 @@ export const AnsweringView = ({
     setSelectedOptionIdx(null);
   }, []);
 
-  const goToResult = useCallback(() => {
+  const goToResult = useCallback(async () => {
+    // Await pending submissions; ignore errors so a failed submit can't block navigation.
+    await Promise.allSettled(pendingSubmitsRef.current);
     router.push(`/quiz/${sessionId}/result`);
   }, [router, sessionId]);
 
@@ -95,12 +96,13 @@ export const AnsweringView = ({
     if (selectedOptionIdx !== null) return;
     setSelectedOptionIdx(choiceIdx);
     const isCorrect = choiceIdx === correctOptionIdx;
-    submitSessionAnswerAction({
+    const submission = submitSessionAnswerAction({
       quizSessionId: sessionId,
       questionId: currentQuestion.id,
       answerOptionId: currentQuestion.answerOptions[choiceIdx].id,
       isCorrect,
     });
+    pendingSubmitsRef.current.push(submission);
   };
 
   const handleNextOnWrong = () => {
