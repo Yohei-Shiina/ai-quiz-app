@@ -182,3 +182,22 @@ export const getTopicQuestions = async (topicId: Topic['id']) => {
   });
   return topic.questions;
 };
+
+export const getSessionResultOrThrow = async (sessionId: QuizSession['id']) => {
+  const user = await requireAuth();
+  return prisma.quizSession.findUniqueOrThrow({
+    where: { id: sessionId, userId: user.id },
+    include: {
+      topic: true,
+      sessionQuestions: {
+        orderBy: { position: 'asc' },
+        include: {
+          question: {
+            include: { answerOptions: true },
+          },
+        },
+      },
+      sessionAnswer: true,
+    },
+  });
+};
