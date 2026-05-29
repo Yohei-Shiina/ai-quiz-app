@@ -77,12 +77,8 @@ export const AnsweringView = ({
     router.push(`/quiz/${sessionId}/result`);
   }, [router, sessionId]);
 
-  // Auto-advance after a correct pick. The dwell (AUTO_ADVANCE_MS) gives the
-  // user time to register the right-answer feedback. The advance happens
-  // inside the setTimeout callback (asynchronous) — never as a synchronous
-  // setState in the effect body, which would trigger React's cascading-render
-  // warning. If `isNextQuestionLoaded` flips during the wait, the effect
-  // re-runs and schedules a fresh timer.
+  // Auto-advance on correct pick. setTimeout avoids the cascading-render warning
+  // from sync setState in effect bodies; restarts when isNextQuestionLoaded flips.
   useEffect(() => {
     if (answerPhase !== 'correct') return;
     const t = setTimeout(() => {
