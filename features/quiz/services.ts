@@ -1,6 +1,12 @@
 import { Output, streamText } from 'ai';
 
-import { QuizSessionStatus, type QuizSession, type Topic } from '@/app/generated/prisma/client';
+import {
+  OrderStatus,
+  QuizSessionStatus,
+  type QuizSession,
+  type Topic,
+} from '@/app/generated/prisma/client';
+import { createOrder, updateOrderByQuizSession } from '@/features/order/data';
 import {
   countSessionAnswers,
   countSessionQuestions,
@@ -22,7 +28,7 @@ import {
   type GeneratedQuestion,
 } from '@/features/quiz/schemas';
 import { createTopic } from '@/features/topic/data';
-import { quizModel } from '@/lib/openai';
+import { quizModel, quizModelId } from '@/lib/openai';
 
 export const resumeOrRestartQuiz = async (topicId: Topic['id']) => {
   const latestSession = await getLatestQuizSessionOrThrow(topicId);
@@ -47,6 +53,7 @@ export const submitAnswer = async (params: {
 export const createTopicAndSession = async (title: Topic['title']) => {
   const topic = await createTopic(title);
   const session = await createQuizSession(topic.id);
+  await createOrder({ topicId: topic.id, quizSessionId: session.id });
   return session;
 };
 
@@ -77,29 +84,45 @@ export const generateQuizForSession = async function* (sessionId: QuizSession['i
   const existing = await countSessionQuestions(sessionId);
   if (existing >= session.questionCount) return;
 
-  const { partialOutputStream } = streamText({
+  const result = streamText({
     model: quizModel(),
     output: Output.object({ schema: generatedQuizSchema }),
     prompt: buildQuizGenerationPrompt(session.topic.title),
   });
 
   let emittedCount = existing;
-  for await (const partial of partialOutputStream) {
-    const questions = partial?.questions ?? [];
-    while (emittedCount < questions.length && emittedCount < session.questionCount) {
-      const candidate = questions[emittedCount];
-      if (!isCompleteQuestion(candidate)) break;
-      const saved = await createQuestionWithOptions({
-        topicId: session.topicId,
-        question: candidate,
-      });
-      await createSessionQuestion({
-        quizSessionId: sessionId,
-        questionId: saved.id,
-        position: emittedCount,
-      });
-      yield { position: emittedCount, question: saved };
-      emittedCount++;
+  try {
+    for await (const partial of result.partialOutputStream) {
+      const questions = partial?.questions ?? [];
+      while (emittedCount < questions.length && emittedCount < session.questionCount) {
+        const candidate = questions[emittedCount];
+        if (!isCompleteQuestion(candidate)) break;
+        const saved = await createQuestionWithOptions({
+          topicId: session.topicId,
+          question: candidate,
+        });
+        await createSessionQuestion({
+          quizSessionId: sessionId,
+          questionId: saved.id,
+          position: emittedCount,
+        });
+        yield { position: emittedCount, question: saved };
+        emittedCount++;
+      }
     }
+    const usage = await result.usage;
+    await updateOrderByQuizSession(sessionId, {
+      status: OrderStatus.success,
+      aiModel: quizModelId(),
+      inputTokens: usage.inputTokens ?? null,
+      outputTokens: usage.outputTokens ?? null,
+    });
+  } catch (error) {
+    await updateOrderByQuizSession(sessionId, {
+      status: OrderStatus.failed,
+      aiModel: quizModelId(),
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+    });
+    throw error;
   }
 };
