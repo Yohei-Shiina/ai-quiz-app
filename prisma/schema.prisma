@@ -19,6 +19,7 @@ model User {
   createdAt    DateTime      @default(now())
   topics       Topic[]
   quizSessions QuizSession[]
+  orders       Order[]
 
   @@map("users")
 }
@@ -31,6 +32,7 @@ model Topic {
   createdAt    DateTime      @default(now())
   questions    Question[]
   quizSessions QuizSession[]
+  orders       Order[]
 
   @@map("topics")
 }
@@ -71,6 +73,7 @@ model QuizSession {
   createdAt        DateTime          @default(now())
   sessionQuestions SessionQuestion[]
   sessionAnswer    SessionAnswer[]
+  orders           Order[]
 
   @@map("quiz_sessions")
 }
@@ -100,7 +103,32 @@ model SessionAnswer {
   @@map("session_answers")
 }
 
+model Order {
+  id            String      @id @default(cuid())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String
+  topic         Topic       @relation(fields: [topicId], references: [id])
+  topicId       String
+  quizSession   QuizSession @relation(fields: [quizSessionId], references: [id])
+  quizSessionId String
+  status        OrderStatus @default(pending)
+  aiModel       String?
+  inputTokens   Int?
+  outputTokens  Int?
+  errorMessage  String?
+  createdAt     DateTime    @default(now())
+
+  @@index([userId, createdAt])
+  @@map("orders")
+}
+
 enum QuizSessionStatus {
   in_progress
   completed
+}
+
+enum OrderStatus {
+  pending
+  success
+  failed
 }
