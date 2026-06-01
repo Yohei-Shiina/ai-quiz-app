@@ -11,8 +11,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { LOCALE_NATIVE_NAMES, nextLocale } from '@/lib/i18n/config';
 import { setLocaleAction } from '@/lib/i18n/actions';
+import { LOCALE_NATIVE_NAMES, nextLocale } from '@/lib/i18n/config';
 import { useI18n } from '@/lib/i18n/context';
 
 export const UserMenu = () => {

@@ -57,6 +57,7 @@ export default async function LoginPage() {
               <Button type="submit" size="lg" variant="outline" className="w-full">
                 <GoogleIcon />
                 {t.login.signIn}
+              </Button>
             </form>
           </CardContent>
         </Card>

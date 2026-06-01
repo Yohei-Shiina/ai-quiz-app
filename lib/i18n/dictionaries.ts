@@ -63,7 +63,7 @@ const en = {
     rateLimit: (limit: number) =>
       `You've reached your limit of ${limit} new quizzes per 24 hours. Please try again later.`,
   },
-} as const;
+};
 
 type Dictionary = typeof en;
 
