@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button';
 import { FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { startQuizAction } from '@/features/quiz/actions';
+import { useI18n } from '@/lib/i18n/context';
 
 export const TopicForm = () => {
+  const { t } = useI18n();
   const [state, action, isPending] = useActionState(startQuizAction, { error: null });
   const [bottomOffset, setBottomOffset] = useState(0);
 
@@ -40,7 +42,7 @@ export const TopicForm = () => {
               type="text"
               name="title"
               className="flex-1 min-w-0 border-none bg-transparent shadow-none focus-visible:ring-0 text-sm p-0 h-auto placeholder:text-muted-foreground"
-              placeholder="Add a topic..."
+              placeholder={t.topicForm.placeholder}
               autoComplete="off"
               aria-invalid={!!state.error}
             />
@@ -51,7 +53,7 @@ export const TopicForm = () => {
               className="shrink-0 h-auto p-0 text-xs font-medium text-primary hover:text-primary/70 hover:bg-transparent disabled:opacity-40"
               disabled={isPending}
             >
-              {isPending ? '...' : 'Go'}
+              {isPending ? '...' : t.topicForm.submit}
             </Button>
           </div>
         </form>

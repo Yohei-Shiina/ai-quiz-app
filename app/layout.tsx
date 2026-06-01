@@ -3,6 +3,9 @@ import { Fraunces, Outfit } from 'next/font/google';
 import type { Metadata } from 'next';
 import './globals.css';
 
+import { I18nProvider } from '@/lib/i18n/context';
+import { getLocale } from '@/lib/i18n/server';
+
 const fraunces = Fraunces({
   subsets: ['latin'],
   style: ['normal', 'italic'],
@@ -26,14 +29,17 @@ export const viewport = {
   viewportFit: 'cover',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
-    <html lang="en">
-      <body className={`${fraunces.variable} ${outfit.variable} antialiased`}>{children}</body>
+    <html lang={locale}>
+      <body className={`${fraunces.variable} ${outfit.variable} antialiased`}>
+        <I18nProvider locale={locale}>{children}</I18nProvider>
+      </body>
     </html>
   );
 }

@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { resumeOrRestartQuizAction } from '@/features/quiz/actions';
 import type { getSessionResultOrThrow } from '@/features/quiz/data';
+import type { Dictionary } from '@/lib/i18n/dictionaries';
+import { getDict } from '@/lib/i18n/server';
 
 type SessionResult = Awaited<ReturnType<typeof getSessionResultOrThrow>>;
 
@@ -14,7 +16,8 @@ const MSG_MISSING_ANSWER = 'a question in this completed session has no answer';
 const MSG_PICKED_OPTION_NOT_FOUND = 'picked answer option does not belong to the question';
 const MSG_CORRECT_OPTION_NOT_FOUND = 'no correct answer option marked on the question';
 
-export const ResultView = ({ result }: Props) => {
+export const ResultView = async ({ result }: Props) => {
+  const t = await getDict();
   const { topic, sessionQuestions, sessionAnswer: answers } = result;
 
   const answerByQuestionId = new Map(answers.map((a) => [a.questionId, a]));
@@ -41,27 +44,25 @@ export const ResultView = ({ result }: Props) => {
           style={{ animation: 'fade-up 0.4s ease-out both' }}
         >
           <p className="font-sans text-[13px] text-muted-foreground m-0">
-            on <span className="font-display italic">&ldquo;{topic.title}&rdquo;</span>
+            <span className="font-display italic">{t.result.onTopic(topic.title)}</span>
           </p>
           <h1 className="font-display italic text-[30px] leading-tight tracking-[-0.01em] font-normal m-0">
-            You got{' '}
-            <span className="text-primary">
-              {score} of {total}
-            </span>
-            .
+            {t.result.youGotPre}
+            <span className="text-primary">{t.result.score(score, total)}</span>
+            {t.result.youGotPost}
           </h1>
         </header>
 
         {misses.length === 0 ? (
-          <PerfectMessage />
+          <PerfectMessage t={t} />
         ) : (
           <>
             <div className="flex items-baseline justify-between mb-3">
               <h2 className="font-sans text-sm font-medium text-foreground m-0">
-                What you missed
+                {t.result.whatYouMissed}
               </h2>
               <span className="font-sans text-xs text-muted-foreground">
-                {misses.length} {misses.length === 1 ? 'question' : 'questions'}
+                {t.result.missesCount(misses.length)}
               </span>
             </div>
 
@@ -73,6 +74,7 @@ export const ResultView = ({ result }: Props) => {
                   question={item.question}
                   pickedOptionId={item.pickedOptionId}
                   index={i}
+                  t={t}
                 />
               ))}
             </div>
@@ -86,14 +88,14 @@ export const ResultView = ({ result }: Props) => {
               type="submit"
               className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
             >
-              Try another round
+              {t.result.tryAnother}
             </Button>
           </form>
           <Link
             href="/"
             className="text-center font-sans text-sm text-muted-foreground hover:text-foreground transition-colors py-2.5"
           >
-            Back to your collection
+            {t.result.backToCollection}
           </Link>
         </div>
       </div>
@@ -101,14 +103,14 @@ export const ResultView = ({ result }: Props) => {
   );
 };
 
-const PerfectMessage = () => (
+const PerfectMessage = ({ t }: { t: Dictionary }) => (
   <div
     className="bg-card border border-border rounded-xl px-4 py-6 flex flex-col items-center gap-2"
     style={{ animation: 'fade-up 0.4s ease-out 0.1s both' }}
   >
-    <p className="font-display italic text-2xl text-foreground m-0">Perfect.</p>
+    <p className="font-display italic text-2xl text-foreground m-0">{t.result.perfect}</p>
     <p className="font-sans text-sm text-muted-foreground m-0 text-center">
-      Nothing to review on this round.
+      {t.result.nothingToReview}
     </p>
   </div>
 );
@@ -120,9 +122,10 @@ type MissCardProps = {
   question: QuestionWithOptions;
   pickedOptionId: string;
   index: number;
+  t: Dictionary;
 };
 
-const MissCard = ({ number, question, pickedOptionId, index }: MissCardProps) => {
+const MissCard = ({ number, question, pickedOptionId, index, t }: MissCardProps) => {
   const correctOption = question.answerOptions.find((o) => o.isCorrect);
   const pickedOption = question.answerOptions.find((o) => o.id === pickedOptionId);
   if (!correctOption) throw new Error(MSG_CORRECT_OPTION_NOT_FOUND);
@@ -134,13 +137,13 @@ const MissCard = ({ number, question, pickedOptionId, index }: MissCardProps) =>
       style={{ animation: `fade-up 0.4s ease-out ${0.04 + index * 0.06}s both` }}
     >
       <span className="font-sans text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground">
-        Question {number}
+        {t.result.questionLabel(number)}
       </span>
       <p className="font-sans text-[15px] leading-normal text-foreground m-0">{question.body}</p>
 
       <div className="flex flex-col gap-2">
-        <AnswerRow kind="wrong" label="Your answer" text={pickedOption.body} />
-        <AnswerRow kind="right" label="Correct" text={correctOption.body} />
+        <AnswerRow kind="wrong" label={t.result.yourAnswer} text={pickedOption.body} />
+        <AnswerRow kind="right" label={t.result.correct} text={correctOption.body} />
       </div>
 
       <div className="flex gap-2 pt-0.5">

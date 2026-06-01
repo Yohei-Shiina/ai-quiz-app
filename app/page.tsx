@@ -1,15 +1,23 @@
 import Link from 'next/link';
 
 import { formatDistanceToNow } from 'date-fns';
+import { enUS, ja } from 'date-fns/locale';
 
 import { QuizSessionStatus } from '@/app/generated/prisma/client';
 import { TopicForm } from '@/app/topic-form';
+import { UserMenu } from '@/components/shared/user-menu';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { resumeOrRestartQuizAction } from '@/features/quiz/actions';
 import { getTopicsWithLatestSession } from '@/features/topic/data';
+import { getDict, getLocale } from '@/lib/i18n/server';
 
 export default async function Home() {
-  const topics = await getTopicsWithLatestSession();
+  const [topics, t, locale] = await Promise.all([
+    getTopicsWithLatestSession(),
+    getDict(),
+    getLocale(),
+  ]);
+  const dateLocale = locale === 'ja' ? ja : enUS;
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-10 bg-background py-5">
@@ -18,11 +26,9 @@ export default async function Home() {
             <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
               <span className="text-primary-foreground text-xs font-bold">Q</span>
             </div>
-            <span className="text-sm font-medium text-foreground">AI Quiz</span>
+            <span className="text-sm font-medium text-foreground">{t.appName}</span>
           </div>
-          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-            <span className="text-xs font-medium text-muted-foreground">Y</span>
-          </div>
+          <UserMenu />
         </div>
       </header>
       <div className="max-w-md mx-auto px-4">
@@ -30,16 +36,22 @@ export default async function Home() {
           {topics.length === 0 ? (
             <div className="flex flex-col gap-3">
               <h1 className="font-display italic text-4xl leading-tight text-foreground">
-                What are you <em className="not-italic text-primary">curious</em> about?
+                {t.home.emptyTitlePre}
+                <em className="not-italic text-primary">{t.home.emptyTitleEm}</em>
+                {t.home.emptyTitlePost}
               </h1>
               <p className="text-sm font-normal text-muted-foreground leading-relaxed">
-                Type a topic and we&apos;ll build a quiz in seconds.
+                {t.home.emptyDesc}
               </p>
             </div>
           ) : (
             <div className="flex items-baseline justify-between">
-              <h1 className="font-display italic text-2xl text-foreground">Your collection</h1>
-              <span className="text-xs text-muted-foreground">{topics.length} topics</span>
+              <h1 className="font-display italic text-2xl text-foreground">
+                {t.home.collectionTitle}
+              </h1>
+              <span className="text-xs text-muted-foreground">
+                {t.home.topicsCount(topics.length)}
+              </span>
             </div>
           )}
 
@@ -65,7 +77,10 @@ export default async function Home() {
                         {topic.title}
                       </CardTitle>
                       <CardDescription className="text-xs mt-1" suppressHydrationWarning>
-                        {formatDistanceToNow(topic.createdAt, { addSuffix: true })}
+                        {formatDistanceToNow(topic.createdAt, {
+                          addSuffix: true,
+                          locale: dateLocale,
+                        })}
                       </CardDescription>
                     </div>
                     <span className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-150 shrink-0 mt-0.5">

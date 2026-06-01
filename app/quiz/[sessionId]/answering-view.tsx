@@ -15,6 +15,7 @@ import {
 } from '@/app/quiz/[sessionId]/use-question-stream';
 import { Button } from '@/components/ui/button';
 import { submitSessionAnswerAction } from '@/features/quiz/actions';
+import { useI18n } from '@/lib/i18n/context';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -36,6 +37,7 @@ export const AnsweringView = ({
   initialQuestions,
   initialIdx,
 }: Props) => {
+  const { t } = useI18n();
   const router = useRouter();
   const [questions, setQuestions] = useState(initialQuestions);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(initialIdx);
@@ -121,7 +123,7 @@ export const AnsweringView = ({
             onClick={() => router.push('/')}
             className="bg-transparent border-0 font-sans text-[13px] text-muted-foreground hover:text-foreground transition-colors px-1 py-1.5 cursor-pointer"
           >
-            Leave quiz
+            {t.answering.leave}
           </button>
           <div className="font-sans text-xs font-medium text-muted-foreground tracking-wider tabular-nums">
             {currentQuestionIdx + 1} / {totalQuestions}
@@ -156,9 +158,9 @@ export const AnsweringView = ({
               onClick={() => router.push('/')}
               className="self-start bg-transparent border-0 px-0 -my-1 font-sans text-[13px] text-muted-foreground cursor-pointer inline-flex items-baseline gap-1.5 leading-snug text-left"
             >
-              Not the topic you meant?{' '}
+              {t.answering.notTheTopic}
               <span className="text-primary font-medium underline underline-offset-[3px] decoration-1">
-                Try a different wording
+                {t.answering.tryDifferent}
               </span>
             </button>
           )}
@@ -188,7 +190,7 @@ export const AnsweringView = ({
               <span className="w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground inline-flex items-center justify-center text-[11px] font-bold">
                 ✓
               </span>
-              Right
+              {t.answering.right}
             </div>
           )}
 
@@ -199,7 +201,7 @@ export const AnsweringView = ({
             >
               <div className="bg-card border border-border rounded-xl px-4 py-[14px] flex flex-col gap-2">
                 <p className="font-sans text-xs text-muted-foreground m-0 tracking-wide lowercase">
-                  The answer was
+                  {t.answering.theAnswerWas}
                 </p>
                 <p className="font-display italic text-base text-foreground m-0 leading-snug">
                   {currentQuestion.answerOptions[correctOptionIdx]?.body}
@@ -215,11 +217,11 @@ export const AnsweringView = ({
                 className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
               >
                 {waitingForNext ? (
-                  <PreparingIndicator label="Preparing next…" />
+                  <PreparingIndicator label={t.answering.preparingNext} />
                 ) : isLastQuestion ? (
-                  'Finish'
+                  t.answering.finish
                 ) : (
-                  'Next question'
+                  t.answering.next
                 )}
               </Button>
             </div>
@@ -227,7 +229,7 @@ export const AnsweringView = ({
 
           {waitingForNext && answerPhase === 'correct' && (
             <PreparingIndicator
-              label="Preparing next question…"
+              label={t.answering.preparingNextQuestion}
               className="text-muted-foreground text-[13px]"
             />
           )}
