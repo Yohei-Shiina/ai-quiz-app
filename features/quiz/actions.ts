@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation';
 import { isOrderLimitReached } from '@/features/order/services';
 import { createTopicAndSession, resumeOrRestartQuiz, submitAnswer } from '@/features/quiz/services';
 import { validateTitleTopic, validateResumeOrRestartQuiz } from '@/features/quiz/validations';
-import { ORDER_RATE_LIMIT_MESSAGE } from '@/lib/constants';
+import { ORDER_RATE_LIMIT } from '@/lib/constants';
+import { getDict } from '@/lib/i18n/server';
 import { ActionState } from '@/lib/types';
 
 export const startQuizAction = async (
@@ -13,8 +14,9 @@ export const startQuizAction = async (
   formData: FormData,
 ): Promise<ActionState> => {
   const result = validateTitleTopic(formData);
-  if (result.error) return { error: result.error };
-  if (await isOrderLimitReached()) return { error: ORDER_RATE_LIMIT_MESSAGE };
+  const t = await getDict();
+  if (result.error) return { error: t.validation.topicRequired };
+  if (await isOrderLimitReached()) return { error: t.validation.rateLimit(ORDER_RATE_LIMIT) };
   const session = await createTopicAndSession(result.data!.title);
   redirect(`/quiz/${session.id}`);
 };

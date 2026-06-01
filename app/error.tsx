@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react';
 
+import { useI18n } from '@/lib/i18n/context';
+
 export default function Error({
   error,
   reset,
@@ -9,6 +11,8 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
+
   useEffect(() => {
     // Log the error to an error reporting service
     console.error(error);
@@ -16,8 +20,8 @@ export default function Error({
 
   return (
     <div>
-      <h2>Something went wrong!</h2>
-      <button onClick={() => reset()}>Try again</button>
+      <h2>{t.error.title}</h2>
+      <button onClick={() => reset()}>{t.error.retry}</button>
     </div>
   );
 }

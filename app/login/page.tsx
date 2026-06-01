@@ -2,6 +2,7 @@ import { signIn } from '@/auth';
 import { Logo } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { getDict } from '@/lib/i18n/server';
 
 function GoogleIcon() {
   return (
@@ -36,27 +37,26 @@ async function handleSignIn() {
   await signIn('google', { redirectTo: '/' });
 }
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getDict();
   return (
     <main className="h-dvh flex flex-col justify-center items-center px-4">
       <div className="flex flex-col w-full max-w-md gap-8">
         <div className="flex flex-col items-center gap-2.5">
           <Logo />
-          <h1 className="text-2xl font-bold text-foreground">AI Quiz App</h1>
-          <p className="text-sm text-muted-foreground">
-            Test your knowledge with AI-generated quizzes
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">{t.login.title}</h1>
+          <p className="text-sm text-muted-foreground">{t.login.subtitle}</p>
         </div>
         <Card className="py-6">
           <CardHeader className="px-6">
-            <CardTitle>Welcome</CardTitle>
-            <CardDescription>Sign in with Google to continue</CardDescription>
+            <CardTitle>{t.login.welcome}</CardTitle>
+            <CardDescription>{t.login.prompt}</CardDescription>
           </CardHeader>
           <CardContent className="px-6">
             <form action={handleSignIn}>
               <Button type="submit" size="lg" variant="outline" className="w-full">
                 <GoogleIcon />
-                Sign in with Google
+                {t.login.signIn}
               </Button>
             </form>
           </CardContent>

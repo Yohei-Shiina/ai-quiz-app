@@ -1,15 +1,18 @@
 // features/quiz/validations.ts
 import { z } from 'zod';
 
+// 'TOPIC_REQUIRED' is a stable code; the user-facing message is resolved
+// per-locale in the action layer (lib/i18n/dictionaries.ts).
 const topicTitleSchema = z.object({
-  title: z.string().trim().min(1, 'Topic is required'),
+  title: z.string().trim().min(1, 'TOPIC_REQUIRED'),
 });
+
+export type TitleValidationError = 'TOPIC_REQUIRED';
 
 export const validateTitleTopic = (formData: FormData) => {
   const result = topicTitleSchema.safeParse({ title: formData.get('title') });
   if (!result.success) {
-    const errors = z.flattenError(result.error);
-    return { error: errors.fieldErrors.title?.[0], data: null };
+    return { error: 'TOPIC_REQUIRED' as TitleValidationError, data: null };
   }
   return { error: null, data: result.data };
 };
