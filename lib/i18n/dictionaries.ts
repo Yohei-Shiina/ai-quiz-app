@@ -2,6 +2,9 @@ import type { Locale } from '@/lib/i18n/config';
 
 const en = {
   appName: 'AI Quiz',
+  settings: {
+    language: 'Language',
+  },
   home: {
     emptyTitlePre: 'What are you ',
     emptyTitleEm: 'curious',
@@ -66,6 +69,9 @@ type Dictionary = typeof en;
 
 const ja: Dictionary = {
   appName: 'AIクイズ',
+  settings: {
+    language: '言語',
+  },
   home: {
     emptyTitlePre: '今、何が',
     emptyTitleEm: '気になる',

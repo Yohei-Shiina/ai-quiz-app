@@ -5,7 +5,7 @@ import { enUS, ja } from 'date-fns/locale';
 
 import { QuizSessionStatus } from '@/app/generated/prisma/client';
 import { TopicForm } from '@/app/topic-form';
-import { LanguageToggle } from '@/components/shared/language-toggle';
+import { UserMenu } from '@/components/shared/user-menu';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { resumeOrRestartQuizAction } from '@/features/quiz/actions';
 import { getTopicsWithLatestSession } from '@/features/topic/data';
@@ -28,12 +28,7 @@ export default async function Home() {
             </div>
             <span className="text-sm font-medium text-foreground">{t.appName}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <LanguageToggle />
-            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-              <span className="text-xs font-medium text-muted-foreground">Y</span>
-            </div>
-          </div>
+          <UserMenu />
         </div>
       </header>
       <div className="max-w-md mx-auto px-4">
