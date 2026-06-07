@@ -12,7 +12,7 @@ import {
   countSessionQuestions,
   createQuestionWithOptions,
   createQuizSession,
-  createSessionAnswer,
+  upsertSessionAnswer,
   createSessionQuestion,
   createSessionQuestions,
   getLatestQuizSessionOrThrow,
@@ -43,7 +43,7 @@ export const submitAnswer = async (params: {
   isCorrect: boolean;
 }) => {
   const session = await getQuizSessionWithTopicByIdOrThrow(params.quizSessionId);
-  await createSessionAnswer(params);
+  await upsertSessionAnswer(params);
   const answeredCount = await countSessionAnswers(params.quizSessionId);
   if (answeredCount >= session.questionCount) {
     await markSessionCompletedOrThrow(params.quizSessionId);

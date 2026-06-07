@@ -67,7 +67,7 @@ export const getSessionQuestionsWithOptions = async (quizSessionId: QuizSession[
   return sessionQuestions.map(({ question }) => question);
 };
 
-export const createSessionAnswer = async ({
+export const upsertSessionAnswer = async ({
   quizSessionId,
   questionId,
   answerOptionId,
@@ -82,8 +82,10 @@ export const createSessionAnswer = async ({
   await prisma.quizSession.findFirstOrThrow({
     where: { id: quizSessionId, userId: user.id },
   });
-  return prisma.sessionAnswer.create({
-    data: { quizSessionId, questionId, answerOptionId, isCorrect },
+  return prisma.sessionAnswer.upsert({
+    where: { quizSessionId_questionId: { quizSessionId, questionId } },
+    create: { quizSessionId, questionId, answerOptionId, isCorrect },
+    update: {},
   });
 };
 
