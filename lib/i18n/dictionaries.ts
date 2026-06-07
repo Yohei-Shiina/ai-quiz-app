@@ -28,6 +28,10 @@ const en = {
     title: 'Something went wrong!',
     retry: 'Try again',
   },
+  notFound: {
+    title: 'Page not found',
+    backHome: 'Back to home',
+  },
   loading: {
     progress: 'Building your quiz',
     steps: ['Analyzing the topic...', 'Generating questions...', 'Almost there...'],
@@ -94,6 +98,10 @@ const ja: Dictionary = {
   error: {
     title: '問題が発生しました',
     retry: 'もう一度試す',
+  },
+  notFound: {
+    title: 'ページが見つかりません',
+    backHome: 'ホームに戻る',
   },
   loading: {
     progress: 'のクイズを作っています',
