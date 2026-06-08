@@ -71,6 +71,9 @@ export const useQuestionStream = ({
             }
           }
         }
+        // Reached only if TCP closed without an SSE done/error event
+        // (e.g. Vercel maxDuration timeout, proxy cut, server crash mid-stream).
+        setStreamError('The connection ended before all questions were generated.');
       } catch (err) {
         if (controller.signal.aborted) return;
         setStreamError(err instanceof Error ? err.message : 'Something went wrong while generating the quiz.');
