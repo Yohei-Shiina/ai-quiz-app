@@ -25,6 +25,11 @@ export default function Error({
           <h2 className="font-display italic text-[30px] leading-tight tracking-[-0.01em] font-normal text-foreground m-0">
             {t.error.title}
           </h2>
+          {error.digest && (
+            <p className="font-sans text-xs text-muted-foreground m-0 tracking-wide">
+              {t.error.errorId}: <span className="font-mono select-all">{error.digest}</span>
+            </p>
+          )}
         </div>
         <Button
           onClick={() => reset()}

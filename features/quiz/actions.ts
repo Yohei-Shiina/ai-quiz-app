@@ -42,7 +42,8 @@ export const submitSessionAnswerAction = async ({
   try {
     await submitAnswer({ quizSessionId, questionId, answerOptionId, isCorrect });
     return { success: true };
-  } catch {
+  } catch (error) {
+    console.error('Submit answer failed', { quizSessionId, questionId, error });
     const t = await getDict();
     return { success: false, error: t.answering.submitError };
   }
