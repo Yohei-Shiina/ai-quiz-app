@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -39,12 +39,12 @@ export const AnsweringView = ({
 }: Props) => {
   const { t } = useI18n();
   const router = useRouter();
+  const [isSubmitting, startTransition] = useTransition();
   const [questions, setQuestions] = useState(initialQuestions);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(initialIdx);
   const [selectedOptionIdx, setSelectedOptionIdx] = useState<number | null>(null);
-  // Awaited before navigating to /result so status='completed' lands first;
-  // otherwise any return to the session URL re-shows the last question.
-  const pendingSubmitsRef = useRef<Promise<unknown>[]>([]);
+  const [shouldNavigateToResult, setShouldNavigateToResult] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const totalQuestions = questionCount;
   const currentQuestion = questions[currentQuestionIdx];
@@ -58,7 +58,7 @@ export const AnsweringView = ({
   const isLastQuestion = currentQuestionIdx === totalQuestions - 1;
   const isNextQuestionLoaded = currentQuestionIdx + 1 < questions.length;
 
-  const { streamError } = useQuestionStream({
+  const { streamError, retryStream } = useQuestionStream({
     sessionId,
     initialCount: initialQuestions.length,
     totalCount: totalQuestions,
@@ -69,36 +69,67 @@ export const AnsweringView = ({
   const goToNextQuestion = useCallback(() => {
     setCurrentQuestionIdx((i) => i + 1);
     setSelectedOptionIdx(null);
+    setSubmitError(null);
   }, []);
 
-  const goToResult = useCallback(async () => {
-    // Await pending submissions; ignore errors so a failed submit can't block navigation.
-    await Promise.allSettled(pendingSubmitsRef.current);
-    router.push(`/quiz/${sessionId}/result`);
-  }, [router, sessionId]);
+  useEffect(() => {
+    if (shouldNavigateToResult && !isSubmitting && !submitError) {
+      router.push(`/quiz/${sessionId}/result`);
+    }
+  }, [shouldNavigateToResult, isSubmitting, submitError, router, sessionId]);
+
+  const goToResult = useCallback(() => {
+    setShouldNavigateToResult(true);
+  }, []);
 
   // Auto-advance on correct pick. setTimeout avoids the cascading-render warning
   // from sync setState in effect bodies; restarts when isNextQuestionLoaded flips.
   useEffect(() => {
     if (answerPhase !== 'correct') return;
-    const t = setTimeout(() => {
+    if (submitError) return;
+    if (isSubmitting) return;
+    const timer = setTimeout(() => {
       if (isLastQuestion) goToResult();
       else if (isNextQuestionLoaded) goToNextQuestion();
     }, AUTO_ADVANCE_MS);
-    return () => clearTimeout(t);
-  }, [answerPhase, isLastQuestion, isNextQuestionLoaded, goToResult, goToNextQuestion]);
+    return () => clearTimeout(timer);
+  }, [
+    answerPhase,
+    isLastQuestion,
+    isNextQuestionLoaded,
+    goToResult,
+    goToNextQuestion,
+    submitError,
+    isSubmitting,
+  ]);
 
   const handlePick = (choiceIdx: number) => {
     if (selectedOptionIdx !== null) return;
     setSelectedOptionIdx(choiceIdx);
     const isCorrect = choiceIdx === correctOptionIdx;
-    const submission = submitSessionAnswerAction({
-      quizSessionId: sessionId,
-      questionId: currentQuestion.id,
-      answerOptionId: currentQuestion.answerOptions[choiceIdx].id,
-      isCorrect,
+    startTransition(async () => {
+      const result = await submitSessionAnswerAction({
+        quizSessionId: sessionId,
+        questionId: currentQuestion.id,
+        answerOptionId: currentQuestion.answerOptions[choiceIdx].id,
+        isCorrect,
+      });
+      if (!result.success) setSubmitError(result.error);
     });
-    pendingSubmitsRef.current.push(submission);
+  };
+
+  const retrySubmit = () => {
+    if (selectedOptionIdx === null) return;
+    startTransition(async () => {
+      const result = await submitSessionAnswerAction({
+        quizSessionId: sessionId,
+        questionId: currentQuestion.id,
+        answerOptionId: currentQuestion.answerOptions[selectedOptionIdx].id,
+        isCorrect: selectedOptionIdx === correctOptionIdx,
+      });
+      if (result.success) setSubmitError(null);
+      else setSubmitError(result.error);
+    });
   };
 
   const handleNextOnWrong = () => {
@@ -107,6 +138,27 @@ export const AnsweringView = ({
   };
 
   if (!currentQuestion) {
+    if (streamError) {
+      return (
+        <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-4">
+          <div
+            role="alert"
+            className="w-full max-w-md bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-[14px] flex flex-col gap-3"
+            style={{ animation: 'fade-up 0.35s ease-out both' }}
+          >
+            <p className="font-sans text-sm text-destructive m-0">{streamError}</p>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={retryStream}
+              className="h-10 rounded-lg text-[14px] font-medium"
+            >
+              {t.answering.submitRetry}
+            </Button>
+          </div>
+        </div>
+      );
+    }
     return <LoadingView topic={topic} />;
   }
 
@@ -182,7 +234,7 @@ export const AnsweringView = ({
             ))}
           </div>
 
-          {answerPhase === 'correct' && (
+          {answerPhase === 'correct' && !submitError && (
             <div
               className="flex items-center gap-2 font-sans text-sm text-primary font-medium"
               style={{ animation: 'fade-in 0.3s ease-out both' }}
@@ -210,24 +262,49 @@ export const AnsweringView = ({
                   {currentQuestion.explanation}
                 </p>
               </div>
+              {!submitError && (
+                <Button
+                  type="button"
+                  onClick={handleNextOnWrong}
+                  disabled={waitingForNext || isSubmitting}
+                  className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
+                >
+                  {waitingForNext || isSubmitting ? (
+                    <PreparingIndicator label={t.answering.preparingNext} />
+                  ) : isLastQuestion ? (
+                    t.answering.finish
+                  ) : (
+                    t.answering.next
+                  )}
+                </Button>
+              )}
+            </div>
+          )}
+
+          {submitError && (
+            <div
+              role="alert"
+              className="bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-[14px] flex flex-col gap-3"
+              style={{ animation: 'fade-up 0.35s ease-out both' }}
+            >
+              <p className="font-sans text-sm text-destructive m-0">{submitError}</p>
               <Button
                 type="button"
-                onClick={handleNextOnWrong}
-                disabled={waitingForNext}
-                className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
+                variant="destructive"
+                onClick={retrySubmit}
+                disabled={isSubmitting}
+                className="h-10 rounded-lg text-[14px] font-medium"
               >
-                {waitingForNext ? (
+                {isSubmitting ? (
                   <PreparingIndicator label={t.answering.preparingNext} />
-                ) : isLastQuestion ? (
-                  t.answering.finish
                 ) : (
-                  t.answering.next
+                  t.answering.submitRetry
                 )}
               </Button>
             </div>
           )}
 
-          {waitingForNext && answerPhase === 'correct' && (
+          {waitingForNext && answerPhase === 'correct' && !submitError && (
             <PreparingIndicator
               label={t.answering.preparingNextQuestion}
               className="text-muted-foreground text-[13px]"
@@ -238,9 +315,21 @@ export const AnsweringView = ({
             answerPhase === 'idle' &&
             !isNextQuestionLoaded &&
             questions.length < totalQuestions && (
-              <p className="text-xs text-destructive" role="alert">
-                {streamError}
-              </p>
+              <div
+                role="alert"
+                className="bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-[14px] flex flex-col gap-3"
+                style={{ animation: 'fade-up 0.35s ease-out both' }}
+              >
+                <p className="font-sans text-sm text-destructive m-0">{streamError}</p>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={retryStream}
+                  className="h-10 rounded-lg text-[14px] font-medium"
+                >
+                  {t.answering.submitRetry}
+                </Button>
+              </div>
             )}
         </main>
       </div>

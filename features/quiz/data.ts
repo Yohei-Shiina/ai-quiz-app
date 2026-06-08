@@ -27,6 +27,8 @@ export const getLatestQuizSessionOrThrow = async (topicId: Topic['id']) => {
   return session;
 };
 
+// Internal flows (quiz generation / answer submission): the session was already
+// verified at page load, so a miss here is unexpected -> throw (handled by R5/R6/R7).
 export const getQuizSessionWithTopicByIdOrThrow = async (id: QuizSession['id']) => {
   const user = await requireAuth();
   const session = await prisma.quizSession.findUniqueOrThrow({
@@ -34,6 +36,14 @@ export const getQuizSessionWithTopicByIdOrThrow = async (id: QuizSession['id']) 
     include: { topic: true },
   });
   return session;
+};
+
+export const getQuizSessionWithTopicById = async (id: QuizSession['id']) => {
+  const user = await requireAuth();
+  return prisma.quizSession.findUnique({
+    where: { id, userId: user.id },
+    include: { topic: true },
+  });
 };
 
 export const countSessionQuestions = async (quizSessionId: QuizSession['id']) => {
@@ -57,7 +67,7 @@ export const getSessionQuestionsWithOptions = async (quizSessionId: QuizSession[
   return sessionQuestions.map(({ question }) => question);
 };
 
-export const createSessionAnswer = async ({
+export const upsertSessionAnswer = async ({
   quizSessionId,
   questionId,
   answerOptionId,
@@ -72,8 +82,10 @@ export const createSessionAnswer = async ({
   await prisma.quizSession.findFirstOrThrow({
     where: { id: quizSessionId, userId: user.id },
   });
-  return prisma.sessionAnswer.create({
-    data: { quizSessionId, questionId, answerOptionId, isCorrect },
+  return prisma.sessionAnswer.upsert({
+    where: { quizSessionId_questionId: { quizSessionId, questionId } },
+    create: { quizSessionId, questionId, answerOptionId, isCorrect },
+    update: {},
   });
 };
 
@@ -183,9 +195,9 @@ export const getTopicQuestions = async (topicId: Topic['id']) => {
   return topic.questions;
 };
 
-export const getSessionResultOrThrow = async (sessionId: QuizSession['id']) => {
+export const getSessionResult = async (sessionId: QuizSession['id']) => {
   const user = await requireAuth();
-  return prisma.quizSession.findUniqueOrThrow({
+  return prisma.quizSession.findUnique({
     where: { id: sessionId, userId: user.id },
     include: {
       topic: true,

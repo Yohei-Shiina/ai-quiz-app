@@ -57,8 +57,7 @@ export default async function Home() {
 
           <div className="flex flex-col gap-3">
             {topics.map((topic, i) => {
-              const isInProgress =
-                topic.latestQuizSession.status === QuizSessionStatus.in_progress;
+              const isInProgress = topic.latestQuizSession.status === QuizSessionStatus.in_progress;
               const card = (
                 <Card
                   className="group shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"

@@ -22,10 +22,8 @@ export async function POST(
         controller.enqueue(encoder.encode(`event: done\ndata: {}\n\n`));
         controller.close();
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        controller.enqueue(
-          encoder.encode(`event: error\ndata: ${JSON.stringify({ message })}\n\n`),
-        );
+        console.error('Quiz generation failed', { sessionId, error });
+        controller.enqueue(encoder.encode(`event: error\ndata: {}\n\n`));
         controller.close();
       }
     },

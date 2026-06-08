@@ -27,6 +27,11 @@ const en = {
   error: {
     title: 'Something went wrong!',
     retry: 'Try again',
+    errorId: 'Error ID',
+  },
+  notFound: {
+    title: 'Page not found',
+    backHome: 'Back to home',
   },
   loading: {
     progress: 'Building your quiz',
@@ -42,6 +47,8 @@ const en = {
     next: 'Next question',
     preparingNext: 'Preparing next…',
     preparingNextQuestion: 'Preparing next question…',
+    submitError: "Couldn't record your answer",
+    submitRetry: 'Try again',
   },
   result: {
     onTopic: (topic: string) => `on “${topic}”`,
@@ -94,6 +101,11 @@ const ja: Dictionary = {
   error: {
     title: '問題が発生しました',
     retry: 'もう一度試す',
+    errorId: 'エラーID',
+  },
+  notFound: {
+    title: 'ページが見つかりません',
+    backHome: 'ホームに戻る',
   },
   loading: {
     progress: 'のクイズを作っています',
@@ -109,6 +121,8 @@ const ja: Dictionary = {
     next: '次の問題',
     preparingNext: '次を準備中…',
     preparingNextQuestion: '次の問題を準備中…',
+    submitError: '回答を記録できませんでした',
+    submitRetry: 'もう一度試す',
   },
   result: {
     onTopic: (topic: string) => `「${topic}」`,

@@ -2,11 +2,11 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { resumeOrRestartQuizAction } from '@/features/quiz/actions';
-import type { getSessionResultOrThrow } from '@/features/quiz/data';
+import type { getSessionResult } from '@/features/quiz/data';
 import type { Dictionary } from '@/lib/i18n/dictionaries';
 import { getDict } from '@/lib/i18n/server';
 
-type SessionResult = Awaited<ReturnType<typeof getSessionResultOrThrow>>;
+type SessionResult = NonNullable<Awaited<ReturnType<typeof getSessionResult>>>;
 
 type Props = { result: SessionResult };
 

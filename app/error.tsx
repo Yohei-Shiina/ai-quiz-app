@@ -1,7 +1,8 @@
-'use client'; // Error boundaries must be Client Components
+'use client';
 
 import { useEffect } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { useI18n } from '@/lib/i18n/context';
 
 export default function Error({
@@ -14,14 +15,29 @@ export default function Error({
   const { t } = useI18n();
 
   useEffect(() => {
-    // Log the error to an error reporting service
     console.error(error);
   }, [error]);
 
   return (
-    <div>
-      <h2>{t.error.title}</h2>
-      <button onClick={() => reset()}>{t.error.retry}</button>
+    <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-md flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <h2 className="font-display italic text-[30px] leading-tight tracking-[-0.01em] font-normal text-foreground m-0">
+            {t.error.title}
+          </h2>
+          {error.digest && (
+            <p className="font-sans text-xs text-muted-foreground m-0 tracking-wide">
+              {t.error.errorId}: <span className="font-mono select-all">{error.digest}</span>
+            </p>
+          )}
+        </div>
+        <Button
+          onClick={() => reset()}
+          className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
+        >
+          {t.error.retry}
+        </Button>
+      </div>
     </div>
   );
 }
