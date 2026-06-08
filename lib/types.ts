@@ -1,5 +1,3 @@
-export type ActionState = { error: string | null };
-
-export type ActionResult<T = void> =
-  | { data: T; error?: never }
-  | { data?: never; error: string };
+export type ActionResult<T = void> = T extends void
+  ? { success: true } | { success: false; error: string }
+  : { success: true; data: T } | { success: false; error: string };

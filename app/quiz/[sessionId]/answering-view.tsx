@@ -114,7 +114,7 @@ export const AnsweringView = ({
         answerOptionId: currentQuestion.answerOptions[choiceIdx].id,
         isCorrect,
       });
-      if (result.error) setSubmitError(result.error);
+      if (!result.success) setSubmitError(result.error);
     });
   };
 
@@ -127,8 +127,8 @@ export const AnsweringView = ({
         answerOptionId: currentQuestion.answerOptions[selectedOptionIdx].id,
         isCorrect: selectedOptionIdx === correctOptionIdx,
       });
-      if (result.error) setSubmitError(result.error);
-      else setSubmitError(null);
+      if (result.success) setSubmitError(null);
+      else setSubmitError(result.error);
     });
   };
 
