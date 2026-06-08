@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useCallback, useEffect, useEffectEvent, useState } from 'react';
 
 import type { AnswerOption, Question, QuizSession } from '@/app/generated/prisma/client';
 
@@ -20,6 +20,7 @@ export const useQuestionStream = ({
   onQuestionReceived,
 }: Params) => {
   const [streamError, setStreamError] = useState<string | null>(null);
+  const [retryToken, setRetryToken] = useState(0);
   const emitQuestion = useEffectEvent(onQuestionReceived);
 
   useEffect(() => {
@@ -81,9 +82,14 @@ export const useQuestionStream = ({
     })();
 
     return () => controller.abort();
-  }, [sessionId, initialCount, totalCount]);
+  }, [sessionId, initialCount, totalCount, retryToken]);
 
-  return { streamError };
+  const retryStream = useCallback(() => {
+    setStreamError(null);
+    setRetryToken((t) => t + 1);
+  }, []);
+
+  return { streamError, retryStream };
 };
 
 type ParsedSse = { event: string; data: Record<string, unknown> | null };

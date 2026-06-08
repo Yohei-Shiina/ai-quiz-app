@@ -58,7 +58,7 @@ export const AnsweringView = ({
   const isLastQuestion = currentQuestionIdx === totalQuestions - 1;
   const isNextQuestionLoaded = currentQuestionIdx + 1 < questions.length;
 
-  const { streamError } = useQuestionStream({
+  const { streamError, retryStream } = useQuestionStream({
     sessionId,
     initialCount: initialQuestions.length,
     totalCount: totalQuestions,
@@ -138,6 +138,27 @@ export const AnsweringView = ({
   };
 
   if (!currentQuestion) {
+    if (streamError) {
+      return (
+        <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-4">
+          <div
+            role="alert"
+            className="w-full max-w-md bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-[14px] flex flex-col gap-3"
+            style={{ animation: 'fade-up 0.35s ease-out both' }}
+          >
+            <p className="font-sans text-sm text-destructive m-0">{streamError}</p>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={retryStream}
+              className="h-10 rounded-lg text-[14px] font-medium"
+            >
+              {t.answering.submitRetry}
+            </Button>
+          </div>
+        </div>
+      );
+    }
     return <LoadingView topic={topic} />;
   }
 
@@ -294,9 +315,21 @@ export const AnsweringView = ({
             answerPhase === 'idle' &&
             !isNextQuestionLoaded &&
             questions.length < totalQuestions && (
-              <p className="text-xs text-destructive" role="alert">
-                {streamError}
-              </p>
+              <div
+                role="alert"
+                className="bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-[14px] flex flex-col gap-3"
+                style={{ animation: 'fade-up 0.35s ease-out both' }}
+              >
+                <p className="font-sans text-sm text-destructive m-0">{streamError}</p>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={retryStream}
+                  className="h-10 rounded-lg text-[14px] font-medium"
+                >
+                  {t.answering.submitRetry}
+                </Button>
+              </div>
             )}
         </main>
       </div>
