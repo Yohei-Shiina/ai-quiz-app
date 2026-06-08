@@ -7,7 +7,7 @@ import { createTopicAndSession, resumeOrRestartQuiz, submitAnswer } from '@/feat
 import { validateTitleTopic, validateResumeOrRestartQuiz } from '@/features/quiz/validations';
 import { ORDER_RATE_LIMIT } from '@/lib/constants';
 import { getDict } from '@/lib/i18n/server';
-import { ActionState } from '@/lib/types';
+import { ActionResult, ActionState } from '@/lib/types';
 
 export const startQuizAction = async (
   _prevState: ActionState,
@@ -37,6 +37,12 @@ export const submitSessionAnswerAction = async ({
   questionId: string;
   answerOptionId: string;
   isCorrect: boolean;
-}): Promise<void> => {
-  await submitAnswer({ quizSessionId, questionId, answerOptionId, isCorrect });
+}): Promise<ActionResult> => {
+  try {
+    await submitAnswer({ quizSessionId, questionId, answerOptionId, isCorrect });
+    return { data: undefined };
+  } catch {
+    const t = await getDict();
+    return { error: t.answering.submitError };
+  }
 };

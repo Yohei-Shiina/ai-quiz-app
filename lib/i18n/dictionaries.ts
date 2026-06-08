@@ -46,6 +46,8 @@ const en = {
     next: 'Next question',
     preparingNext: 'Preparing next…',
     preparingNextQuestion: 'Preparing next question…',
+    submitError: "Couldn't record your answer",
+    submitRetry: 'Try again',
   },
   result: {
     onTopic: (topic: string) => `on “${topic}”`,
@@ -117,6 +119,8 @@ const ja: Dictionary = {
     next: '次の問題',
     preparingNext: '次を準備中…',
     preparingNextQuestion: '次の問題を準備中…',
+    submitError: '回答を記録できませんでした',
+    submitRetry: 'もう一度試す',
   },
   result: {
     onTopic: (topic: string) => `「${topic}」`,
