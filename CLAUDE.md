@@ -45,8 +45,8 @@ Before starting any implementation task (including all file modifications such a
   番号なしで選択肢を提示しないこと。ユーザーが番号だけで返答できるよう、候補リストは必ず連番で示すこと。
 - Do not silently accept incorrect word usage from the user; point out the error and provide the correct usage concisely.
   ユーザーの誤った用語使用を黙認しないこと。誤りを指摘し、正しい用法を簡潔に伝えること。
-- Do not read source code to answer questions about app specifications or background knowledge (e.g., what topics the app supports, what UI text is appropriate); instead, check the knowledge base at `/dev/one-step-archive/ai-quiz-app/`.
-  アプリ仕様や背景知識（対応トピック、UIテキストなど）に関する質問にソースコードを読んで答えないこと。代わりにナレッジベース（`/dev/one-step-archive/ai-quiz-app/`）を参照すること。
+- Do not read source code to answer questions about app specifications or background knowledge (e.g., what topics the app supports, what UI text is appropriate); instead, check the knowledge base at `ai-quiz-app-knowledge-base/`.
+  アプリ仕様や背景知識（対応トピック、UIテキストなど）に関する質問にソースコードを読んで答えないこと。代わりにナレッジベース（`ai-quiz-app-knowledge-base/`）を参照すること。
 - Do not save to memory without explicit user approval; always ask the user before writing any memory file or updating MEMORY.md.
   明示的なユーザー承認なしにメモリを保存しないこと。メモリファイルの書き込みやMEMORY.mdの更新前に必ず確認すること。
 - Do not use ambiguous terms (e.g., "domain" which can mean DNS domain, business domain, or DDD domain) without clarifying the context; either make the context explicit or replace with a concrete term (e.g., "app specification", "URL", "aggregate").
