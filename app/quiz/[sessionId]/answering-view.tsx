@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, useTransition } from 'react';
+import { startTransition, useCallback, useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -26,7 +26,11 @@ type Props = {
   initialIdx: number;
 };
 
-type AnswerPhase = 'idle' | 'correct' | 'wrong';
+type AnswerPhase =
+  | { kind: 'idle' }
+  | { kind: 'attempting'; choiceIdx: number; isCorrect: boolean; previousError?: string }
+  | { kind: 'succeeded'; choiceIdx: number; isCorrect: boolean }
+  | { kind: 'failed'; choiceIdx: number; isCorrect: boolean; error: string };
 
 const AUTO_ADVANCE_MS = 1000;
 
@@ -37,76 +41,64 @@ export const AnsweringView = ({
   initialQuestions,
   initialIdx,
 }: Props) => {
-  const { t } = useI18n();
-  const router = useRouter();
-  const [isSubmitting, startTransition] = useTransition();
+  // === state ===
   const [questions, setQuestions] = useState(initialQuestions);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(initialIdx);
-  const [selectedOptionIdx, setSelectedOptionIdx] = useState<number | null>(null);
-  const [shouldNavigateToResult, setShouldNavigateToResult] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [answerPhase, setAnswerPhase] = useState<AnswerPhase>({ kind: 'idle' });
+  const [autoAdvanceReady, setAutoAdvanceReady] = useState(false);
 
-  const totalQuestions = questionCount;
-  const currentQuestion = questions[currentQuestionIdx];
-  const correctOptionIdx = currentQuestion?.answerOptions.findIndex((o) => o.isCorrect) ?? -1;
-  const answerPhase: AnswerPhase =
-    selectedOptionIdx === null
-      ? 'idle'
-      : selectedOptionIdx === correctOptionIdx
-        ? 'correct'
-        : 'wrong';
-  const isLastQuestion = currentQuestionIdx === totalQuestions - 1;
-  const isNextQuestionLoaded = currentQuestionIdx + 1 < questions.length;
-
+  // === external hooks ===
+  const { t } = useI18n();
+  const router = useRouter();
   const { streamError, retryStream } = useQuestionStream({
     sessionId,
     initialCount: initialQuestions.length,
-    totalCount: totalQuestions,
+    totalCount: questionCount,
     onQuestionReceived: (q) =>
-      setQuestions((prev) => (prev.length >= totalQuestions ? prev : [...prev, q])),
+      setQuestions((prev) => (prev.length >= questionCount ? prev : [...prev, q])),
   });
 
+  // === derived ===
+  const currentQuestion = questions[currentQuestionIdx];
+  const correctOptionIdx = currentQuestion?.answerOptions.findIndex((o) => o.isCorrect) ?? -1;
+  const selectedOptionIdx = answerPhase.kind === 'idle' ? null : answerPhase.choiceIdx;
+  const isLastQuestion = currentQuestionIdx === questionCount - 1;
+  const isNextQuestionLoaded = currentQuestionIdx + 1 < questions.length;
+  const isAttemptingSave = answerPhase.kind === 'attempting';
+  const canGoToNextQuestion =
+    !isLastQuestion && isNextQuestionLoaded && answerPhase.kind === 'succeeded';
+  const canGoToResult = isLastQuestion && answerPhase.kind === 'succeeded';
+  const showWrongBlock = answerPhase.kind !== 'idle' && !answerPhase.isCorrect;
+  const submissionError =
+    answerPhase.kind === 'failed'
+      ? answerPhase.error
+      : answerPhase.kind === 'attempting'
+        ? answerPhase.previousError
+        : undefined;
+  const showCorrectBadge =
+    (answerPhase.kind === 'attempting' || answerPhase.kind === 'succeeded') &&
+    answerPhase.isCorrect &&
+    !submissionError;
+  const showWrongNextButton = showWrongBlock && !submissionError;
+  const shouldStartAutoAdvanceTimer =
+    answerPhase.kind === 'succeeded' && answerPhase.isCorrect;
+  const progressPercent =
+    ((currentQuestionIdx + (answerPhase.kind !== 'idle' ? 1 : 0)) / questionCount) * 100;
+
+  // === callbacks ===
   const goToNextQuestion = useCallback(() => {
     setCurrentQuestionIdx((i) => i + 1);
-    setSelectedOptionIdx(null);
-    setSubmitError(null);
+    setAnswerPhase({ kind: 'idle' });
+    setAutoAdvanceReady(false);
   }, []);
-
-  useEffect(() => {
-    if (shouldNavigateToResult && !isSubmitting && !submitError) {
-      router.push(`/quiz/${sessionId}/result`);
-    }
-  }, [shouldNavigateToResult, isSubmitting, submitError, router, sessionId]);
 
   const goToResult = useCallback(() => {
-    setShouldNavigateToResult(true);
-  }, []);
+    router.push(`/quiz/${sessionId}/result`);
+  }, [router, sessionId]);
 
-  // Auto-advance on correct pick. setTimeout avoids the cascading-render warning
-  // from sync setState in effect bodies; restarts when isNextQuestionLoaded flips.
-  useEffect(() => {
-    if (answerPhase !== 'correct') return;
-    if (submitError) return;
-    if (isSubmitting) return;
-    const timer = setTimeout(() => {
-      if (isLastQuestion) goToResult();
-      else if (isNextQuestionLoaded) goToNextQuestion();
-    }, AUTO_ADVANCE_MS);
-    return () => clearTimeout(timer);
-  }, [
-    answerPhase,
-    isLastQuestion,
-    isNextQuestionLoaded,
-    goToResult,
-    goToNextQuestion,
-    submitError,
-    isSubmitting,
-  ]);
-
-  const handlePick = (choiceIdx: number) => {
-    if (selectedOptionIdx !== null) return;
-    setSelectedOptionIdx(choiceIdx);
-    const isCorrect = choiceIdx === correctOptionIdx;
+  const submitAnswer = (choiceIdx: number, isCorrect: boolean, previousError?: string) => {
+    setAnswerPhase({ kind: 'attempting', choiceIdx, isCorrect, previousError });
+    setAutoAdvanceReady(false);
     startTransition(async () => {
       const result = await submitSessionAnswerAction({
         quizSessionId: sessionId,
@@ -114,47 +106,60 @@ export const AnsweringView = ({
         answerOptionId: currentQuestion.answerOptions[choiceIdx].id,
         isCorrect,
       });
-      if (!result.success) setSubmitError(result.error);
+      setAnswerPhase(
+        result.success
+          ? { kind: 'succeeded', choiceIdx, isCorrect }
+          : { kind: 'failed', choiceIdx, isCorrect, error: result.error },
+      );
     });
+  };
+
+  const handlePick = (choiceIdx: number) => {
+    if (answerPhase.kind !== 'idle') return;
+    submitAnswer(choiceIdx, choiceIdx === correctOptionIdx);
   };
 
   const retrySubmit = () => {
-    if (selectedOptionIdx === null) return;
-    startTransition(async () => {
-      const result = await submitSessionAnswerAction({
-        quizSessionId: sessionId,
-        questionId: currentQuestion.id,
-        answerOptionId: currentQuestion.answerOptions[selectedOptionIdx].id,
-        isCorrect: selectedOptionIdx === correctOptionIdx,
-      });
-      if (result.success) setSubmitError(null);
-      else setSubmitError(result.error);
-    });
+    if (answerPhase.kind !== 'failed') return;
+    submitAnswer(answerPhase.choiceIdx, answerPhase.isCorrect, answerPhase.error);
   };
 
-  const handleNextOnWrong = () => {
-    if (isLastQuestion) goToResult();
-    else if (isNextQuestionLoaded) goToNextQuestion();
-  };
+  // === effects ===
+  // Auto-advance runs in two phases so the timer doesn't restart when the next
+  // question streams in mid-wait:
+  //   1. Arm a timer when the answer is settled (succeeded + correct).
+  //      Depends only on `shouldStartAutoAdvanceTimer`, not on destination
+  //      readiness, so a late stream chunk can't extend the wait.
+  //   2. When the timer has signalled readiness AND a destination is reachable,
+  //      navigate. If the destination isn't ready yet, we just wait — this
+  //      effect re-runs when `canGoTo*` flips.
+  useEffect(() => {
+    if (!shouldStartAutoAdvanceTimer) return;
+    const timer = setTimeout(() => setAutoAdvanceReady(true), AUTO_ADVANCE_MS);
+    return () => clearTimeout(timer);
+  }, [shouldStartAutoAdvanceTimer]);
 
+  useEffect(() => {
+    if (!autoAdvanceReady) return;
+    if (canGoToResult) goToResult();
+    // goToNextQuestion writes state in its handler; the lint rule that flags
+    // cascading state writes in effects is overly strict for this coordination
+    // pattern (acknowledged false positive in facebook/react#34743).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    else if (canGoToNextQuestion) goToNextQuestion();
+  }, [autoAdvanceReady, canGoToResult, canGoToNextQuestion, goToResult, goToNextQuestion]);
+
+  // === early return ===
   if (!currentQuestion) {
     if (streamError) {
       return (
         <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-4">
-          <div
-            role="alert"
-            className="w-full max-w-md bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-[14px] flex flex-col gap-3"
-            style={{ animation: 'fade-up 0.35s ease-out both' }}
-          >
-            <p className="font-sans text-sm text-destructive m-0">{streamError}</p>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={retryStream}
-              className="h-10 rounded-lg text-[14px] font-medium"
-            >
-              {t.answering.submitRetry}
-            </Button>
+          <div className="w-full max-w-md">
+            <ErrorRetryCard
+              message={streamError}
+              onRetry={retryStream}
+              retryLabel={t.answering.submitRetry}
+            />
           </div>
         </div>
       );
@@ -162,10 +167,7 @@ export const AnsweringView = ({
     return <LoadingView topic={topic} />;
   }
 
-  const progressPct =
-    ((currentQuestionIdx + (selectedOptionIdx !== null ? 1 : 0)) / totalQuestions) * 100;
-  const waitingForNext = answerPhase !== 'idle' && !isLastQuestion && !isNextQuestionLoaded;
-
+  // === render ===
   return (
     <div className="min-h-dvh bg-background">
       <div className="mx-auto max-w-md px-4 pt-14 pb-8">
@@ -178,14 +180,14 @@ export const AnsweringView = ({
             {t.answering.leave}
           </button>
           <div className="font-sans text-xs font-medium text-muted-foreground tracking-wider tabular-nums">
-            {currentQuestionIdx + 1} / {totalQuestions}
+            {currentQuestionIdx + 1} / {questionCount}
           </div>
         </div>
 
         <div className="h-0.5 bg-muted rounded-full overflow-hidden mt-2.5 mb-5">
           <div
             className="h-full bg-primary transition-[width] duration-400 ease-out"
-            style={{ width: `${progressPct}%` }}
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
 
@@ -204,7 +206,7 @@ export const AnsweringView = ({
             {currentQuestion.body}
           </h1>
 
-          {currentQuestionIdx === 0 && selectedOptionIdx === null && (
+          {currentQuestionIdx === 0 && answerPhase.kind === 'idle' && (
             <button
               type="button"
               onClick={() => router.push('/')}
@@ -234,7 +236,7 @@ export const AnsweringView = ({
             ))}
           </div>
 
-          {answerPhase === 'correct' && !submitError && (
+          {showCorrectBadge && (
             <div
               className="flex items-center gap-2 font-sans text-sm text-primary font-medium"
               style={{ animation: 'fade-in 0.3s ease-out both' }}
@@ -246,7 +248,7 @@ export const AnsweringView = ({
             </div>
           )}
 
-          {answerPhase === 'wrong' && (
+          {showWrongBlock && (
             <div
               className="flex flex-col gap-4"
               style={{ animation: 'fade-up 0.35s ease-out both' }}
@@ -262,49 +264,48 @@ export const AnsweringView = ({
                   {currentQuestion.explanation}
                 </p>
               </div>
-              {!submitError && (
-                <Button
-                  type="button"
-                  onClick={handleNextOnWrong}
-                  disabled={waitingForNext || isSubmitting}
-                  className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
-                >
-                  {waitingForNext || isSubmitting ? (
-                    <PreparingIndicator label={t.answering.preparingNext} />
-                  ) : isLastQuestion ? (
-                    t.answering.finish
-                  ) : (
-                    t.answering.next
-                  )}
-                </Button>
-              )}
-            </div>
-          )}
-
-          {submitError && (
-            <div
-              role="alert"
-              className="bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-[14px] flex flex-col gap-3"
-              style={{ animation: 'fade-up 0.35s ease-out both' }}
-            >
-              <p className="font-sans text-sm text-destructive m-0">{submitError}</p>
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={retrySubmit}
-                disabled={isSubmitting}
-                className="h-10 rounded-lg text-[14px] font-medium"
-              >
-                {isSubmitting ? (
-                  <PreparingIndicator label={t.answering.preparingNext} />
+              {showWrongNextButton &&
+                (isLastQuestion ? (
+                  <Button
+                    type="button"
+                    onClick={goToResult}
+                    disabled={!canGoToResult}
+                    className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
+                  >
+                    {canGoToResult ? (
+                      t.answering.finish
+                    ) : (
+                      <PreparingIndicator label={t.answering.preparingNext} />
+                    )}
+                  </Button>
                 ) : (
-                  t.answering.submitRetry
-                )}
-              </Button>
+                  <Button
+                    type="button"
+                    onClick={goToNextQuestion}
+                    disabled={!canGoToNextQuestion}
+                    className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
+                  >
+                    {canGoToNextQuestion ? (
+                      t.answering.next
+                    ) : (
+                      <PreparingIndicator label={t.answering.preparingNext} />
+                    )}
+                  </Button>
+                ))}
             </div>
           )}
 
-          {waitingForNext && answerPhase === 'correct' && !submitError && (
+          {submissionError && (
+            <ErrorRetryCard
+              message={submissionError}
+              onRetry={retrySubmit}
+              retryLabel={t.answering.submitRetry}
+              isPending={isAttemptingSave}
+              pendingLabel={t.answering.preparingNext}
+            />
+          )}
+
+          {!isLastQuestion && !isNextQuestionLoaded && showCorrectBadge && (
             <PreparingIndicator
               label={t.answering.preparingNextQuestion}
               className="text-muted-foreground text-[13px]"
@@ -312,24 +313,14 @@ export const AnsweringView = ({
           )}
 
           {streamError &&
-            answerPhase === 'idle' &&
+            answerPhase.kind === 'idle' &&
             !isNextQuestionLoaded &&
-            questions.length < totalQuestions && (
-              <div
-                role="alert"
-                className="bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-[14px] flex flex-col gap-3"
-                style={{ animation: 'fade-up 0.35s ease-out both' }}
-              >
-                <p className="font-sans text-sm text-destructive m-0">{streamError}</p>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={retryStream}
-                  className="h-10 rounded-lg text-[14px] font-medium"
-                >
-                  {t.answering.submitRetry}
-                </Button>
-              </div>
+            questions.length < questionCount && (
+              <ErrorRetryCard
+                message={streamError}
+                onRetry={retryStream}
+                retryLabel={t.answering.submitRetry}
+              />
             )}
         </main>
       </div>
@@ -342,4 +333,37 @@ const PreparingIndicator = ({ label, className }: { label: string; className?: s
     <Loader2 className="animate-spin" size={14} />
     {label}
   </span>
+);
+
+type ErrorRetryCardProps = {
+  message: string;
+  onRetry: () => void;
+  retryLabel: string;
+  isPending?: boolean;
+  pendingLabel?: string;
+};
+
+const ErrorRetryCard = ({
+  message,
+  onRetry,
+  retryLabel,
+  isPending,
+  pendingLabel,
+}: ErrorRetryCardProps) => (
+  <div
+    role="alert"
+    className="bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-[14px] flex flex-col gap-3"
+    style={{ animation: 'fade-up 0.35s ease-out both' }}
+  >
+    <p className="font-sans text-sm text-destructive m-0">{message}</p>
+    <Button
+      type="button"
+      variant="destructive"
+      onClick={onRetry}
+      disabled={isPending}
+      className="h-10 rounded-lg text-[14px] font-medium"
+    >
+      {isPending && pendingLabel ? <PreparingIndicator label={pendingLabel} /> : retryLabel}
+    </Button>
+  </div>
 );
