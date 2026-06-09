@@ -80,8 +80,7 @@ export const AnsweringView = ({
     answerPhase.isCorrect &&
     !submissionError;
   const showWrongNextButton = showWrongBlock && !submissionError;
-  const shouldStartAutoAdvanceTimer =
-    answerPhase.kind === 'succeeded' && answerPhase.isCorrect;
+  const shouldStartAutoAdvanceTimer = answerPhase.kind === 'succeeded' && answerPhase.isCorrect;
   const progressPercent =
     ((currentQuestionIdx + (answerPhase.kind !== 'idle' ? 1 : 0)) / questionCount) * 100;
 
