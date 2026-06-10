@@ -57,6 +57,7 @@ model AnswerOption {
   questionId     String
   body           String
   isCorrect      Boolean         @default(false)
+  createdAt      DateTime        @default(now())
   sessionAnswers SessionAnswer[]
 
   @@map("answer_options")
@@ -85,6 +86,7 @@ model SessionQuestion {
   question      Question    @relation(fields: [questionId], references: [id])
   questionId    String
   position      Int
+  createdAt     DateTime    @default(now())
 
   @@map("session_questions")
 }
