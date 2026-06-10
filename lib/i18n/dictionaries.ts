@@ -4,6 +4,7 @@ const en = {
   appName: 'AI Quiz',
   settings: {
     language: 'Language',
+    signOut: 'Sign out',
   },
   home: {
     emptyTitlePre: 'What are you ',
@@ -78,6 +79,7 @@ const ja: Dictionary = {
   appName: 'AIクイズ',
   settings: {
     language: '言語',
+    signOut: 'ログアウト',
   },
   home: {
     emptyTitlePre: '今、何が',
