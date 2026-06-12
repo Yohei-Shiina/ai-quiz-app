@@ -1,4 +1,5 @@
 import {
+  type Prisma,
   QuizSessionStatus,
   type Topic,
   type QuizSession,
@@ -107,24 +108,33 @@ export const markSessionCompletedOrThrow = async (id: QuizSession['id']) => {
   });
 };
 
-export const createQuestionWithOptions = async ({
-  topicId,
-  question,
-}: {
-  topicId: Topic['id'];
-  question: GeneratedQuestion;
-}) => {
-  const user = await requireAuth();
-  await prisma.topic.findFirstOrThrow({
-    where: { id: topicId, userId: user.id },
+// Transaction-only: read existing SessionQuestions ordered by position, eager-loading
+// the related Question and its AnswerOptions. Used by the "replay" path when another
+// transaction already populated the session (e.g., user reloaded mid-generation).
+export const getStoredSessionQuestionsWithOptionsInTx = async (
+  tx: Prisma.TransactionClient,
+  quizSessionId: QuizSession['id'],
+) =>
+  tx.sessionQuestion.findMany({
+    where: { quizSessionId },
+    orderBy: { position: 'asc' },
+    include: { question: { include: { answerOptions: true } } },
   });
-  return prisma.question.create({
+
+// Transaction-only: called from inside generateQuizForSession's $transaction so that
+// the question insert participates in the same rollback unit as the SessionQuestion
+// insert and the Order status update. Caller is responsible for ownership checks.
+export const createQuestionWithOptionsInTx = async (
+  tx: Prisma.TransactionClient,
+  params: { topicId: Topic['id']; question: GeneratedQuestion },
+) =>
+  tx.question.create({
     data: {
-      topicId,
-      body: question.body,
-      explanation: question.explanation,
+      topicId: params.topicId,
+      body: params.question.body,
+      explanation: params.question.explanation,
       answerOptions: {
-        create: question.options.map((option) => ({
+        create: params.question.options.map((option) => ({
           body: option.body,
           isCorrect: option.isCorrect,
         })),
@@ -132,32 +142,19 @@ export const createQuestionWithOptions = async ({
     },
     include: { answerOptions: true },
   });
-};
 
-export const createSessionQuestion = async ({
-  quizSessionId,
-  questionId,
-  position,
-}: {
-  quizSessionId: QuizSession['id'];
-  questionId: string;
-  position: number;
-}) => {
-  const user = await requireAuth();
-  await prisma.quizSession.findFirstOrThrow({
-    where: {
-      id: quizSessionId,
-      userId: user.id,
-      topic: {
-        userId: user.id,
-        questions: { some: { id: questionId } },
-      },
+// Transaction-only: pairs with createQuestionWithOptionsInTx above.
+export const createSessionQuestionInTx = async (
+  tx: Prisma.TransactionClient,
+  params: { quizSessionId: QuizSession['id']; questionId: string; position: number },
+) =>
+  tx.sessionQuestion.create({
+    data: {
+      quizSessionId: params.quizSessionId,
+      questionId: params.questionId,
+      position: params.position,
     },
   });
-  return prisma.sessionQuestion.create({
-    data: { quizSessionId, questionId, position },
-  });
-};
 
 export const createSessionQuestions = async ({
   quizSessionId,
