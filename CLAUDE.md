@@ -53,6 +53,8 @@ Before starting any implementation task (including all file modifications such a
   文脈を明確にせずに曖昧な用語（例：「ドメイン」はDNSドメイン・ビジネスドメイン・DDDのドメインなど複数の意味を持つ）を使わないこと。文脈を明示するか、具体的な用語（例：「アプリ仕様」「URL」「集約」）に置き換えること。
 - Do not present unverified information as fact; if something has not been confirmed through direct observation (reading files, running commands, searching), say so explicitly instead of stating assumptions or inferences as facts.
   未確認の情報を事実として提示しないこと。直接確認（ファイル読み込み・コマンド実行・検索）していない内容は、推測・推論として明示すること。
+- Do not leave code that implements a special countermeasure uncommented; describe it concisely as `Problem: <problem> / Solution: <solution>`. Do not write the trigger as the Problem; the Problem is the actual harmful outcome the trigger causes (e.g., not "user reloads the page" but "LLM runs duplicate, producing excess rows").
+  特殊な対策を実装するコードをコメント無しで残さないこと。`Problem: <問題> / Solution: <解決策>` 形式で簡潔に記述すること。Problem に「きっかけ（トリガー）」を書かないこと。Problem は実際の悪影響（例：「ユーザーがリロードする」ではなく「LLM が二重に走って行が過剰になる」）。
 
 # Security Constraints
 
