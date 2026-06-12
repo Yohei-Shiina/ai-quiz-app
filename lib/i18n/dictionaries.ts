@@ -28,6 +28,7 @@ const en = {
   error: {
     title: 'Something went wrong!',
     retry: 'Try again',
+    backHome: 'Back to home',
     errorId: 'Error ID',
   },
   notFound: {
@@ -103,6 +104,7 @@ const ja: Dictionary = {
   error: {
     title: '問題が発生しました',
     retry: 'もう一度試す',
+    backHome: 'ホームに戻る',
     errorId: 'エラーID',
   },
   notFound: {

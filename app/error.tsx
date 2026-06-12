@@ -2,7 +2,10 @@
 
 import { useEffect } from 'react';
 
+import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/constants';
 import { useI18n } from '@/lib/i18n/context';
 
 export default function Error({
@@ -31,12 +34,20 @@ export default function Error({
             </p>
           )}
         </div>
-        <Button
-          onClick={() => reset()}
-          className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
-        >
-          {t.error.retry}
-        </Button>
+        <div className="flex flex-col gap-3">
+          <Button
+            onClick={() => reset()}
+            className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
+          >
+            {t.error.retry}
+          </Button>
+          <Link
+            href={ROUTES.home}
+            className="text-center font-sans text-sm text-muted-foreground hover:text-foreground transition-colors py-2.5"
+          >
+            {t.error.backHome}
+          </Link>
+        </div>
       </div>
     </div>
   );

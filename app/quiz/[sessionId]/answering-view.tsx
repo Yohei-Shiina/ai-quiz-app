@@ -2,6 +2,7 @@
 
 import { startTransition, useCallback, useEffect, useState } from 'react';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { Loader2 } from 'lucide-react';
@@ -15,6 +16,7 @@ import {
 } from '@/app/quiz/[sessionId]/use-question-stream';
 import { Button } from '@/components/ui/button';
 import { submitSessionAnswerAction } from '@/features/quiz/actions';
+import { ROUTES } from '@/lib/constants';
 import { useI18n } from '@/lib/i18n/context';
 import { cn } from '@/lib/utils';
 
@@ -153,12 +155,18 @@ export const AnsweringView = ({
     if (streamError) {
       return (
         <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-4">
-          <div className="w-full max-w-md">
+          <div className="w-full max-w-md flex flex-col gap-3">
             <ErrorRetryCard
               message={streamError}
               onRetry={retryStream}
               retryLabel={t.answering.submitRetry}
             />
+            <Link
+              href={ROUTES.home}
+              className="text-center font-sans text-sm text-muted-foreground hover:text-foreground transition-colors py-2.5"
+            >
+              {t.error.backHome}
+            </Link>
           </div>
         </div>
       );
