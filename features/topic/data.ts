@@ -9,6 +9,14 @@ export const createTopic = async (title: Topic['title']) => {
   });
 };
 
+export const deleteTopics = async (topicIds: Topic['id'][]) => {
+  if (topicIds.length === 0) return { count: 0 };
+  const user = await requireAuth();
+  return prisma.topic.deleteMany({
+    where: { id: { in: topicIds }, userId: user.id },
+  });
+};
+
 export const getTopicsWithLatestSession = async () => {
   const user = await requireAuth();
   const topics = await prisma.topic.findMany({
