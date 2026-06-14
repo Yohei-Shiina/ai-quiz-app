@@ -42,7 +42,7 @@ export const TopicForm = () => {
             <Input
               type="text"
               name="title"
-              className="flex-1 min-w-0 border-none bg-transparent shadow-none focus-visible:ring-0 text-sm p-0 h-auto placeholder:text-muted-foreground"
+              className="flex-1 min-w-0 border-none bg-transparent shadow-none focus-visible:ring-0 p-0 h-auto placeholder:text-muted-foreground"
               placeholder={t.topicForm.placeholder}
               autoComplete="off"
               aria-invalid={!!errorMessage}
