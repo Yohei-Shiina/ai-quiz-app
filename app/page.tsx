@@ -5,7 +5,7 @@ import { enUS, ja } from 'date-fns/locale';
 
 import { QuizSessionStatus } from '@/app/generated/prisma/client';
 import { TopicForm } from '@/app/topic-form';
-import { UserMenu } from '@/components/shared/user-menu';
+import { SiteHeader } from '@/components/shared/site-header';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { resumeOrRestartQuizAction } from '@/features/quiz/actions';
 import { getTopicsWithLatestSession } from '@/features/topic/data';
@@ -20,17 +20,7 @@ export default async function Home() {
   const dateLocale = locale === 'ja' ? ja : enUS;
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-10 bg-background py-5">
-        <div className="max-w-md mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground text-xs font-bold">Q</span>
-            </div>
-            <span className="text-sm font-medium text-foreground">{t.appName}</span>
-          </div>
-          <UserMenu />
-        </div>
-      </header>
+      <SiteHeader />
       <div className="max-w-md mx-auto px-4">
         <main className="flex flex-col gap-4 pb-24">
           {topics.length === 0 ? (
@@ -57,8 +47,7 @@ export default async function Home() {
 
           <div className="flex flex-col gap-3">
             {topics.map((topic, i) => {
-              const isInProgress =
-                topic.latestQuizSession.status === QuizSessionStatus.in_progress;
+              const isInProgress = topic.latestQuizSession.status === QuizSessionStatus.in_progress;
               const card = (
                 <Card
                   className="group shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"

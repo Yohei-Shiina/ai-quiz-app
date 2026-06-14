@@ -1,12 +1,13 @@
 import Link from 'next/link';
 
+import { SiteHeader } from '@/components/shared/site-header';
 import { Button } from '@/components/ui/button';
 import { resumeOrRestartQuizAction } from '@/features/quiz/actions';
-import type { getSessionResultOrThrow } from '@/features/quiz/data';
+import type { getSessionResult } from '@/features/quiz/data';
 import type { Dictionary } from '@/lib/i18n/dictionaries';
 import { getDict } from '@/lib/i18n/server';
 
-type SessionResult = Awaited<ReturnType<typeof getSessionResultOrThrow>>;
+type SessionResult = NonNullable<Awaited<ReturnType<typeof getSessionResult>>>;
 
 type Props = { result: SessionResult };
 
@@ -38,7 +39,8 @@ export const ResultView = async ({ result }: Props) => {
 
   return (
     <div className="min-h-dvh bg-background">
-      <div className="mx-auto max-w-md px-4 pt-16 pb-7">
+      <SiteHeader />
+      <div className="mx-auto max-w-md px-4 pt-8 pb-7">
         <header
           className="flex flex-col gap-1.5 mb-[22px]"
           style={{ animation: 'fade-up 0.4s ease-out both' }}

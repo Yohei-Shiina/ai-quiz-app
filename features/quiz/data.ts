@@ -1,4 +1,5 @@
 import {
+  type Prisma,
   QuizSessionStatus,
   type Topic,
   type QuizSession,
@@ -27,6 +28,8 @@ export const getLatestQuizSessionOrThrow = async (topicId: Topic['id']) => {
   return session;
 };
 
+// Internal flows (quiz generation / answer submission): the session was already
+// verified at page load, so a miss here is unexpected -> throw (handled by R5/R6/R7).
 export const getQuizSessionWithTopicByIdOrThrow = async (id: QuizSession['id']) => {
   const user = await requireAuth();
   const session = await prisma.quizSession.findUniqueOrThrow({
@@ -34,6 +37,14 @@ export const getQuizSessionWithTopicByIdOrThrow = async (id: QuizSession['id']) 
     include: { topic: true },
   });
   return session;
+};
+
+export const getQuizSessionWithTopicById = async (id: QuizSession['id']) => {
+  const user = await requireAuth();
+  return prisma.quizSession.findUnique({
+    where: { id, userId: user.id },
+    include: { topic: true },
+  });
 };
 
 export const countSessionQuestions = async (quizSessionId: QuizSession['id']) => {
@@ -57,7 +68,7 @@ export const getSessionQuestionsWithOptions = async (quizSessionId: QuizSession[
   return sessionQuestions.map(({ question }) => question);
 };
 
-export const createSessionAnswer = async ({
+export const upsertSessionAnswer = async ({
   quizSessionId,
   questionId,
   answerOptionId,
@@ -72,8 +83,10 @@ export const createSessionAnswer = async ({
   await prisma.quizSession.findFirstOrThrow({
     where: { id: quizSessionId, userId: user.id },
   });
-  return prisma.sessionAnswer.create({
-    data: { quizSessionId, questionId, answerOptionId, isCorrect },
+  return prisma.sessionAnswer.upsert({
+    where: { quizSessionId_questionId: { quizSessionId, questionId } },
+    create: { quizSessionId, questionId, answerOptionId, isCorrect },
+    update: {},
   });
 };
 
@@ -95,24 +108,34 @@ export const markSessionCompletedOrThrow = async (id: QuizSession['id']) => {
   });
 };
 
-export const createQuestionWithOptions = async ({
-  topicId,
-  question,
-}: {
-  topicId: Topic['id'];
-  question: GeneratedQuestion;
-}) => {
-  const user = await requireAuth();
-  await prisma.topic.findFirstOrThrow({
-    where: { id: topicId, userId: user.id },
+// Transaction-only: read existing SessionQuestions ordered by position, eager-loading
+// the related Question and its AnswerOptions. Used by the "replay" path when another
+// transaction already populated the session (e.g., user reloaded mid-generation).
+export const getStoredSessionQuestionsWithOptionsInTx = async (
+  tx: Prisma.TransactionClient,
+  quizSessionId: QuizSession['id'],
+) =>
+  tx.sessionQuestion.findMany({
+    where: { quizSessionId },
+    orderBy: { position: 'asc' },
+    include: { question: { include: { answerOptions: true } } },
   });
-  return prisma.question.create({
+
+// Transaction-only: called from inside generateQuizForSession's $transaction so that
+// the question insert participates in the same rollback unit as the SessionQuestion
+// insert and the QuizGenerationEvent status update. Caller is responsible for
+// ownership checks.
+export const createQuestionWithOptionsInTx = async (
+  tx: Prisma.TransactionClient,
+  params: { topicId: Topic['id']; question: GeneratedQuestion },
+) =>
+  tx.question.create({
     data: {
-      topicId,
-      body: question.body,
-      explanation: question.explanation,
+      topicId: params.topicId,
+      body: params.question.body,
+      explanation: params.question.explanation,
       answerOptions: {
-        create: question.options.map((option) => ({
+        create: params.question.options.map((option) => ({
           body: option.body,
           isCorrect: option.isCorrect,
         })),
@@ -120,32 +143,19 @@ export const createQuestionWithOptions = async ({
     },
     include: { answerOptions: true },
   });
-};
 
-export const createSessionQuestion = async ({
-  quizSessionId,
-  questionId,
-  position,
-}: {
-  quizSessionId: QuizSession['id'];
-  questionId: string;
-  position: number;
-}) => {
-  const user = await requireAuth();
-  await prisma.quizSession.findFirstOrThrow({
-    where: {
-      id: quizSessionId,
-      userId: user.id,
-      topic: {
-        userId: user.id,
-        questions: { some: { id: questionId } },
-      },
+// Transaction-only: pairs with createQuestionWithOptionsInTx above.
+export const createSessionQuestionInTx = async (
+  tx: Prisma.TransactionClient,
+  params: { quizSessionId: QuizSession['id']; questionId: string; position: number },
+) =>
+  tx.sessionQuestion.create({
+    data: {
+      quizSessionId: params.quizSessionId,
+      questionId: params.questionId,
+      position: params.position,
     },
   });
-  return prisma.sessionQuestion.create({
-    data: { quizSessionId, questionId, position },
-  });
-};
 
 export const createSessionQuestions = async ({
   quizSessionId,
@@ -183,9 +193,9 @@ export const getTopicQuestions = async (topicId: Topic['id']) => {
   return topic.questions;
 };
 
-export const getSessionResultOrThrow = async (sessionId: QuizSession['id']) => {
+export const getSessionResult = async (sessionId: QuizSession['id']) => {
   const user = await requireAuth();
-  return prisma.quizSession.findUniqueOrThrow({
+  return prisma.quizSession.findUnique({
     where: { id: sessionId, userId: user.id },
     include: {
       topic: true,

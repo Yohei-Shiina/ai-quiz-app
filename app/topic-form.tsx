@@ -10,7 +10,8 @@ import { useI18n } from '@/lib/i18n/context';
 
 export const TopicForm = () => {
   const { t } = useI18n();
-  const [state, action, isPending] = useActionState(startQuizAction, { error: null });
+  const [state, action, isPending] = useActionState(startQuizAction, null);
+  const errorMessage = state && !state.success ? state.error : null;
   const [bottomOffset, setBottomOffset] = useState(0);
 
   useEffect(() => {
@@ -34,17 +35,17 @@ export const TopicForm = () => {
       style={{ bottom: bottomOffset }}
     >
       <div className="max-w-md mx-auto">
-        <FieldError className="mb-2 text-xs px-1">{state.error}</FieldError>
+        <FieldError className="mb-2 text-xs px-1">{errorMessage}</FieldError>
         <form action={action}>
           <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3 shadow-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200">
             <span className="text-primary text-lg select-none">+</span>
             <Input
               type="text"
               name="title"
-              className="flex-1 min-w-0 border-none bg-transparent shadow-none focus-visible:ring-0 text-sm p-0 h-auto placeholder:text-muted-foreground"
+              className="flex-1 min-w-0 border-none bg-transparent shadow-none focus-visible:ring-0 p-0 h-auto placeholder:text-muted-foreground"
               placeholder={t.topicForm.placeholder}
               autoComplete="off"
-              aria-invalid={!!state.error}
+              aria-invalid={!!errorMessage}
             />
             <Button
               type="submit"
