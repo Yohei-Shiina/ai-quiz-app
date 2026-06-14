@@ -1,19 +1,14 @@
 import { Output, streamText } from 'ai';
 
 import {
-  OrderStatus,
   type Prisma,
+  QuizGenerationEventStatus,
   QuizSessionStatus,
   type QuizSession,
   type Topic,
 } from '@/app/generated/prisma/client';
+import { createAiUsageRecordInTx } from '@/features/ai-usage-record/data';
 import { requireAuth } from '@/features/auth/services';
-import {
-  createOrder,
-  lockOrderForQuizSessionInTx,
-  markOrderFailedByQuizSession,
-  updateOrderByQuizSessionInTx,
-} from '@/features/order/data';
 import {
   countSessionAnswers,
   countSessionQuestions,
@@ -35,6 +30,13 @@ import {
   generatedQuizSchema,
   type GeneratedQuestion,
 } from '@/features/quiz/schemas';
+import {
+  createQuizGenerationEvent,
+  getQuizGenerationEventIdBySessionInTx,
+  lockQuizGenerationEventForSessionInTx,
+  markQuizGenerationEventFailedBySession,
+  updateQuizGenerationEventBySessionInTx,
+} from '@/features/quiz-generation-event/data';
 import { createTopic } from '@/features/topic/data';
 import { quizModel, quizModelId } from '@/lib/openai';
 import { prisma } from '@/lib/prisma';
@@ -62,7 +64,7 @@ export const submitAnswer = async (params: {
 export const createTopicAndSession = async (title: Topic['title']) => {
   const topic = await createTopic(title);
   const session = await createQuizSession(topic.id);
-  await createOrder({ topicId: topic.id, quizSessionId: session.id });
+  await createQuizGenerationEvent({ quizSessionId: session.id, aiModel: quizModelId() });
   return session;
 };
 
@@ -116,7 +118,8 @@ const emitStoredQuestions = async (
 };
 
 // → generate path: stream from the LLM, persist each completed question, and push
-//   chunks as we go. Finally flips the session's Order to success in the same tx.
+//   chunks as we go. Finally flips the event to success and logs an AiUsageRecord
+//   in the same tx so questions + event + usage commit together.
 const generateAndPersistQuestions = async (
   tx: Prisma.TransactionClient,
   session: {
@@ -126,6 +129,7 @@ const generateAndPersistQuestions = async (
     questionCount: number;
   },
   startPosition: number,
+  userId: string,
   push: (chunk: GeneratedChunk) => void,
 ) => {
   const result = streamText({
@@ -158,20 +162,27 @@ const generateAndPersistQuestions = async (
     }
   }
 
-  // → flip Order to success inside the same tx so SessionQuestion + Order commit together
   const usage = await result.usage;
-  await updateOrderByQuizSessionInTx(tx, session.id, {
-    status: OrderStatus.success,
+  await updateQuizGenerationEventBySessionInTx(tx, session.id, {
+    status: QuizGenerationEventStatus.success,
+  });
+  const eventId = await getQuizGenerationEventIdBySessionInTx(tx, session.id);
+  await createAiUsageRecordInTx(tx, {
+    userId,
+    quizGenerationEventId: eventId,
     aiModel: quizModelId(),
-    inputTokens: usage.inputTokens ?? null,
-    outputTokens: usage.outputTokens ?? null,
+    inputTokens: usage.inputTokens ?? 0,
+    outputTokens: usage.outputTokens ?? 0,
+    totalTokens: usage.totalTokens ?? 0,
+    inputTokenDetails: usage.inputTokenDetails as Prisma.InputJsonValue,
+    outputTokenDetails: usage.outputTokenDetails as Prisma.InputJsonValue,
   });
 };
 
 // Problem 1: parallel /generate calls (e.g. reload mid-stream) trigger redundant
 //            LLM runs (excess Question rows, wasted tokens).
-// Solution: row lock on Order. First caller generates; later callers send back the
-//            stored questions instead of generating again.
+// Solution: row lock on QuizGenerationEvent. First caller generates; later callers send
+//            back the stored questions instead of generating again.
 //
 // Problem 2: $transaction's callback can't yield from a generator.
 // Solution: tx pushes to a queue and notifies; outer generator awaits and yields.
@@ -190,7 +201,7 @@ export const generateQuizForSession = async function* (sessionId: QuizSession['i
   const generationTask = prisma
     .$transaction(
       async (tx) => {
-        await lockOrderForQuizSessionInTx(tx, sessionId, user.id);
+        await lockQuizGenerationEventForSessionInTx(tx, sessionId, user.id);
 
         const session = await tx.quizSession.findUniqueOrThrow({
           where: { id: sessionId },
@@ -206,7 +217,7 @@ export const generateQuizForSession = async function* (sessionId: QuizSession['i
           await emitStoredQuestions(tx, sessionId, push);
           return;
         }
-        await generateAndPersistQuestions(tx, session, existing, push);
+        await generateAndPersistQuestions(tx, session, existing, user.id, push);
       },
       // timeout: matches route's maxDuration so the tx never outlives the request.
       // maxWait: how long Prisma waits for a connection pool slot before giving up.
@@ -215,12 +226,9 @@ export const generateQuizForSession = async function* (sessionId: QuizSession['i
     .catch(async (error) => {
       // → stash for re-throw after the queue drains; route handler will log + emit SSE error
       caughtError = error;
-      // → tx rolled back, so Order is unchanged; record failure on a fresh connection.
-      //   Ignore secondary failures so the original error is what surfaces.
-      await markOrderFailedByQuizSession(sessionId, user.id, {
-        aiModel: quizModelId(),
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-      }).catch(() => undefined);
+      // → tx rolled back, so the event status is unchanged; record failure on a fresh
+      //   connection. Ignore secondary failures so the original error is what surfaces.
+      await markQuizGenerationEventFailedBySession(sessionId, user.id).catch(() => undefined);
     })
     .finally(() => {
       finished = true;

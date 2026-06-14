@@ -123,7 +123,8 @@ export const getStoredSessionQuestionsWithOptionsInTx = async (
 
 // Transaction-only: called from inside generateQuizForSession's $transaction so that
 // the question insert participates in the same rollback unit as the SessionQuestion
-// insert and the Order status update. Caller is responsible for ownership checks.
+// insert and the QuizGenerationEvent status update. Caller is responsible for
+// ownership checks.
 export const createQuestionWithOptionsInTx = async (
   tx: Prisma.TransactionClient,
   params: { topicId: Topic['id']; question: GeneratedQuestion },

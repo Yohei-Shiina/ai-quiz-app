@@ -13,13 +13,14 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  name         String?
-  createdAt    DateTime      @default(now())
-  topics       Topic[]
-  quizSessions QuizSession[]
-  orders       Order[]
+  id                   String                @id @default(cuid())
+  email                String                @unique
+  name                 String?
+  createdAt            DateTime              @default(now())
+  topics               Topic[]
+  quizSessions         QuizSession[]
+  quizGenerationEvents QuizGenerationEvent[]
+  aiUsageRecords       AiUsageRecord[]
 
   @@map("users")
 }
@@ -32,7 +33,6 @@ model Topic {
   createdAt    DateTime      @default(now())
   questions    Question[]
   quizSessions QuizSession[]
-  orders       Order[]
 
   @@map("topics")
 }
@@ -72,9 +72,9 @@ model QuizSession {
   status           QuizSessionStatus @default(in_progress)
   questionCount    Int               @default(5)
   createdAt        DateTime          @default(now())
-  sessionQuestions SessionQuestion[]
-  sessionAnswer    SessionAnswer[]
-  orders           Order[]
+  sessionQuestions     SessionQuestion[]
+  sessionAnswer        SessionAnswer[]
+  quizGenerationEvents QuizGenerationEvent[]
 
   @@map("quiz_sessions")
 }
@@ -106,23 +106,37 @@ model SessionAnswer {
   @@map("session_answers")
 }
 
-model Order {
-  id            String      @id @default(cuid())
-  user          User        @relation(fields: [userId], references: [id])
-  userId        String
-  topic         Topic       @relation(fields: [topicId], references: [id])
-  topicId       String
-  quizSession   QuizSession @relation(fields: [quizSessionId], references: [id])
-  quizSessionId String
-  status        OrderStatus @default(pending)
-  aiModel       String?
-  inputTokens   Int?
-  outputTokens  Int?
-  errorMessage  String?
-  createdAt     DateTime    @default(now())
+model QuizGenerationEvent {
+  id             String                    @id @default(cuid())
+  user           User?                     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId         String?
+  quizSession    QuizSession?              @relation(fields: [quizSessionId], references: [id], onDelete: SetNull)
+  quizSessionId  String?
+  status         QuizGenerationEventStatus @default(pending)
+  aiModel        String
+  createdAt      DateTime                  @default(now())
+  aiUsageRecords AiUsageRecord[]
 
   @@index([userId, createdAt])
-  @@map("orders")
+  @@map("quiz_generation_events")
+}
+
+model AiUsageRecord {
+  id                    String               @id @default(cuid())
+  user                  User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId                String?
+  quizGenerationEvent   QuizGenerationEvent? @relation(fields: [quizGenerationEventId], references: [id], onDelete: SetNull)
+  quizGenerationEventId String?
+  aiModel               String
+  inputTokens           Int
+  outputTokens          Int
+  totalTokens           Int
+  inputTokenDetails     Json
+  outputTokenDetails    Json
+  createdAt             DateTime             @default(now())
+
+  @@index([userId, createdAt])
+  @@map("ai_usage_records")
 }
 
 enum QuizSessionStatus {
@@ -130,7 +144,7 @@ enum QuizSessionStatus {
   completed
 }
 
-enum OrderStatus {
+enum QuizGenerationEventStatus {
   pending
   success
   failed
