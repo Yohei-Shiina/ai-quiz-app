@@ -46,7 +46,7 @@ export const UserMenu = () => {
               switchLanguage();
             }}
             disabled={isPending}
-            className="flex w-full items-center justify-between rounded-sm px-3 py-2 text-sm outline-none cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
+            className="flex w-full items-center justify-between rounded-sm px-3 py-2 text-sm outline-none cursor-pointer focus:bg-accent focus:text-accent-foreground data-disabled:opacity-50 data-disabled:pointer-events-none"
           >
             <span>{t.settings.language}</span>
             <span className="text-muted-foreground">{LOCALE_NATIVE_NAMES[target]}</span>
@@ -62,7 +62,7 @@ export const UserMenu = () => {
               });
             }}
             disabled={isPending}
-            className="flex w-full items-center rounded-sm px-3 py-2 text-sm outline-none cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
+            className="flex w-full items-center rounded-sm px-3 py-2 text-sm outline-none cursor-pointer focus:bg-accent focus:text-accent-foreground data-disabled:opacity-50 data-disabled:pointer-events-none"
           >
             {t.settings.signOut}
           </DropdownMenuPrimitive.Item>
