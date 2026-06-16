@@ -55,6 +55,10 @@ Before starting any implementation task (including all file modifications such a
   未確認の情報を事実として提示しないこと。直接確認（ファイル読み込み・コマンド実行・検索）していない内容は、推測・推論として明示すること。
 - Do not leave code that implements a special countermeasure uncommented; describe it concisely as `Problem: <problem> / Solution: <solution>`. Do not write the trigger as the Problem; the Problem is the actual harmful outcome the trigger causes (e.g., not "user reloads the page" but "LLM runs duplicate, producing excess rows").
   特殊な対策を実装するコードをコメント無しで残さないこと。`Problem: <問題> / Solution: <解決策>` 形式で簡潔に記述すること。Problem に「きっかけ（トリガー）」を書かないこと。Problem は実際の悪影響（例：「ユーザーがリロードする」ではなく「LLM が二重に走って行が過剰になる」）。
+- When discussing a concern, first check whether the relevant code/state is scheduled for removal. If the concern only matters under "continued existence" despite the planned removal, surface that contradiction and propose stopping the deep-dive. Concerns arising from the removal itself (migration risk, data loss, compatibility) remain valid. The assistant must flag this distinction proactively.
+  懸念を議論する時、対象が撤去・削除予定かどうかを確認すること。撤去・削除予定にもかかわらず"残る前提"でのみ意味を持つ懸念なら、その矛盾を明示し深掘りの停止を提案すること。撤去・削除自体から発生する懸念（移行リスク、データ損失、互換性）は引き続き議論する。アシスタントはこの区別を能動的に明示すること。
+- When proposing or agreeing on a refactor, explicitly list what features/behaviors will be removed at the feature level (not just file/function names). This serves as the reference for distinguishing valid concerns (removal side effects) from invalid concerns (assuming continued existence).
+  リファクタを提案・合意する時、何が（ファイル・関数単位ではなく機能単位で）撤去されるかを最初に明示すること。これが「議論する価値がある懸念」と「撤去対象由来で議論不要な懸念」を区別する基準になる。
 
 # Security Constraints
 
