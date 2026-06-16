@@ -29,15 +29,11 @@ Wait for the user to pick both before starting implementation.
 
 # Environment Setup
 
-At the start of each session, prepend nvm's Node v24.12.0 to PATH before running any pnpm/node/prisma command:
+At the start of each session, run:
 `export PATH=~/.nvm/versions/node/v24.12.0/bin:$PATH`
 
-The Bash tool runs in a non-interactive shell that loads `~/.zshenv` (which sources nvm.sh) but does not run `nvm use`. Without the explicit PATH prepend, `node` / `pnpm` / `prisma` fail with "command not found".
-
-セッション開始時、pnpm/node/prisma 等を実行する前に nvm の Node v24.12.0 を PATH に追加すること：
+セッション開始時に以下を実行：
 `export PATH=~/.nvm/versions/node/v24.12.0/bin:$PATH`
-
-Bash ツールは非対話シェルで動作し、`~/.zshenv` 経由で nvm.sh を読み込むが `nvm use` は実行されない。明示的に PATH を通さないと `node` / `pnpm` / `prisma` が "command not found" で失敗する。
 
 # Behavioral Constraints
 
