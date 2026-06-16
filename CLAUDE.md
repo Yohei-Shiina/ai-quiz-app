@@ -13,15 +13,31 @@ All rules in this file apply regardless of the conversation language.
 
 # Branch Workflow
 
-Before starting any implementation task (including all file modifications such as code, config, and skill files), ask the user in 2 exchanges:
+Before starting any implementation task (including all file modifications such as code, config, and skill files), ask the user once with both the base branch and the working branch name in a single message:
 
-1. Show numbered list of branches (`git branch -a`) → ask which to use as base
-2. Show 4 numbered options for the working branch name (1: current branch, 2–4: name suggestions labeled **(new)** if they don't exist yet) → ask which to use → then start implementing
+- Base branch: numbered list of existing branches (`git branch -a`).
+- Working branch name: 4 numbered options (1: current branch, 2–4: name suggestions labeled **(new)** if they don't exist yet).
 
-実装タスクを開始する前に（コード・設定ファイル・スキルファイルなどあらゆるファイル変更を含む）、以下の2段階でユーザーに確認すること：
+Wait for the user to pick both before starting implementation.
 
-1. ブランチの番号付きリスト（`git branch -a`）を表示 → ベースとして使うブランチを確認
-2. 作業ブランチ名の候補を4つ番号付きで提示（1: 現在のブランチ、2〜4: 候補名。まだ存在しない場合は **(new)** と明記）→ 選択を確認 → 実装開始
+実装タスクを開始する前に（コード・設定ファイル・スキルファイルなどあらゆるファイル変更を含む）、ベースブランチと作業ブランチ名の両方を1つのメッセージにまとめてユーザーに確認すること：
+
+- ベースブランチ：既存ブランチの番号付きリスト（`git branch -a`）
+- 作業ブランチ名：4つの番号付き候補（1: 現在のブランチ、2〜4: 候補名。まだ存在しない場合は **(new)** と明記）
+
+両方の選択を待ってから実装を開始する。
+
+# Environment Setup
+
+At the start of each session, prepend nvm's Node v24.12.0 to PATH before running any pnpm/node/prisma command:
+`export PATH=~/.nvm/versions/node/v24.12.0/bin:$PATH`
+
+The Bash tool runs in a non-interactive shell that loads `~/.zshenv` (which sources nvm.sh) but does not run `nvm use`. Without the explicit PATH prepend, `node` / `pnpm` / `prisma` fail with "command not found".
+
+セッション開始時、pnpm/node/prisma 等を実行する前に nvm の Node v24.12.0 を PATH に追加すること：
+`export PATH=~/.nvm/versions/node/v24.12.0/bin:$PATH`
+
+Bash ツールは非対話シェルで動作し、`~/.zshenv` 経由で nvm.sh を読み込むが `nvm use` は実行されない。明示的に PATH を通さないと `node` / `pnpm` / `prisma` が "command not found" で失敗する。
 
 # Behavioral Constraints
 

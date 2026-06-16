@@ -9,5 +9,40 @@
         "repo": "anthropics/claude-plugins-official"
       }
     }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(pnpm tsc)",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm build)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm prisma generate)",
+      "Bash(rtk)",
+      "Bash(rtk:*)",
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git log)",
+      "Bash(git log:*)",
+      "Bash(git diff)",
+      "Bash(git diff:*)",
+      "Bash(git branch)",
+      "Bash(git branch -a)",
+      "Bash(git branch -v)",
+      "Bash(git branch -l:*)",
+      "Bash(git show)",
+      "Bash(git show:*)",
+      "Bash(gh issue view)",
+      "Bash(gh issue view:*)",
+      "Bash(gh pr view)",
+      "Bash(gh pr view:*)",
+      "Bash(gh issue list)",
+      "Bash(gh issue list:*)",
+      "Bash(gh pr list)",
+      "Bash(gh pr list:*)",
+      "Bash(find)",
+      "Bash(find:*)"
+    ]
   }
 }
