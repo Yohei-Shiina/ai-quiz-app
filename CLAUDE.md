@@ -32,9 +32,6 @@ Wait for the user to pick both before starting implementation.
 At the start of each session, run:
 `export PATH=~/.nvm/versions/node/v24.12.0/bin:$PATH`
 
-セッション開始時に以下を実行：
-`export PATH=~/.nvm/versions/node/v24.12.0/bin:$PATH`
-
 # Behavioral Constraints
 
 - Do not treat undecided matters as decided; confirm with the user before recording or acting on any unconfirmed specifics.
