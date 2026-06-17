@@ -4,9 +4,11 @@ import { redirect } from 'next/navigation';
 
 import { createTopicAndSession, resumeOrRestartQuiz, submitAnswer } from '@/features/quiz/services';
 import { validateTitleTopic, validateResumeOrRestartQuiz } from '@/features/quiz/validations';
+import { createQuizGenerationEvent } from '@/features/quiz-generation-event/data';
 import { isQuizGenerationLimitReached } from '@/features/quiz-generation-event/services';
 import { QUIZ_GENERATION_RATE_LIMIT } from '@/lib/constants';
 import { getDict } from '@/lib/i18n/server';
+import { quizModelId } from '@/lib/openai';
 import { ActionResult } from '@/lib/types';
 
 export const startQuizAction = async (
@@ -44,6 +46,23 @@ export const submitSessionAnswerAction = async ({
     return { success: true };
   } catch (error) {
     console.error('Submit answer failed', { quizSessionId, questionId, error });
+    const t = await getDict();
+    return { success: false, error: t.answering.submitError };
+  }
+};
+
+// Called from the stream-retry button when a prior generation failed (event
+// status='failed' blocks the CAS lock from being re-acquired). Creates a fresh
+// QuizGenerationEvent in `pending` so the next SSE call can CAS-acquire it
+// and resume from the committed-so-far position.
+export const retryQuizGenerationAction = async (
+  quizSessionId: string,
+): Promise<ActionResult> => {
+  try {
+    await createQuizGenerationEvent({ quizSessionId, aiModel: quizModelId() });
+    return { success: true };
+  } catch (error) {
+    console.error('Retry quiz generation failed', { quizSessionId, error });
     const t = await getDict();
     return { success: false, error: t.answering.submitError };
   }

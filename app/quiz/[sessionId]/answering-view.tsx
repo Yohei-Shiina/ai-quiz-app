@@ -15,7 +15,7 @@ import {
   type QuestionWithOptions,
 } from '@/app/quiz/[sessionId]/use-question-stream';
 import { Button } from '@/components/ui/button';
-import { submitSessionAnswerAction } from '@/features/quiz/actions';
+import { retryQuizGenerationAction, submitSessionAnswerAction } from '@/features/quiz/actions';
 import { ROUTES } from '@/lib/constants';
 import { useI18n } from '@/lib/i18n/context';
 import { cn } from '@/lib/utils';
@@ -57,8 +57,17 @@ export const AnsweringView = ({
     initialCount: initialQuestions.length,
     totalCount: questionCount,
     onQuestionReceived: (q) =>
-      setQuestions((prev) => (prev.length >= questionCount ? prev : [...prev, q])),
+      setQuestions((prev) => {
+        if (prev.length >= questionCount) return prev;
+        const ids = new Set(prev.map((p) => p.id));
+        return ids.has(q.id) ? prev : [...prev, q];
+      }),
   });
+
+  const handleStreamRetry = async () => {
+    await retryQuizGenerationAction(sessionId);
+    retryStream();
+  };
 
   // === derived ===
   const currentQuestion = questions[currentQuestionIdx];
@@ -158,7 +167,7 @@ export const AnsweringView = ({
           <div className="w-full max-w-md flex flex-col gap-3">
             <ErrorRetryCard
               message={streamError}
-              onRetry={retryStream}
+              onRetry={handleStreamRetry}
               retryLabel={t.answering.submitRetry}
             />
             <Link
@@ -325,7 +334,7 @@ export const AnsweringView = ({
             questions.length < questionCount && (
               <ErrorRetryCard
                 message={streamError}
-                onRetry={retryStream}
+                onRetry={handleStreamRetry}
                 retryLabel={t.answering.submitRetry}
               />
             )}
