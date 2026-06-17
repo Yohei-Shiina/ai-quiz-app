@@ -1,5 +1,4 @@
 import {
-  type Prisma,
   type QuizGenerationEvent,
   QuizGenerationEventStatus,
   type QuizSession,
@@ -36,40 +35,51 @@ export const countActiveQuizGenerationEventsInWindow = async () => {
   });
 };
 
-// Transaction-only: takes a row lock on the session's QuizGenerationEvent so concurrent
-// /generate calls for the same session serialize. Throws if no event row is found
-// (wrong user or missing row), which doubles as an ownership check.
-export const lockQuizGenerationEventForSessionInTx = async (
-  tx: Prisma.TransactionClient,
+// CAS lock acquisition: atomically transitions pending -> generating. The single
+// statement holds an internal row lock only for the duration of the UPDATE, so
+// it works with Prisma's connection pool and Supabase's transaction pooler
+// (unlike pg_advisory_lock, which is session-scoped and leaks across pooled
+// connections). Returns true when this caller became the generator.
+export const tryAcquireGenerationLockBySession = async (
   quizSessionId: QuizSession['id'],
   userId: User['id'],
-) => {
-  const locked = await tx.$queryRaw<{ id: string }[]>`
-    SELECT id FROM quiz_generation_events
-    WHERE "quizSessionId" = ${quizSessionId} AND "userId" = ${userId}
-    FOR UPDATE
-  `;
-  if (locked.length === 0) {
-    throw new Error(`No quiz generation event row to lock for quiz session ${quizSessionId}`);
-  }
+): Promise<boolean> => {
+  const result = await prisma.quizGenerationEvent.updateMany({
+    where: {
+      quizSessionId,
+      userId,
+      status: QuizGenerationEventStatus.pending,
+    },
+    data: { status: QuizGenerationEventStatus.generating },
+  });
+  return result.count === 1;
 };
 
-// Transaction-only: called from inside generateQuizForSession's $transaction so the
-// event success/failure status flips atomically with the SessionQuestion inserts.
-export const updateQuizGenerationEventBySessionInTx = async (
-  tx: Prisma.TransactionClient,
+// Inverse of tryAcquire: returns generating -> pending so the next caller can
+// take over. Used when the active generator aborts (e.g., client disconnect).
+export const releaseGenerationLockAsPending = async (
   quizSessionId: QuizSession['id'],
-  data: Pick<QuizGenerationEvent, 'status'>,
+  userId: User['id'],
 ) =>
-  tx.quizGenerationEvent.updateMany({
-    where: { quizSessionId },
-    data,
+  prisma.quizGenerationEvent.updateMany({
+    where: {
+      quizSessionId,
+      userId,
+      status: QuizGenerationEventStatus.generating,
+    },
+    data: { status: QuizGenerationEventStatus.pending },
   });
 
-// Post-rollback recovery: the generation transaction rolled back, leaving the event
-// in its previous state. Record the failure on a fresh connection. Caller treats this
-// as best-effort.
-export const markQuizGenerationEventFailedBySession = async (
+export const markGenerationSuccessBySession = async (
+  quizSessionId: QuizSession['id'],
+  userId: User['id'],
+) =>
+  prisma.quizGenerationEvent.updateMany({
+    where: { quizSessionId, userId },
+    data: { status: QuizGenerationEventStatus.success },
+  });
+
+export const markGenerationFailedBySession = async (
   quizSessionId: QuizSession['id'],
   userId: User['id'],
 ) =>
@@ -78,12 +88,12 @@ export const markQuizGenerationEventFailedBySession = async (
     data: { status: QuizGenerationEventStatus.failed },
   });
 
-export const getQuizGenerationEventIdBySessionInTx = async (
-  tx: Prisma.TransactionClient,
+export const getQuizGenerationEventIdBySession = async (
   quizSessionId: QuizSession['id'],
+  userId: User['id'],
 ) => {
-  const event = await tx.quizGenerationEvent.findFirstOrThrow({
-    where: { quizSessionId },
+  const event = await prisma.quizGenerationEvent.findFirstOrThrow({
+    where: { quizSessionId, userId },
     select: { id: true },
   });
   return event.id;

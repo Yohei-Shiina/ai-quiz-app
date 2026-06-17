@@ -146,6 +146,7 @@ enum QuizSessionStatus {
 
 enum QuizGenerationEventStatus {
   pending
+  generating
   success
   failed
 }

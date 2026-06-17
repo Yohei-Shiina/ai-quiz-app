@@ -6,7 +6,7 @@ import { generateQuizForSession } from '@/features/quiz/services';
 export const maxDuration = 60;
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> },
 ) {
   await requireAuth();
@@ -16,7 +16,10 @@ export async function POST(
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        for await (const chunk of generateQuizForSession(sessionId)) {
+        // request.signal aborts on client disconnect (reload, tab close). Passing
+        // it to the generator lets the LLM call cancel and the lock revert to
+        // pending so the next caller can resume from the committed-so-far position.
+        for await (const chunk of generateQuizForSession(sessionId, request.signal)) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
         }
         controller.enqueue(encoder.encode(`event: done\ndata: {}\n\n`));
