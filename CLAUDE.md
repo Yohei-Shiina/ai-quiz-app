@@ -55,6 +55,10 @@ Before starting any implementation task (including all file modifications such a
   未確認の情報を事実として提示しないこと。直接確認（ファイル読み込み・コマンド実行・検索）していない内容は、推測・推論として明示すること。
 - Do not leave code that implements a special countermeasure uncommented; describe it concisely as `Problem: <problem> / Solution: <solution>`. Do not write the trigger as the Problem; the Problem is the actual harmful outcome the trigger causes (e.g., not "user reloads the page" but "LLM runs duplicate, producing excess rows").
   特殊な対策を実装するコードをコメント無しで残さないこと。`Problem: <問題> / Solution: <解決策>` 形式で簡潔に記述すること。Problem に「きっかけ（トリガー）」を書かないこと。Problem は実際の悪影響（例：「ユーザーがリロードする」ではなく「LLM が二重に走って行が過剰になる」）。
+- Before raising a concern about possible code behaviour, verify it against the actual code; do not surface speculative concerns without checking the current implementation.
+  懸念を提起する前に、その挙動が実コードで本当に起こりうるかを確認すること。実装を確認せずに推測ベースの懸念を出さない。
+- Before editing or replacing existing file content, re-verify the file's current state with Read; do not rely on memory from earlier in the session or from a different branch.
+  既存ファイルの編集・置換前に Read で現在の状態を再確認すること。同じセッションの過去ターンや別ブランチの記憶を頼りにしないこと。
 
 # Security Constraints
 
