@@ -21,6 +21,17 @@ export const createQuizGenerationEvent = async ({
   });
 };
 
+export const hasPendingQuizGenerationEventBySession = async (
+  quizSessionId: QuizSession['id'],
+): Promise<boolean> => {
+  const user = await requireAuth();
+  const event = await prisma.quizGenerationEvent.findFirst({
+    where: { quizSessionId, userId: user.id, status: QuizGenerationEventStatus.pending },
+    select: { id: true },
+  });
+  return event !== null;
+};
+
 // Rolling window: count the current user's non-failed events created within the
 // trailing QUIZ_GENERATION_RATE_LIMIT_WINDOW_MS.
 export const countActiveQuizGenerationEventsInWindow = async () => {
@@ -39,62 +50,32 @@ export const countActiveQuizGenerationEventsInWindow = async () => {
 // statement holds an internal row lock only for the duration of the UPDATE, so
 // it works with Prisma's connection pool and Supabase's transaction pooler
 // (unlike pg_advisory_lock, which is session-scoped and leaks across pooled
-// connections). Returns true when this caller became the generator.
+// connections). Returns the acquired event id, or null if no pending row matched.
 export const tryAcquireGenerationLockBySession = async (
   quizSessionId: QuizSession['id'],
   userId: User['id'],
-): Promise<boolean> => {
-  const result = await prisma.quizGenerationEvent.updateMany({
+): Promise<string | null> => {
+  const result = await prisma.quizGenerationEvent.updateManyAndReturn({
     where: {
       quizSessionId,
       userId,
       status: QuizGenerationEventStatus.pending,
     },
     data: { status: QuizGenerationEventStatus.generating },
+    select: { id: true },
   });
-  return result.count === 1;
+  if (result.length !== 1) return null;
+  return result[0].id;
 };
 
-// Inverse of tryAcquire: returns generating -> pending so the next caller can
-// take over. Used when the active generator aborts (e.g., client disconnect).
-export const releaseGenerationLockAsPending = async (
-  quizSessionId: QuizSession['id'],
-  userId: User['id'],
-) =>
-  prisma.quizGenerationEvent.updateMany({
-    where: {
-      quizSessionId,
-      userId,
-      status: QuizGenerationEventStatus.generating,
-    },
-    data: { status: QuizGenerationEventStatus.pending },
-  });
-
-export const markGenerationSuccessBySession = async (
-  quizSessionId: QuizSession['id'],
-  userId: User['id'],
-) =>
-  prisma.quizGenerationEvent.updateMany({
-    where: { quizSessionId, userId },
+export const markGenerationSuccess = async (eventId: QuizGenerationEvent['id']) =>
+  prisma.quizGenerationEvent.update({
+    where: { id: eventId },
     data: { status: QuizGenerationEventStatus.success },
   });
 
-export const markGenerationFailedBySession = async (
-  quizSessionId: QuizSession['id'],
-  userId: User['id'],
-) =>
-  prisma.quizGenerationEvent.updateMany({
-    where: { quizSessionId, userId },
+export const markGenerationFailed = async (eventId: QuizGenerationEvent['id']) =>
+  prisma.quizGenerationEvent.update({
+    where: { id: eventId },
     data: { status: QuizGenerationEventStatus.failed },
   });
-
-export const getQuizGenerationEventIdBySession = async (
-  quizSessionId: QuizSession['id'],
-  userId: User['id'],
-) => {
-  const event = await prisma.quizGenerationEvent.findFirstOrThrow({
-    where: { quizSessionId, userId },
-    select: { id: true },
-  });
-  return event.id;
-};

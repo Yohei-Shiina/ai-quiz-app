@@ -30,10 +30,8 @@ import {
 } from '@/features/quiz/schemas';
 import {
   createQuizGenerationEvent,
-  getQuizGenerationEventIdBySession,
-  markGenerationFailedBySession,
-  markGenerationSuccessBySession,
-  releaseGenerationLockAsPending,
+  markGenerationFailed,
+  markGenerationSuccess,
   tryAcquireGenerationLockBySession,
 } from '@/features/quiz-generation-event/data';
 import { createTopic } from '@/features/topic/data';
@@ -96,15 +94,12 @@ const isCompleteQuestion = (value: unknown): value is GeneratedQuestion => {
 // Solution: CAS lock on the event row (single-statement, pool-safe) + commit
 //           each question in its own small tx so the Question is visible to
 //           other connections the moment it's pushed to the SSE client.
-export const generateQuizForSession = async function* (
-  sessionId: QuizSession['id'],
-  signal?: AbortSignal,
-) {
+export const generateQuizForSession = async function* (sessionId: QuizSession['id']) {
   const user = await requireAuth();
 
-  const acquired = await tryAcquireGenerationLockBySession(sessionId, user.id);
+  const eventId = await tryAcquireGenerationLockBySession(sessionId, user.id);
 
-  if (!acquired) {
+  if (eventId === null) {
     // Another caller holds the lock; emit what's already committed so the
     // client at least sees prior progress. Live forwarding of new commits is
     // not implemented yet, so clients hitting this path should reload to retry.
@@ -115,7 +110,6 @@ export const generateQuizForSession = async function* (
     return;
   }
 
-  let state: 'unknown' | 'success' | 'failed' = 'unknown';
   try {
     const session = await prisma.quizSession.findUniqueOrThrow({
       where: { id: sessionId },
@@ -138,12 +132,10 @@ export const generateQuizForSession = async function* (
         model: quizModel(),
         output: Output.object({ schema: generatedQuizSchema }),
         prompt: buildQuizGenerationPrompt(session.topic.title),
-        abortSignal: signal,
       });
 
       let emittedCount = existing;
       for await (const partial of result.partialOutputStream) {
-        if (signal?.aborted) return;
         const questions = partial?.questions ?? [];
         while (emittedCount < questions.length && emittedCount < session.questionCount) {
           const candidate = questions[emittedCount];
@@ -167,10 +159,7 @@ export const generateQuizForSession = async function* (
         }
       }
 
-      if (signal?.aborted) return;
-
       const usage = await result.usage;
-      const eventId = await getQuizGenerationEventIdBySession(sessionId, user.id);
       await createAiUsageRecord({
         userId: user.id,
         quizGenerationEventId: eventId,
@@ -183,18 +172,9 @@ export const generateQuizForSession = async function* (
       });
     }
 
-    await markGenerationSuccessBySession(sessionId, user.id);
-    state = 'success';
+    await markGenerationSuccess(eventId);
   } catch (error) {
-    state = 'failed';
-    await markGenerationFailedBySession(sessionId, user.id).catch(() => undefined);
+    await markGenerationFailed(eventId).catch(() => undefined);
     throw error;
-  } finally {
-    if (state === 'unknown') {
-      // Aborted: yield returned abruptly (consumer break) or `return` after
-      // signal check. Hand the lock back so the next caller can resume from
-      // the committed-so-far position via the existing `existing` count check.
-      await releaseGenerationLockAsPending(sessionId, user.id).catch(() => undefined);
-    }
   }
 };
