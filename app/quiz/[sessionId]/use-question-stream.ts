@@ -41,6 +41,7 @@ export const useQuestionStream = ({
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
+        let emittedDuringStream = 0;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -66,9 +67,20 @@ export const useQuestionStream = ({
               setStreamError(msg);
               return;
             }
-            if (parsed.event === 'done') return;
+            if (parsed.event === 'done') {
+              // Problem: when another generation is in flight, /generate returns only what's
+              //          saved so far and ends, so the client never receives the rest.
+              // Solution: prompt reload when stream ends with fewer questions than totalCount.
+              if (initialCount + emittedDuringStream < totalCount) {
+                setStreamError(
+                  'Questions are still being generated in the background. Please reload in a moment.',
+                );
+              }
+              return;
+            }
             if (parsed.data?.question) {
               emitQuestion(parsed.data.question as QuestionWithOptions);
+              emittedDuringStream++;
             }
           }
         }
