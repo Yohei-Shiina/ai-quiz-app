@@ -61,6 +61,10 @@ Before starting any implementation task (including all file modifications such a
   懸念を提起する前に、その挙動が実コードで本当に起こりうるかを確認すること。実装を確認せずに推測ベースの懸念を出さない。
 - Before editing or replacing existing file content, re-verify the file's current state with Read; do not rely on memory from earlier in the session or from a different branch.
   既存ファイルの編集・置換前に Read で現在の状態を再確認すること。同じセッションの過去ターンや別ブランチの記憶を頼りにしないこと。
+- When discussing a concern, first check whether the relevant code/state is scheduled for removal. If the concern only matters under "continued existence" despite the planned removal, surface that contradiction and propose stopping the deep-dive. Concerns arising from the removal itself (migration risk, data loss, compatibility) remain valid. The assistant must flag this distinction proactively.
+  懸念を議論する時、対象が撤去・削除予定かどうかを確認すること。撤去・削除予定にもかかわらず"残る前提"でのみ意味を持つ懸念なら、その矛盾を明示し深掘りの停止を提案すること。撤去・削除自体から発生する懸念（移行リスク、データ損失、互換性）は引き続き議論する。アシスタントはこの区別を能動的に明示すること。
+- When proposing or agreeing on a refactor, explicitly list what features/behaviors will be removed at the feature level (not just file/function names). This serves as the reference for distinguishing valid concerns (removal side effects) from invalid concerns (assuming continued existence).
+  リファクタを提案・合意する時、何が（ファイル・関数単位ではなく機能単位で）撤去されるかを最初に明示すること。これが「議論する価値がある懸念」と「撤去対象由来で議論不要な懸念」を区別する基準になる。
 
 # Security Constraints
 
