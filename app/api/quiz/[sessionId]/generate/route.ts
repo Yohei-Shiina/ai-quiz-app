@@ -30,16 +30,12 @@ export async function POST(
         }
         try {
           controller.enqueue(encoder.encode(`event: done\ndata: {}\n\n`));
-        } catch {}
-        try {
           controller.close();
         } catch {}
       } catch (error) {
         console.error('Quiz generation failed', { sessionId, error });
         try {
           controller.enqueue(encoder.encode(`event: error\ndata: {}\n\n`));
-        } catch {}
-        try {
           controller.close();
         } catch {}
       }
