@@ -1,6 +1,6 @@
 'use client';
 
-import { startTransition, useCallback, useEffect, useState } from 'react';
+import { startTransition, useCallback, useEffect, useState, useTransition } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -48,6 +48,7 @@ export const AnsweringView = ({
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(initialIdx);
   const [answerPhase, setAnswerPhase] = useState<AnswerPhase>({ kind: 'idle' });
   const [autoAdvanceReady, setAutoAdvanceReady] = useState(false);
+  const [isRetryingStream, startRetryTransition] = useTransition();
 
   // === external hooks ===
   const { t } = useI18n();
@@ -64,9 +65,12 @@ export const AnsweringView = ({
       }),
   });
 
-  const handleStreamRetry = async () => {
-    await retryQuizGenerationAction(sessionId);
-    retryStream();
+  const handleStreamRetry = () => {
+    if (isRetryingStream) return;
+    startRetryTransition(async () => {
+      await retryQuizGenerationAction(sessionId);
+      retryStream();
+    });
   };
 
   // === derived ===
@@ -169,6 +173,8 @@ export const AnsweringView = ({
               message={streamError}
               onRetry={handleStreamRetry}
               retryLabel={t.answering.submitRetry}
+              isPending={isRetryingStream}
+              pendingLabel={t.answering.preparingNext}
             />
             <Link
               href={ROUTES.home}
@@ -336,6 +342,8 @@ export const AnsweringView = ({
                 message={streamError}
                 onRetry={handleStreamRetry}
                 retryLabel={t.answering.submitRetry}
+                isPending={isRetryingStream}
+                pendingLabel={t.answering.preparingNext}
               />
             )}
         </main>

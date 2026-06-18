@@ -4,7 +4,10 @@ import { redirect } from 'next/navigation';
 
 import { createTopicAndSession, resumeOrRestartQuiz, submitAnswer } from '@/features/quiz/services';
 import { validateTitleTopic, validateResumeOrRestartQuiz } from '@/features/quiz/validations';
-import { createQuizGenerationEvent } from '@/features/quiz-generation-event/data';
+import {
+  createQuizGenerationEvent,
+  hasPendingQuizGenerationEventBySession,
+} from '@/features/quiz-generation-event/data';
 import { isQuizGenerationLimitReached } from '@/features/quiz-generation-event/services';
 import { QUIZ_GENERATION_RATE_LIMIT } from '@/lib/constants';
 import { getDict } from '@/lib/i18n/server';
@@ -58,12 +61,21 @@ export const submitSessionAnswerAction = async ({
 export const retryQuizGenerationAction = async (
   quizSessionId: string,
 ): Promise<ActionResult> => {
+  const t = await getDict();
+  if (await isQuizGenerationLimitReached())
+    return { success: false, error: t.validation.rateLimit(QUIZ_GENERATION_RATE_LIMIT) };
+  // Problem: multi-tab / API parallel retry creates multiple pending events, making
+  //          tryAcquireGenerationLockBySession see count > 1 and lock the session
+  //          into a permanent CAS dead-end (no /generate can ever acquire).
+  // Solution: skip create if a pending event already exists for this session.
+  //           Best-effort dedup; a sub-millisecond TOCTOU race window still permits
+  //           parallel inserts, accepted as the rare-edge cost.
+  if (await hasPendingQuizGenerationEventBySession(quizSessionId)) return { success: true };
   try {
     await createQuizGenerationEvent({ quizSessionId, aiModel: quizModelId() });
     return { success: true };
   } catch (error) {
     console.error('Retry quiz generation failed', { quizSessionId, error });
-    const t = await getDict();
     return { success: false, error: t.answering.submitError };
   }
 };
