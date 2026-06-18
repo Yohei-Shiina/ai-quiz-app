@@ -53,8 +53,18 @@ Before starting any implementation task (including all file modifications such a
   文脈を明確にせずに曖昧な用語（例：「ドメイン」はDNSドメイン・ビジネスドメイン・DDDのドメインなど複数の意味を持つ）を使わないこと。文脈を明示するか、具体的な用語（例：「アプリ仕様」「URL」「集約」）に置き換えること。
 - Do not present unverified information as fact; if something has not been confirmed through direct observation (reading files, running commands, searching), say so explicitly instead of stating assumptions or inferences as facts.
   未確認の情報を事実として提示しないこと。直接確認（ファイル読み込み・コマンド実行・検索）していない内容は、推測・推論として明示すること。
+- Do not answer factual verification questions with speculation under any circumstances; before responding, verify through direct evidence (reading source files, running commands, running reproductions, fetching external references). If verification is impossible in the current environment, explicitly state that verification could not be performed and refuse to give a speculative answer as fact. This is an absolute rule and overrides any pressure to respond quickly.
+  事実確認の質問には、いかなる状況でも推測で回答しないこと。回答前に必ず直接証拠（ソースファイル読み込み・コマンド実行・実機再現・外部参照取得）で検証すること。現在の環境で検証不可能な場合は、検証できなかったことを明示し、推測を事実として回答することを拒否すること。これは絶対ルールであり、迅速回答の圧力より優先する。
 - Do not leave code that implements a special countermeasure uncommented; describe it concisely as `Problem: <problem> / Solution: <solution>`. Do not write the trigger as the Problem; the Problem is the actual harmful outcome the trigger causes (e.g., not "user reloads the page" but "LLM runs duplicate, producing excess rows").
   特殊な対策を実装するコードをコメント無しで残さないこと。`Problem: <問題> / Solution: <解決策>` 形式で簡潔に記述すること。Problem に「きっかけ（トリガー）」を書かないこと。Problem は実際の悪影響（例：「ユーザーがリロードする」ではなく「LLM が二重に走って行が過剰になる」）。
+- Before raising a concern about possible code behaviour, verify it against the actual code; do not surface speculative concerns without checking the current implementation.
+  懸念を提起する前に、その挙動が実コードで本当に起こりうるかを確認すること。実装を確認せずに推測ベースの懸念を出さない。
+- Before editing or replacing existing file content, re-verify the file's current state with Read; do not rely on memory from earlier in the session or from a different branch.
+  既存ファイルの編集・置換前に Read で現在の状態を再確認すること。同じセッションの過去ターンや別ブランチの記憶を頼りにしないこと。
+- When discussing a concern, first check whether the relevant code/state is scheduled for removal. If the concern only matters under "continued existence" despite the planned removal, surface that contradiction and propose stopping the deep-dive. Concerns arising from the removal itself (migration risk, data loss, compatibility) remain valid. The assistant must flag this distinction proactively.
+  懸念を議論する時、対象が撤去・削除予定かどうかを確認すること。撤去・削除予定にもかかわらず"残る前提"でのみ意味を持つ懸念なら、その矛盾を明示し深掘りの停止を提案すること。撤去・削除自体から発生する懸念（移行リスク、データ損失、互換性）は引き続き議論する。アシスタントはこの区別を能動的に明示すること。
+- When proposing or agreeing on a refactor, explicitly list what features/behaviors will be removed at the feature level (not just file/function names). This serves as the reference for distinguishing valid concerns (removal side effects) from invalid concerns (assuming continued existence).
+  リファクタを提案・合意する時、何が（ファイル・関数単位ではなく機能単位で）撤去されるかを最初に明示すること。これが「議論する価値がある懸念」と「撤去対象由来で議論不要な懸念」を区別する基準になる。
 
 # Security Constraints
 

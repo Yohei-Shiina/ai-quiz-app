@@ -108,19 +108,6 @@ export const markSessionCompletedOrThrow = async (id: QuizSession['id']) => {
   });
 };
 
-// Transaction-only: read existing SessionQuestions ordered by position, eager-loading
-// the related Question and its AnswerOptions. Used by the "replay" path when another
-// transaction already populated the session (e.g., user reloaded mid-generation).
-export const getStoredSessionQuestionsWithOptionsInTx = async (
-  tx: Prisma.TransactionClient,
-  quizSessionId: QuizSession['id'],
-) =>
-  tx.sessionQuestion.findMany({
-    where: { quizSessionId },
-    orderBy: { position: 'asc' },
-    include: { question: { include: { answerOptions: true } } },
-  });
-
 // Transaction-only: called from inside generateQuizForSession's $transaction so that
 // the question insert participates in the same rollback unit as the SessionQuestion
 // insert and the QuizGenerationEvent status update. Caller is responsible for

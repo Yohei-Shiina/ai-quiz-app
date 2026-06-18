@@ -17,9 +17,7 @@ export const generatedQuestionSchema = z.object({
   options: z
     .array(generatedAnswerOptionSchema)
     .length(QUIZ_OPTION_COUNT)
-    .describe(
-      `Exactly ${QUIZ_OPTION_COUNT} options, with exactly one marked isCorrect: true`,
-    ),
+    .describe(`Exactly ${QUIZ_OPTION_COUNT} options, with exactly one marked isCorrect: true`),
 });
 
 export const generatedQuizSchema = z.object({

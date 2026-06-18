@@ -1,6 +1,6 @@
 'use client';
 
-import { startTransition, useCallback, useEffect, useState } from 'react';
+import { startTransition, useCallback, useEffect, useState, useTransition } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,7 +15,7 @@ import {
   type QuestionWithOptions,
 } from '@/app/quiz/[sessionId]/use-question-stream';
 import { Button } from '@/components/ui/button';
-import { submitSessionAnswerAction } from '@/features/quiz/actions';
+import { retryQuizGenerationAction, submitSessionAnswerAction } from '@/features/quiz/actions';
 import { ROUTES } from '@/lib/constants';
 import { useI18n } from '@/lib/i18n/context';
 import { cn } from '@/lib/utils';
@@ -48,6 +48,7 @@ export const AnsweringView = ({
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(initialIdx);
   const [answerPhase, setAnswerPhase] = useState<AnswerPhase>({ kind: 'idle' });
   const [autoAdvanceReady, setAutoAdvanceReady] = useState(false);
+  const [isRetryingStream, startRetryTransition] = useTransition();
 
   // === external hooks ===
   const { t } = useI18n();
@@ -57,8 +58,20 @@ export const AnsweringView = ({
     initialCount: initialQuestions.length,
     totalCount: questionCount,
     onQuestionReceived: (q) =>
-      setQuestions((prev) => (prev.length >= questionCount ? prev : [...prev, q])),
+      setQuestions((prev) => {
+        if (prev.length >= questionCount) return prev;
+        const ids = new Set(prev.map((p) => p.id));
+        return ids.has(q.id) ? prev : [...prev, q];
+      }),
   });
+
+  const handleStreamRetry = () => {
+    if (isRetryingStream) return;
+    startRetryTransition(async () => {
+      await retryQuizGenerationAction(sessionId);
+      retryStream();
+    });
+  };
 
   // === derived ===
   const currentQuestion = questions[currentQuestionIdx];
@@ -158,8 +171,10 @@ export const AnsweringView = ({
           <div className="w-full max-w-md flex flex-col gap-3">
             <ErrorRetryCard
               message={streamError}
-              onRetry={retryStream}
+              onRetry={handleStreamRetry}
               retryLabel={t.answering.submitRetry}
+              isPending={isRetryingStream}
+              pendingLabel={t.answering.preparingNext}
             />
             <Link
               href={ROUTES.home}
@@ -325,8 +340,10 @@ export const AnsweringView = ({
             questions.length < questionCount && (
               <ErrorRetryCard
                 message={streamError}
-                onRetry={retryStream}
+                onRetry={handleStreamRetry}
                 retryLabel={t.answering.submitRetry}
+                isPending={isRetryingStream}
+                pendingLabel={t.answering.preparingNext}
               />
             )}
         </main>
