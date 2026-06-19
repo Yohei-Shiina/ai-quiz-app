@@ -68,27 +68,28 @@ export const getSessionQuestionsWithOptions = async (quizSessionId: QuizSession[
   return sessionQuestions.map(({ question }) => question);
 };
 
-export const upsertSessionAnswer = async ({
-  quizSessionId,
-  questionId,
-  answerOptionId,
-  isCorrect,
-}: {
-  quizSessionId: QuizSession['id'];
-  questionId: string;
-  answerOptionId: string;
-  isCorrect: boolean;
-}) => {
-  const user = await requireAuth();
-  await prisma.quizSession.findFirstOrThrow({
-    where: { id: quizSessionId, userId: user.id },
-  });
-  return prisma.sessionAnswer.upsert({
-    where: { quizSessionId_questionId: { quizSessionId, questionId } },
-    create: { quizSessionId, questionId, answerOptionId, isCorrect },
+// Transaction-only: pairs with createInitialReviewStateIfMissingInTx so a wrong
+// answer's SessionAnswer write and SRS-state registration commit atomically.
+// Caller is responsible for the QuizSession ownership check.
+export const upsertSessionAnswerInTx = async (
+  tx: Prisma.TransactionClient,
+  params: {
+    quizSessionId: QuizSession['id'];
+    questionId: string;
+    answerOptionId: string;
+    isCorrect: boolean;
+  },
+) =>
+  tx.sessionAnswer.upsert({
+    where: {
+      quizSessionId_questionId: {
+        quizSessionId: params.quizSessionId,
+        questionId: params.questionId,
+      },
+    },
+    create: params,
     update: {},
   });
-};
 
 export const countSessionAnswers = async (quizSessionId: QuizSession['id']) => {
   const user = await requireAuth();

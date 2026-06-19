@@ -8,13 +8,15 @@ import {
 } from '@/app/generated/prisma/client';
 import { createAiUsageRecord } from '@/features/ai-usage-record/data';
 import { requireAuth } from '@/features/auth/services';
+import { createInitialReviewStateIfMissingInTx } from '@/features/question-review-state/data';
+import { computeInitialStateOnFirstWrong } from '@/features/question-review-state/services';
 import {
   countSessionAnswers,
   countSessionQuestions,
   createQuestionWithOptionsInTx,
   createQuizSession,
   createSessionQuestionInTx,
-  upsertSessionAnswer,
+  upsertSessionAnswerInTx,
   createSessionQuestions,
   getLatestQuizSessionOrThrow,
   getQuizSessionWithTopicByIdOrThrow,
@@ -51,7 +53,34 @@ export const submitAnswer = async (params: {
   isCorrect: boolean;
 }) => {
   const session = await getQuizSessionWithTopicByIdOrThrow(params.quizSessionId);
-  await upsertSessionAnswer(params);
+  const initial = !params.isCorrect ? computeInitialStateOnFirstWrong(new Date()) : null;
+  try {
+    await prisma.$transaction(async (tx) => {
+      await upsertSessionAnswerInTx(tx, params);
+      if (initial) {
+        await createInitialReviewStateIfMissingInTx(tx, {
+          questionId: params.questionId,
+          box: initial.box,
+          dueAt: initial.dueAt,
+        });
+      }
+    });
+  } catch (err) {
+    // Diagnostic for P2003 on session_answers.questionId — distinguishes "row missing"
+    // (real bug) from "row not yet visible" (race with question generation tx).
+    if ((err as { code?: string })?.code === 'P2003') {
+      const q = await prisma.question.findUnique({
+        where: { id: params.questionId },
+        select: { id: true },
+      });
+      console.log('[FK-check]', {
+        questionId: params.questionId,
+        existsNow: !!q,
+        ts: new Date().toISOString(),
+      });
+    }
+    throw err;
+  }
   const answeredCount = await countSessionAnswers(params.quizSessionId);
   if (answeredCount >= session.questionCount) {
     await markSessionCompletedOrThrow(params.quizSessionId);
@@ -97,7 +126,7 @@ const isCompleteQuestion = (value: unknown): value is GeneratedQuestion => {
 export const generateQuizForSession = async function* (sessionId: QuizSession['id']) {
   const user = await requireAuth();
 
-  const eventId = await tryAcquireGenerationLockBySession(sessionId, user.id);
+  const eventId = await tryAcquireGenerationLockBySession(sessionId);
 
   if (eventId === null) {
     // Another caller holds the lock; emit what's already committed so the
