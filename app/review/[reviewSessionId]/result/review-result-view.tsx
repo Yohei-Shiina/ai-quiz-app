@@ -1,8 +1,6 @@
 import Link from 'next/link';
 
 import { SiteHeader } from '@/components/shared/site-header';
-import { Button } from '@/components/ui/button';
-import { startOrResumeReviewSessionAction } from '@/features/review-session/actions';
 import type { getReviewSessionResult } from '@/features/review-session/data';
 import type { Dictionary } from '@/lib/i18n/dictionaries';
 import { getDict } from '@/lib/i18n/server';
@@ -83,14 +81,6 @@ export const ReviewResultView = async ({ result }: Props) => {
         )}
 
         <div className="flex flex-col gap-2 mt-[22px]">
-          <form action={startOrResumeReviewSessionAction}>
-            <Button
-              type="submit"
-              className="h-12 w-full rounded-xl text-[15px] font-medium shadow-sm"
-            >
-              {t.reviewResult.tryAnother}
-            </Button>
-          </form>
           <Link
             href="/"
             className="text-center font-sans text-sm text-muted-foreground hover:text-foreground transition-colors py-2.5"

@@ -88,7 +88,6 @@ const en = {
     youGotPost: '.',
     perfect: 'All recalled.',
     nothingToReview: 'Nothing to review on this round.',
-    tryAnother: 'Review more',
     backToCollection: 'Back to your collection',
   },
   validation: {
@@ -188,7 +187,6 @@ const ja: Dictionary = {
     youGotPost: ' 思い出せた。',
     perfect: 'すべて思い出せた。',
     nothingToReview: 'このラウンドで復習する問題はありません。',
-    tryAnother: '続けて復習する',
     backToCollection: 'コレクションに戻る',
   },
   validation: {
