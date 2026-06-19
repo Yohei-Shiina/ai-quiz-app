@@ -11,6 +11,7 @@ import { Check, Trash2 } from 'lucide-react';
 import { TopicForm } from '@/app/topic-form';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { resumeOrRestartQuizAction } from '@/features/quiz/actions';
+import { startOrResumeReviewSessionAction } from '@/features/review-session/actions';
 import { deleteTopicsAction } from '@/features/topic/actions';
 import { useI18n } from '@/lib/i18n/context';
 
@@ -24,6 +25,7 @@ type TopicListItem = {
 
 type Props = {
   topics: TopicListItem[];
+  reviewDueCount: number;
 };
 
 // Problem: rapid 2nd delete leaves the previous batch in limbo (still hidden,
@@ -31,7 +33,7 @@ type Props = {
 // Solution: one pending batch at a time; a new delete commits the previous one immediately.
 const UNDO_WINDOW_MS = 4000;
 
-export const CollectionView = ({ topics }: Props) => {
+export const CollectionView = ({ topics, reviewDueCount }: Props) => {
   const { t, locale } = useI18n();
   const dateLocale = locale === 'ja' ? ja : enUS;
 
@@ -165,6 +167,33 @@ export const CollectionView = ({ topics }: Props) => {
       )}
 
       <div className="flex flex-col gap-3">
+        {!isEditMode && reviewDueCount > 0 && (
+          <form action={startOrResumeReviewSessionAction}>
+            <button type="submit" className="block w-full text-left">
+              <Card
+                className="group shadow-sm bg-primary/8 border-primary/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                style={{ animation: 'fade-up 0.4s ease-out 0.05s both' }}
+              >
+                <CardContent className="flex items-start gap-3 px-4">
+                  <div className="mt-1 shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="font-display italic text-lg leading-snug text-card-foreground">
+                      {t.home.reviewCardTitle(reviewDueCount)}
+                    </CardTitle>
+                    <CardDescription className="text-xs mt-1">
+                      {t.home.reviewCardSubtitle}
+                    </CardDescription>
+                  </div>
+                  <span className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-150 shrink-0 mt-0.5">
+                    ›
+                  </span>
+                </CardContent>
+              </Card>
+            </button>
+          </form>
+        )}
         {visibleTopics.map((topic, i) => {
           const isInProgress = topic.latestQuizSession.status === 'in_progress';
           const isSelected = selected.has(topic.id);
