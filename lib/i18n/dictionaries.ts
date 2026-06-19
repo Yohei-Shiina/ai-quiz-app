@@ -19,6 +19,8 @@ const en = {
     topicsDeleted: (n: number) => `${n} ${n === 1 ? 'topic' : 'topics'} deleted`,
     undo: 'Undo',
     selectTopicAriaLabel: (title: string) => `Select topic: ${title}`,
+    reviewCardTitle: (n: number) => `Review ${n} ${n === 1 ? 'question' : 'questions'}`,
+    reviewCardSubtitle: 'A chance to make it stick',
   },
   topicForm: {
     placeholder: 'Add a topic...',
@@ -58,6 +60,12 @@ const en = {
     submitError: "Couldn't record your answer",
     submitRetry: 'Try again',
   },
+  review: {
+    leave: 'Leave review',
+    headerLabel: 'Review',
+    finish: 'Finish',
+    next: 'Next question',
+  },
   result: {
     onTopic: (topic: string) => `on “${topic}”`,
     youGotPre: 'You got ',
@@ -71,6 +79,15 @@ const en = {
     yourAnswer: 'Your answer',
     correct: 'Correct',
     tryAnother: 'Try another round',
+    backToCollection: 'Back to your collection',
+  },
+  reviewResult: {
+    headerLabel: 'Review',
+    youGotPre: 'You got ',
+    score: (score: number, total: number) => `${score} of ${total}`,
+    youGotPost: '.',
+    perfect: 'All recalled.',
+    nothingToReview: 'Nothing to review on this round.',
     backToCollection: 'Back to your collection',
   },
   validation: {
@@ -101,6 +118,8 @@ const ja: Dictionary = {
     topicsDeleted: (n: number) => `${n}件のトピックを削除しました`,
     undo: '元に戻す',
     selectTopicAriaLabel: (title: string) => `トピックを選択: ${title}`,
+    reviewCardTitle: (n: number) => `${n}問を復習する`,
+    reviewCardSubtitle: '記憶に定着させるチャンスです',
   },
   topicForm: {
     placeholder: 'トピックを追加...',
@@ -140,6 +159,12 @@ const ja: Dictionary = {
     submitError: '回答を記録できませんでした',
     submitRetry: 'もう一度試す',
   },
+  review: {
+    leave: '復習を終了',
+    headerLabel: '復習',
+    finish: '完了',
+    next: '次の問題',
+  },
   result: {
     onTopic: (topic: string) => `「${topic}」`,
     youGotPre: '',
@@ -153,6 +178,15 @@ const ja: Dictionary = {
     yourAnswer: 'あなたの回答',
     correct: '正解',
     tryAnother: 'もう一度挑戦',
+    backToCollection: 'コレクションに戻る',
+  },
+  reviewResult: {
+    headerLabel: '復習',
+    youGotPre: '',
+    score: (score: number, total: number) => `${total}問中${score}問`,
+    youGotPost: ' 思い出せた。',
+    perfect: 'すべて思い出せた。',
+    nothingToReview: 'このラウンドで復習する問題はありません。',
     backToCollection: 'コレクションに戻る',
   },
   validation: {
