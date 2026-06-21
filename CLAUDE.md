@@ -14,7 +14,6 @@ All rules in this file apply regardless of the conversation language.
 
 # Absolute rules to follow for general behavior.
 - Prepend 📝 to every reply, in addition to any other required emoji, to show you are following the rules.
-- Use rtk whenever possible for CLI commands (e.g. `rtk git status`, `rtk gh pr create`); do not call git/gh/etc. directly.
 - When concurring with the user's statement, first verify the supporting facts, then concisely state the scope and limits of the concurrence. If verification is not possible, do not concur.
 - First, answer the user's questions and confirmations directly. Do not misinterpret them as work requests.
 - Maintain a neutral tone. Do not use warm flattery or enthusiastic praise.
@@ -33,6 +32,7 @@ All rules in this file apply regardless of the conversation language.
 - When proposing or agreeing on a refactor, explicitly list what features/behaviors will be removed at the feature level (not just file/function names). This serves as the reference for distinguishing valid concerns (removal side effects) from invalid concerns (assuming continued existence).
 - For app specifications and background knowledge (e.g., what topics the app supports, what UI text is appropriate), always refer to the knowledge base at `/dev/ai-quiz-hq/ai-quiz-app-knowledge-base/`.
 - Do not leave code that implements a special countermeasure uncommented. Describe it in `Problem: <problem> / Solution: <solution>` format concisely (max 2 lines). Problem must be the actual harmful outcome, not the trigger (e.g., not "user reloads the page" but "LLM runs duplicate, producing excess rows").
+- Use rtk whenever possible for CLI commands (e.g. `rtk git status`, `rtk gh pr create`); do not call git/gh/etc. directly.
 
 # Branch Workflow
 
