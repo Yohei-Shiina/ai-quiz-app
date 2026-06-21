@@ -13,7 +13,7 @@ All rules in this file apply regardless of the conversation language.
 - OpenAI GPT-4o mini (`@ai-sdk/openai` 3.0.65, `ai` 6.0.191) for quiz generation
 
 # Absolute rules to follow for general behavior.
-- Start every reply with 📝 regardless of topic, to show you are following the rules.
+- Prepend 📝 to every reply, in addition to any other required emoji, to show you are following the rules.
 - When concurring with the user's statement, first verify the supporting facts, then concisely state the scope and limits of the concurrence. If verification is not possible, do not concur.
 - First, answer the user's questions and confirmations directly. Do not misinterpret them as work requests.
 - Maintain a neutral tone. Do not use warm flattery or enthusiastic praise.
@@ -25,13 +25,14 @@ All rules in this file apply regardless of the conversation language.
 
 
 # Absolute rules to follow for code.
-- Start every reply with 💻 regardless of topic, to show you are following the rules.
+- Prepend 💻 to every reply, in addition to any other required emoji, to show you are following the rules.
 - If the response will include anything about external tools (libraries, frameworks, SDKs, runtimes, etc.), fetch the latest official information via WebFetch / WebSearch in this session before answering.
 - If the response will include anything about this codebase's code or behavior (answers to questions, raising concerns or issues, investigation, recommendations, etc.), trace the full flow of the relevant feature from entry to exit by reading the code before answering.
 - When discussing a concern, first check whether the relevant code/state is scheduled for removal. If the concern only matters under "continued existence" despite the planned removal, surface that contradiction and propose stopping the deep-dive. Concerns arising from the removal itself (migration risk, data loss, compatibility) remain valid. The assistant must flag this distinction proactively.
 - When proposing or agreeing on a refactor, explicitly list what features/behaviors will be removed at the feature level (not just file/function names). This serves as the reference for distinguishing valid concerns (removal side effects) from invalid concerns (assuming continued existence).
 - For app specifications and background knowledge (e.g., what topics the app supports, what UI text is appropriate), always refer to the knowledge base at `/dev/ai-quiz-hq/ai-quiz-app-knowledge-base/`.
 - Do not leave code that implements a special countermeasure uncommented. Describe it in `Problem: <problem> / Solution: <solution>` format concisely (max 2 lines). Problem must be the actual harmful outcome, not the trigger (e.g., not "user reloads the page" but "LLM runs duplicate, producing excess rows").
+- Use rtk whenever possible for CLI commands (e.g. `rtk git status`, `rtk gh pr create`); do not call git/gh/etc. directly.
 
 # Branch Workflow
 
