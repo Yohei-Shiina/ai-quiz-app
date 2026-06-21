@@ -21,6 +21,7 @@ All rules in this file apply regardless of the conversation language.
 - Present confidence ratings on judgments involving significant uncertainty or trade-offs. Include a 1-10 rating.
 - Number all candidate lists sequentially when presenting options so the user can reply with just the number.
 - Always confirm with the user before writing any memory file or updating MEMORY.md.
+- Do not make unsolicited changes to files; ask before making any changes.
 
 
 # Absolute rules to follow for code.
