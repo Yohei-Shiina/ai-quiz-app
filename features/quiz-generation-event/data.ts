@@ -2,7 +2,6 @@ import {
   type QuizGenerationEvent,
   QuizGenerationEventStatus,
   type QuizSession,
-  type User,
 } from '@/app/generated/prisma/client';
 import { requireAuth } from '@/features/auth/services';
 import { QUIZ_GENERATION_RATE_LIMIT_WINDOW_MS } from '@/lib/constants';
@@ -53,12 +52,12 @@ export const countActiveQuizGenerationEventsInWindow = async () => {
 // connections). Returns the acquired event id, or null if no pending row matched.
 export const tryAcquireGenerationLockBySession = async (
   quizSessionId: QuizSession['id'],
-  userId: User['id'],
 ): Promise<string | null> => {
+  const user = await requireAuth();
   const result = await prisma.quizGenerationEvent.updateManyAndReturn({
     where: {
       quizSessionId,
-      userId,
+      userId: user.id,
       status: QuizGenerationEventStatus.pending,
     },
     data: { status: QuizGenerationEventStatus.generating },

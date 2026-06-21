@@ -4,8 +4,9 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../app/generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -21,6 +22,8 @@ model User {
   quizSessions         QuizSession[]
   quizGenerationEvents QuizGenerationEvent[]
   aiUsageRecords       AiUsageRecord[]
+  questionReviewStates QuestionReviewState[]
+  reviewSessions       ReviewSession[]
 
   @@map("users")
 }
@@ -38,40 +41,44 @@ model Topic {
 }
 
 model Question {
-  id               String            @id @default(cuid())
-  topic            Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  topicId          String
-  body             String
-  explanation      String
-  createdAt        DateTime          @default(now())
-  answerOptions    AnswerOption[]
-  sessionQuestions SessionQuestion[]
-  sessionAnswers   SessionAnswer[]
+  id                     String                  @id @default(cuid())
+  topic                  Topic                   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topicId                String
+  body                   String
+  explanation            String
+  createdAt              DateTime                @default(now())
+  answerOptions          AnswerOption[]
+  sessionQuestions       SessionQuestion[]
+  sessionAnswers         SessionAnswer[]
+  reviewState            QuestionReviewState?
+  reviewSessionQuestions ReviewSessionQuestion[]
+  reviewSessionAnswers   ReviewSessionAnswer[]
 
   @@map("questions")
 }
 
 model AnswerOption {
-  id             String          @id @default(cuid())
-  question       Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId     String
-  body           String
-  isCorrect      Boolean         @default(false)
-  createdAt      DateTime        @default(now())
-  sessionAnswers SessionAnswer[]
+  id                   String                @id @default(cuid())
+  question             Question              @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId           String
+  body                 String
+  isCorrect            Boolean               @default(false)
+  createdAt            DateTime              @default(now())
+  sessionAnswers       SessionAnswer[]
+  reviewSessionAnswers ReviewSessionAnswer[]
 
   @@map("answer_options")
 }
 
 model QuizSession {
-  id               String            @id @default(cuid())
-  user             User              @relation(fields: [userId], references: [id])
-  userId           String
-  topic            Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  topicId          String
-  status           QuizSessionStatus @default(in_progress)
-  questionCount    Int               @default(5)
-  createdAt        DateTime          @default(now())
+  id                   String                @id @default(cuid())
+  user                 User                  @relation(fields: [userId], references: [id])
+  userId               String
+  topic                Topic                 @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topicId              String
+  status               QuizSessionStatus     @default(in_progress)
+  questionCount        Int                   @default(5)
+  createdAt            DateTime              @default(now())
   sessionQuestions     SessionQuestion[]
   sessionAnswer        SessionAnswer[]
   quizGenerationEvents QuizGenerationEvent[]
@@ -139,6 +146,70 @@ model AiUsageRecord {
   @@map("ai_usage_records")
 }
 
+model QuestionReviewState {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Denormalized from Question.topic.user to keep the "due reviews for current user"
+  // query a single-table scan instead of a three-table join.
+  userId     String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String   @unique
+  box        Int
+  dueAt      DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, dueAt])
+  @@map("question_review_states")
+}
+
+model ReviewSession {
+  id                     String                  @id @default(cuid())
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                 String
+  status                 ReviewSessionStatus     @default(in_progress)
+  createdAt              DateTime                @default(now())
+  reviewSessionQuestions ReviewSessionQuestion[]
+  reviewSessionAnswers   ReviewSessionAnswer[]
+
+  // Problem: parallel start-review requests would each pass the in-app existing-check
+  //          and both succeed in creating an in_progress ReviewSession, leaving an
+  //          orphan row the user can never reach.
+  // Solution: enforce "at most one in_progress per user" at the DB layer with a partial
+  //           unique index; completed sessions stay free to accumulate as history.
+  @@unique([userId], where: raw("status = 'in_progress'"))
+  @@index([userId, status])
+  @@map("review_sessions")
+}
+
+model ReviewSessionQuestion {
+  id              String        @id @default(cuid())
+  reviewSession   ReviewSession @relation(fields: [reviewSessionId], references: [id], onDelete: Cascade)
+  reviewSessionId String
+  question        Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId      String
+  position        Int
+  createdAt       DateTime      @default(now())
+
+  @@unique([reviewSessionId, questionId])
+  @@map("review_session_questions")
+}
+
+model ReviewSessionAnswer {
+  id              String        @id @default(cuid())
+  reviewSession   ReviewSession @relation(fields: [reviewSessionId], references: [id], onDelete: Cascade)
+  reviewSessionId String
+  question        Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId      String
+  answerOption    AnswerOption  @relation(fields: [answerOptionId], references: [id], onDelete: Cascade)
+  answerOptionId  String
+  isCorrect       Boolean
+  createdAt       DateTime      @default(now())
+
+  @@unique([reviewSessionId, questionId])
+  @@map("review_session_answers")
+}
+
 enum QuizSessionStatus {
   in_progress
   completed
@@ -149,4 +220,9 @@ enum QuizGenerationEventStatus {
   generating
   success
   failed
+}
+
+enum ReviewSessionStatus {
+  in_progress
+  completed
 }
