@@ -9,5 +9,11 @@
         "repo": "anthropics/claude-plugins-official"
       }
     }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(rtk)",
+      "Bash(rtk:*)"
+    ]
   }
 }
