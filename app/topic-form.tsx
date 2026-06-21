@@ -31,7 +31,7 @@ export const TopicForm = () => {
 
   return (
     <div
-      className="fixed left-0 right-0 px-4 pb-[env(safe-area-inset-bottom)]"
+      className="fixed left-0 right-0 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)]"
       style={{ bottom: bottomOffset }}
     >
       <div className="max-w-md mx-auto">
