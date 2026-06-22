@@ -12,7 +12,9 @@
     "tsc": "tsc --noEmit",
     "postinstall": "prisma generate",
     "migrate": "dotenv -e .env.local -- prisma migrate dev",
-    "migrate:deploy": "dotenv -e .env.production -- prisma migrate deploy"
+    "migrate:deploy": "dotenv -e .env.production -- prisma migrate deploy",
+    "cleanup:demo": "dotenv -e .env.local -- node scripts/cleanup-demo-users.mjs",
+    "cleanup:demo:prod": "dotenv -e .env.production -- node scripts/cleanup-demo-users.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.65",

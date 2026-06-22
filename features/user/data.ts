@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 
-export const upsertUserFromOAuth = async (email: string, name?: string) => {
+// Upserts a user by email. Used by every auth provider (Google OAuth and the
+// portfolio demo Credentials provider), so it is not OAuth-specific.
+export const upsertUser = async (email: string, name?: string) => {
   await prisma.user.upsert({
     where: { email },
     update: { name },
