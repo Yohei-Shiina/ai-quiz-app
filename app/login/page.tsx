@@ -1,7 +1,14 @@
+import { redirect } from 'next/navigation';
+
+import { AuthError } from 'next-auth';
+
 import { signIn } from '@/auth';
 import { Logo } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ROUTES } from '@/lib/constants';
 import { getDict } from '@/lib/i18n/server';
 
 function GoogleIcon() {
@@ -37,8 +44,32 @@ async function handleSignIn() {
   await signIn('google', { redirectTo: '/' });
 }
 
-export default async function LoginPage() {
+async function handleCredentialsSignIn(formData: FormData) {
+  'use server';
+  try {
+    await signIn('credentials', {
+      id: formData.get('id'),
+      password: formData.get('password'),
+      redirectTo: '/',
+    });
+  } catch (error) {
+    // A successful sign-in throws a redirect (not an AuthError), so it falls
+    // through to the rethrow and the redirect proceeds. Only failed credentials
+    // surface as AuthError, which we turn into an inline error on the page.
+    if (error instanceof AuthError) {
+      redirect(`${ROUTES.signIn}?error=credentials`);
+    }
+    throw error;
+  }
+}
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const t = await getDict();
+  const { error } = await searchParams;
   return (
     <main className="h-dvh flex flex-col justify-center items-center px-4">
       <div className="flex flex-col w-full max-w-md gap-8">
@@ -52,11 +83,43 @@ export default async function LoginPage() {
             <CardTitle>{t.login.welcome}</CardTitle>
             <CardDescription>{t.login.prompt}</CardDescription>
           </CardHeader>
-          <CardContent className="px-6">
+          <CardContent className="px-6 flex flex-col gap-6">
             <form action={handleSignIn}>
               <Button type="submit" size="lg" variant="outline" className="w-full">
                 <GoogleIcon />
                 {t.login.signIn}
+              </Button>
+            </form>
+
+            <div className="flex items-center gap-3">
+              <span className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">{t.login.orDivider}</span>
+              <span className="h-px flex-1 bg-border" />
+            </div>
+
+            <form action={handleCredentialsSignIn} className="flex flex-col gap-4">
+              <p className="text-sm font-medium text-foreground">{t.login.demoLabel}</p>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="id">{t.login.idLabel}</Label>
+                <Input id="id" name="id" type="text" autoComplete="username" required />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="password">{t.login.passwordLabel}</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+              {error === 'credentials' && (
+                <p className="text-sm text-destructive" role="alert">
+                  {t.login.invalidCredentials}
+                </p>
+              )}
+              <Button type="submit" size="lg" className="w-full">
+                {t.login.credentialsSignIn}
               </Button>
             </form>
           </CardContent>
