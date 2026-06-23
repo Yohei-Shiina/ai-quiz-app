@@ -32,6 +32,12 @@ const en = {
     welcome: 'Welcome',
     prompt: 'Sign in with Google to continue',
     signIn: 'Sign in with Google',
+    orDivider: 'or',
+    demoLabel: 'Demo login',
+    idLabel: 'ID',
+    passwordLabel: 'Password',
+    credentialsSignIn: 'Sign in',
+    invalidCredentials: 'Invalid ID or password',
   },
   error: {
     title: 'Something went wrong!',
@@ -49,8 +55,6 @@ const en = {
   },
   answering: {
     leave: 'Leave quiz',
-    notTheTopic: 'Not the topic you meant? ',
-    tryDifferent: 'Try a different wording',
     right: 'Right',
     theAnswerWas: 'The answer was',
     finish: 'Finish',
@@ -131,6 +135,12 @@ const ja: Dictionary = {
     welcome: 'ようこそ',
     prompt: 'Googleでサインインして続ける',
     signIn: 'Googleでサインイン',
+    orDivider: 'または',
+    demoLabel: 'デモログイン',
+    idLabel: 'ID',
+    passwordLabel: 'パスワード',
+    credentialsSignIn: 'サインイン',
+    invalidCredentials: 'IDまたはパスワードが正しくありません',
   },
   error: {
     title: '問題が発生しました',
@@ -148,8 +158,6 @@ const ja: Dictionary = {
   },
   answering: {
     leave: 'クイズを終了',
-    notTheTopic: '意図したトピックと違う？ ',
-    tryDifferent: '別の言い方を試す',
     right: '正解',
     theAnswerWas: '正解は',
     finish: '完了',

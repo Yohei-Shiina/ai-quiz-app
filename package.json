@@ -5,14 +5,17 @@
   "packageManager": "pnpm@11.6.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "tsc": "tsc --noEmit",
     "postinstall": "prisma generate",
     "migrate": "dotenv -e .env.local -- prisma migrate dev",
-    "migrate:deploy": "dotenv -e .env.production -- prisma migrate deploy"
+    "migrate:deploy": "dotenv -e .env.production -- prisma migrate deploy",
+    "gen:quiz": "dotenv -e .env.local -- node scripts/generate-quiz.mjs",
+    "cleanup:demo": "dotenv -e .env.local -- node scripts/cleanup-demo-users.mjs",
+    "cleanup:demo:prod": "dotenv -e .env.production -- node scripts/cleanup-demo-users.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.65",
