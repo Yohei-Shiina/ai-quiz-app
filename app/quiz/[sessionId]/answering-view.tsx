@@ -228,19 +228,6 @@ export const AnsweringView = ({
             {currentQuestion.body}
           </h1>
 
-          {currentQuestionIdx === 0 && answerPhase.kind === 'idle' && (
-            <button
-              type="button"
-              onClick={() => router.push('/')}
-              className="self-start bg-transparent border-0 px-0 -my-1 font-sans text-[13px] text-muted-foreground cursor-pointer inline-flex items-baseline gap-1.5 leading-snug text-left"
-            >
-              {t.answering.notTheTopic}
-              <span className="text-primary font-medium underline underline-offset-[3px] decoration-1">
-                {t.answering.tryDifferent}
-              </span>
-            </button>
-          )}
-
           <div className="flex flex-col gap-2.5">
             {currentQuestion.answerOptions.map((option, i) => (
               <div

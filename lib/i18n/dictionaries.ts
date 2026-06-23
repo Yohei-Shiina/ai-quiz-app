@@ -55,8 +55,6 @@ const en = {
   },
   answering: {
     leave: 'Leave quiz',
-    notTheTopic: 'Not the topic you meant? ',
-    tryDifferent: 'Try a different wording',
     right: 'Right',
     theAnswerWas: 'The answer was',
     finish: 'Finish',
@@ -160,8 +158,6 @@ const ja: Dictionary = {
   },
   answering: {
     leave: 'クイズを終了',
-    notTheTopic: '意図したトピックと違う？ ',
-    tryDifferent: '別の言い方を試す',
     right: '正解',
     theAnswerWas: '正解は',
     finish: '完了',
