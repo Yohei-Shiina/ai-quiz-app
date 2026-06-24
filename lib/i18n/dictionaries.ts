@@ -106,7 +106,7 @@ const en = {
 type Dictionary = typeof en;
 
 const ja: Dictionary = {
-  appName: 'AIクイズ',
+  appName: 'AI Quiz',
   settings: {
     language: '言語',
     signOut: 'ログアウト',
@@ -132,7 +132,7 @@ const ja: Dictionary = {
     submit: '作成',
   },
   login: {
-    title: 'AIクイズアプリ',
+    title: 'AI Quiz App',
     subtitle: 'AIが生成するクイズで知識を試そう',
     welcome: 'ようこそ',
     prompt: 'Googleでサインインして続ける',
