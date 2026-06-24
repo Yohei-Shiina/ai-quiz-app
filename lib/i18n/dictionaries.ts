@@ -1,7 +1,7 @@
 import type { Locale } from '@/lib/i18n/config';
 
 const en = {
-  appName: 'AI Quiz',
+  appName: 'Quriosity',
   settings: {
     language: 'Language',
     signOut: 'Sign out',
@@ -27,7 +27,7 @@ const en = {
     submit: 'Go',
   },
   login: {
-    title: 'AI Quiz App',
+    title: 'Quriosity',
     subtitle: 'Test your knowledge with AI-generated quizzes',
     welcome: 'Welcome',
     prompt: 'Sign in with Google to continue',
@@ -106,7 +106,7 @@ const en = {
 type Dictionary = typeof en;
 
 const ja: Dictionary = {
-  appName: 'AI Quiz',
+  appName: 'Quriosity',
   settings: {
     language: '言語',
     signOut: 'ログアウト',
@@ -132,7 +132,7 @@ const ja: Dictionary = {
     submit: '作成',
   },
   login: {
-    title: 'AI Quiz App',
+    title: 'Quriosity',
     subtitle: 'AIが生成するクイズで知識を試そう',
     welcome: 'ようこそ',
     prompt: 'Googleでサインインして続ける',
