@@ -136,10 +136,10 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
   return (
     <>
       {visibleTopics.length === 0 ? (
-        <div className="flex flex-col gap-3">
-          <h1 className="font-display italic text-4xl leading-tight text-foreground">
+        <div className="flex flex-col justify-center gap-3 text-center min-h-[calc(100svh-10rem)]">
+          <h1 className="font-display text-3xl leading-tight text-foreground">
             {t.home.emptyTitlePre}
-            <em className="not-italic text-primary">{t.home.emptyTitleEm}</em>
+            <span className="text-primary">{t.home.emptyTitleEm}</span>
             {t.home.emptyTitlePost}
           </h1>
           <p className="text-sm font-normal text-muted-foreground leading-relaxed">
