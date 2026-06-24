@@ -1,17 +1,17 @@
 import type { Locale } from '@/lib/i18n/config';
 
 const en = {
-  appName: 'AI Quiz',
+  appName: 'Quriosity',
   settings: {
     language: 'Language',
     signOut: 'Sign out',
   },
   home: {
-    emptyTitlePre: 'What are you ',
-    emptyTitleEm: 'curious',
-    emptyTitlePost: ' about?',
+    emptyTitlePre: 'Quiz your ',
+    emptyTitleEm: 'curiosity',
+    emptyTitlePost: '',
     emptyDesc: "Type a topic and we'll build a quiz in seconds.",
-    collectionTitle: 'Your collection',
+    collectionTitle: 'Your topics',
     topicsCount: (n: number) => `${n} topics`,
     edit: 'Edit',
     done: 'Done',
@@ -27,7 +27,7 @@ const en = {
     submit: 'Go',
   },
   login: {
-    title: 'AI Quiz App',
+    title: 'Quriosity',
     subtitle: 'Test your knowledge with AI-generated quizzes',
     welcome: 'Welcome',
     prompt: 'Sign in with Google to continue',
@@ -83,7 +83,7 @@ const en = {
     yourAnswer: 'Your answer',
     correct: 'Correct',
     tryAnother: 'Try another round',
-    backToCollection: 'Back to your collection',
+    backToCollection: 'Back to your topics',
   },
   reviewResult: {
     headerLabel: 'Review',
@@ -92,7 +92,7 @@ const en = {
     youGotPost: '.',
     perfect: 'All recalled.',
     nothingToReview: 'Nothing to review on this round.',
-    backToCollection: 'Back to your collection',
+    backToCollection: 'Back to your topics',
   },
   validation: {
     topicRequired: 'Topic is required',
@@ -104,18 +104,18 @@ const en = {
 type Dictionary = typeof en;
 
 const ja: Dictionary = {
-  appName: 'AIクイズ',
+  appName: 'Quriosity',
   settings: {
     language: '言語',
     signOut: 'ログアウト',
   },
   home: {
-    emptyTitlePre: '今、何が',
+    emptyTitlePre: '',
     emptyTitleEm: '気になる',
-    emptyTitlePost: '？',
-    emptyDesc: 'トピックを入力すれば、数秒でクイズを作ります。',
-    collectionTitle: 'あなたのコレクション',
-    topicsCount: (n: number) => `${n}件のトピック`,
+    emptyTitlePost: 'をクイズに',
+    emptyDesc: 'あなたの入力から、AIがクイズを生成',
+    collectionTitle: 'あなたのトピック',
+    topicsCount: (n: number) => `${n}件`,
     edit: '編集',
     done: '完了',
     deleteCountTopics: (n: number) => `${n}件のトピックを削除`,
@@ -130,7 +130,7 @@ const ja: Dictionary = {
     submit: '作成',
   },
   login: {
-    title: 'AIクイズアプリ',
+    title: 'Quriosity',
     subtitle: 'AIが生成するクイズで知識を試そう',
     welcome: 'ようこそ',
     prompt: 'Googleでサインインして続ける',
@@ -186,7 +186,7 @@ const ja: Dictionary = {
     yourAnswer: 'あなたの回答',
     correct: '正解',
     tryAnother: 'もう一度挑戦',
-    backToCollection: 'コレクションに戻る',
+    backToCollection: 'トピックに戻る',
   },
   reviewResult: {
     headerLabel: '復習',
@@ -195,7 +195,7 @@ const ja: Dictionary = {
     youGotPost: ' 思い出せた。',
     perfect: 'すべて思い出せた。',
     nothingToReview: 'このラウンドで復習する問題はありません。',
-    backToCollection: 'コレクションに戻る',
+    backToCollection: 'トピックに戻る',
   },
   validation: {
     topicRequired: 'トピックを入力してください',
