@@ -4,6 +4,7 @@ import { useTransition } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { User } from 'lucide-react';
 import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';
 
 import { signOutAction } from '@/features/auth/actions';
@@ -31,7 +32,7 @@ export const UserMenu = () => {
         className="w-8 h-8 rounded-full bg-muted flex items-center justify-center transition-shadow hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
         aria-label={t.settings.language}
       >
-        <span className="text-xs font-medium text-muted-foreground">Y</span>
+        <User className="size-4 text-muted-foreground" aria-hidden="true" />
       </DropdownMenuPrimitive.Trigger>
 
       <DropdownMenuPrimitive.Portal>
