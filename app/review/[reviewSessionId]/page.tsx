@@ -6,6 +6,7 @@ import {
   countReviewSessionAnswers,
   getReviewSessionWithQuestions,
 } from '@/features/review-session/data';
+import { shuffleArray } from '@/lib/shuffle';
 
 type Props = { reviewSessionId: ReviewSession['id'] };
 export default async function ReviewPage({ params }: { params: Promise<Props> }) {
@@ -25,7 +26,9 @@ export default async function ReviewPage({ params }: { params: Promise<Props> })
     body: sq.question.body,
     explanation: sq.question.explanation,
     topicTitle: sq.question.topic.title,
-    answerOptions: sq.question.answerOptions.map((o) => ({
+    // Shuffle server-side (RSC) to avoid a client hydration mismatch; safe because grading
+    // keys off the isCorrect flag + answerOptionId, not the array index.
+    answerOptions: shuffleArray(sq.question.answerOptions).map((o) => ({
       id: o.id,
       body: o.body,
       isCorrect: o.isCorrect,

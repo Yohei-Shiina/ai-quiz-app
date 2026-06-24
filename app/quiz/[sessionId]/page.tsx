@@ -4,6 +4,7 @@ import { QuizSessionStatus, type QuizSession } from '@/app/generated/prisma/clie
 import { AnsweringView } from '@/app/quiz/[sessionId]/answering-view';
 import { countSessionAnswers, getQuizSessionWithTopicById } from '@/features/quiz/data';
 import { prepareSessionQuestions } from '@/features/quiz/services';
+import { shuffleArray } from '@/lib/shuffle';
 
 type Props = { sessionId: QuizSession['id'] };
 export default async function QuizPage({ params }: { params: Props }) {
@@ -25,12 +26,19 @@ export default async function QuizPage({ params }: { params: Props }) {
 
   const initialIdx = answeredCount;
 
+  // Shuffle server-side (RSC) to avoid a client hydration mismatch; safe because grading
+  // keys off the isCorrect flag + answerOptionId, not the array index.
+  const shuffledQuestions = initialQuestions.map((question) => ({
+    ...question,
+    answerOptions: shuffleArray(question.answerOptions),
+  }));
+
   return (
     <AnsweringView
       sessionId={sessionId}
       topic={session.topic.title}
       questionCount={session.questionCount}
-      initialQuestions={initialQuestions}
+      initialQuestions={shuffledQuestions}
       initialIdx={initialIdx}
     />
   );

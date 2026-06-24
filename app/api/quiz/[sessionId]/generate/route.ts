@@ -1,5 +1,6 @@
 import { requireAuth } from '@/features/auth/services';
 import { generateQuizForSession } from '@/features/quiz/services';
+import { shuffleArray } from '@/lib/shuffle';
 
 export const maxDuration = 60;
 
@@ -24,8 +25,18 @@ export async function POST(
     async start(controller) {
       try {
         for await (const chunk of generateQuizForSession(sessionId)) {
+          // Shuffle server-side (not on the client): the initial questions must be shuffled
+          // in the RSC page to avoid an SSR hydration mismatch, so the streamed ones are
+          // shuffled here too — option ordering stays in one server layer, client renders only.
+          const payload = {
+            ...chunk,
+            question: {
+              ...chunk.question,
+              answerOptions: shuffleArray(chunk.question.answerOptions),
+            },
+          };
           try {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
           } catch {}
         }
         try {
