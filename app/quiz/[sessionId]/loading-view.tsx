@@ -32,7 +32,7 @@ export const LoadingView = ({ topic }: { topic: string }) => {
   }, [stepIndex, steps.length]);
 
   return (
-    <main className="min-h-dvh flex flex-col max-w-md mx-auto px-4 items-center justify-center">
+    <main className="min-h-dvh flex flex-col max-w-md sm:max-w-lg mx-auto px-4 items-center justify-center">
       <div className="flex flex-col items-center gap-2">
         <p className="font-display italic text-4xl text-primary">{topic}</p>
         <p className="text-base text-foreground">{t.loading.progress}</p>

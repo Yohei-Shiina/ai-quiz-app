@@ -34,7 +34,7 @@ export const TopicForm = () => {
       className="fixed left-0 right-0 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)]"
       style={{ bottom: bottomOffset }}
     >
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md sm:max-w-lg mx-auto">
         <FieldError className="mb-2 text-xs px-1">{errorMessage}</FieldError>
         <form action={action}>
           <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3 shadow-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200">

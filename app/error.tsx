@@ -23,7 +23,7 @@ export default function Error({
 
   return (
     <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md flex flex-col gap-6">
+      <div className="w-full max-w-md sm:max-w-lg flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h2 className="font-display italic text-[30px] leading-tight tracking-[-0.01em] font-normal text-foreground m-0">
             {t.error.title}

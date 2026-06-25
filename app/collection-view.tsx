@@ -282,7 +282,7 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
       {/* Bottom action bar — shown only with 1+ selection. */}
       {isEditMode && selected.size > 0 && (
         <div className="fixed inset-x-0 bottom-0 z-20 px-4 pb-6 pt-3 bg-linear-to-t from-background via-background/95 to-transparent">
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md sm:max-w-lg mx-auto">
             <button
               type="button"
               onClick={handleDeleteSelected}
@@ -301,7 +301,7 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
           className="fixed inset-x-0 bottom-0 z-30 px-4 pb-6 pt-3"
           style={{ animation: 'fade-up 0.25s ease-out both' }}
         >
-          <div className="max-w-md mx-auto flex items-center justify-between gap-3 rounded-xl bg-foreground text-background px-4 py-3 shadow-lg">
+          <div className="max-w-md sm:max-w-lg mx-auto flex items-center justify-between gap-3 rounded-xl bg-foreground text-background px-4 py-3 shadow-lg">
             <span className="text-sm">{t.home.topicsDeleted(pendingDelete.topics.length)}</span>
             <button
               type="button"
