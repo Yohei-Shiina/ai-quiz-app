@@ -37,7 +37,7 @@ export const ReviewResultView = async ({ result }: Props) => {
   return (
     <div className="min-h-dvh bg-background">
       <SiteHeader />
-      <div className="mx-auto max-w-md px-4 pt-8 pb-7">
+      <div className="mx-auto max-w-md sm:max-w-lg px-4 pt-8 pb-7">
         <header
           className="flex flex-col gap-1.5 mb-[22px]"
           style={{ animation: 'fade-up 0.4s ease-out both' }}

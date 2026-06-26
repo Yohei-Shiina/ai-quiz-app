@@ -148,7 +148,9 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
         </div>
       ) : (
         <div className="flex items-baseline justify-between">
-          <h1 className="font-display italic text-2xl text-foreground">{t.home.collectionTitle}</h1>
+          <h1 className="font-display italic text-2xl lg:text-3xl text-foreground">
+            {t.home.collectionTitle}
+          </h1>
           <div className="flex items-baseline gap-3">
             {!isEditMode && (
               <span className="text-xs text-muted-foreground">
@@ -166,9 +168,9 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {!isEditMode && reviewDueCount > 0 && (
-          <form action={startOrResumeReviewSessionAction}>
+          <form action={startOrResumeReviewSessionAction} className="sm:col-span-2 lg:col-span-3">
             <button type="submit" className="block w-full text-left">
               <Card
                 className="group shadow-sm bg-primary/8 border-primary/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
@@ -229,7 +231,7 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <CardTitle className="font-display italic text-lg leading-snug text-card-foreground truncate">
+                  <CardTitle className="font-display italic text-lg lg:text-xl leading-snug text-card-foreground truncate">
                     {topic.title}
                   </CardTitle>
                   <CardDescription className="text-xs mt-1" suppressHydrationWarning>
@@ -282,7 +284,7 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
       {/* Bottom action bar — shown only with 1+ selection. */}
       {isEditMode && selected.size > 0 && (
         <div className="fixed inset-x-0 bottom-0 z-20 px-4 pb-6 pt-3 bg-linear-to-t from-background via-background/95 to-transparent">
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md sm:max-w-lg mx-auto">
             <button
               type="button"
               onClick={handleDeleteSelected}
@@ -301,7 +303,7 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
           className="fixed inset-x-0 bottom-0 z-30 px-4 pb-6 pt-3"
           style={{ animation: 'fade-up 0.25s ease-out both' }}
         >
-          <div className="max-w-md mx-auto flex items-center justify-between gap-3 rounded-xl bg-foreground text-background px-4 py-3 shadow-lg">
+          <div className="max-w-md sm:max-w-lg mx-auto flex items-center justify-between gap-3 rounded-xl bg-foreground text-background px-4 py-3 shadow-lg">
             <span className="text-sm">{t.home.topicsDeleted(pendingDelete.topics.length)}</span>
             <button
               type="button"
