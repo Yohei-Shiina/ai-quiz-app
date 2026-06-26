@@ -124,8 +124,8 @@ export const ReviewAnsweringView = ({ reviewSessionId, questions, initialIdx }: 
   }
 
   return (
-    <div className="min-h-dvh bg-background">
-      <div className="mx-auto max-w-md px-4 pt-14 pb-8">
+    <div className="min-h-dvh bg-background lg:flex lg:items-center lg:justify-center">
+      <div className="mx-auto w-full max-w-md sm:max-w-lg px-4 pt-14 pb-8 lg:py-12">
         <div className="flex items-center justify-between min-h-8">
           <button
             type="button"
