@@ -40,7 +40,7 @@ export const ResultView = async ({ result }: Props) => {
   return (
     <div className="min-h-dvh bg-background">
       <SiteHeader />
-      <div className="mx-auto max-w-md sm:max-w-lg px-4 pt-8 pb-7">
+      <div className="mx-auto max-w-md sm:max-w-lg lg:max-w-2xl px-4 pt-8 pb-7">
         <header
           className="flex flex-col gap-1.5 mb-[22px]"
           style={{ animation: 'fade-up 0.4s ease-out both' }}
@@ -48,7 +48,7 @@ export const ResultView = async ({ result }: Props) => {
           <p className="font-sans text-[13px] text-muted-foreground m-0">
             <span className="font-display italic">{t.result.onTopic(topic.title)}</span>
           </p>
-          <h1 className="font-display italic text-[30px] leading-tight tracking-[-0.01em] font-normal m-0">
+          <h1 className="font-display italic text-[30px] lg:text-4xl leading-tight tracking-[-0.01em] font-normal m-0">
             {t.result.youGotPre}
             <span className="text-primary">{t.result.score(score, total)}</span>
             {t.result.youGotPost}

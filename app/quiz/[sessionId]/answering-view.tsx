@@ -192,7 +192,7 @@ export const AnsweringView = ({
   // === render ===
   return (
     <div className="min-h-dvh bg-background lg:flex lg:items-center lg:justify-center">
-      <div className="mx-auto w-full max-w-md sm:max-w-lg px-4 pt-14 pb-8 lg:py-12">
+      <div className="mx-auto w-full max-w-md sm:max-w-lg lg:max-w-xl px-4 pt-14 pb-8 lg:py-12">
         <div className="flex items-center justify-between min-h-8">
           <button
             type="button"
@@ -224,7 +224,7 @@ export const AnsweringView = ({
             </span>
           </p>
 
-          <h1 className="font-sans text-[19px] leading-normal font-normal m-0 text-foreground">
+          <h1 className="font-sans text-[19px] lg:text-2xl leading-normal font-normal m-0 text-foreground">
             {currentQuestion.body}
           </h1>
 

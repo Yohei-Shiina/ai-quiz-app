@@ -43,7 +43,7 @@ export const AnswerChoice = ({
       onClick={onClick}
       disabled={selectedOptionIdx !== null}
       className={cn(
-        'w-full text-left rounded-xl px-4 py-[14px] border font-sans text-[15px] leading-snug',
+        'w-full text-left rounded-xl px-4 py-[14px] lg:px-5 lg:py-4 border font-sans text-[15px] lg:text-base leading-snug',
         'flex items-center gap-3 transition-all duration-200',
         'shadow-sm',
         state === 'default' &&

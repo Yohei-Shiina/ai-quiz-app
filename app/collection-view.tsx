@@ -148,7 +148,9 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
         </div>
       ) : (
         <div className="flex items-baseline justify-between">
-          <h1 className="font-display italic text-2xl text-foreground">{t.home.collectionTitle}</h1>
+          <h1 className="font-display italic text-2xl lg:text-3xl text-foreground">
+            {t.home.collectionTitle}
+          </h1>
           <div className="flex items-baseline gap-3">
             {!isEditMode && (
               <span className="text-xs text-muted-foreground">
@@ -166,9 +168,9 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {!isEditMode && reviewDueCount > 0 && (
-          <form action={startOrResumeReviewSessionAction}>
+          <form action={startOrResumeReviewSessionAction} className="sm:col-span-2 lg:col-span-3">
             <button type="submit" className="block w-full text-left">
               <Card
                 className="group shadow-sm bg-primary/8 border-primary/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
@@ -229,7 +231,7 @@ export const CollectionView = ({ topics, reviewDueCount }: Props) => {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <CardTitle className="font-display italic text-lg leading-snug text-card-foreground truncate">
+                  <CardTitle className="font-display italic text-lg lg:text-xl leading-snug text-card-foreground truncate">
                     {topic.title}
                   </CardTitle>
                   <CardDescription className="text-xs mt-1" suppressHydrationWarning>
