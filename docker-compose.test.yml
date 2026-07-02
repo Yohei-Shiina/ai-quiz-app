@@ -1,0 +1,20 @@
+# Disposable Postgres for Tier2 integration tests (real-DB concurrency / CAS lock
+# / rate-limit window). Data lives in tmpfs so the container is fully ephemeral
+# and fast. Runs on 5434 to avoid clashing with local dev Postgres (5432/5433).
+services:
+  test-db:
+    image: postgres:16-alpine
+    container_name: quriosity-test-db
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: quriosity_test
+    ports:
+      - '5434:5432'
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U test -d quriosity_test']
+      interval: 2s
+      timeout: 3s
+      retries: 15
