@@ -1,4 +1,4 @@
-# Disposable Postgres for Tier2 integration tests (real-DB concurrency / CAS lock
+# Disposable Postgres for integration tests (real-DB concurrency / CAS lock
 # / rate-limit window). Data lives in tmpfs so the container is fully ephemeral
 # and fast. Runs on 5434 to avoid clashing with local dev Postgres (5432/5433).
 services:

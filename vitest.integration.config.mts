@@ -3,7 +3,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 import { TEST_DB_URL } from './test/integration/test-db';
 
-// Tier2 integration tests: run against the disposable Postgres from
+// Integration tests: run against the disposable Postgres from
 // docker-compose.test.yml (node environment, no jsdom). DATABASE_URL points at
 // the throwaway container so lib/prisma.ts connects there on import.
 export default defineConfig({
