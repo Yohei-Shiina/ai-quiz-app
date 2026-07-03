@@ -2,11 +2,24 @@ import { randomUUID } from 'node:crypto';
 
 import { QuizGenerationEventStatus } from '@/app/generated/prisma/client';
 import { prisma } from '@/lib/prisma';
+import { TEST_DB_URL } from '@/test/integration/test-db';
+
+// Problem: resetDb wipes every table; if DATABASE_URL isn't the disposable test
+//          DB (config regression / stray env / direct run) it would erase dev/prod.
+// Solution: refuse unless the active connection is exactly the throwaway test DB.
+const assertTargetingTestDb = () => {
+  if (process.env.DATABASE_URL !== TEST_DB_URL) {
+    throw new Error(
+      `resetDb refused: DATABASE_URL is not the disposable test DB (expected ${TEST_DB_URL}).`,
+    );
+  }
+};
 
 // Wipe every table before each test. TRUNCATE ... CASCADE on users removes all
 // child rows (topics, sessions, events, ...) in one statement; RESTART IDENTITY
 // keeps runs independent.
 export const resetDb = async () => {
+  assertTargetingTestDb();
   await prisma.$executeRawUnsafe('TRUNCATE TABLE "users" RESTART IDENTITY CASCADE');
 };
 
