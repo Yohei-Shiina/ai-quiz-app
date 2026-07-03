@@ -75,7 +75,7 @@ describe('hasPendingQuizGenerationEventBySession', () => {
   });
 });
 
-describe('tryAcquireGenerationLockBySession (CAS lock)', () => {
+describe('tryAcquireGenerationLockBySession', () => {
   test('exactly one of many concurrent callers wins the lock', async () => {
     const session = await seedQuizSession(userId);
     await seedGenerationEvent({ userId, quizSessionId: session.id });
