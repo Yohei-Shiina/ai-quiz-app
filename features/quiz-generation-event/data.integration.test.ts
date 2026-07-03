@@ -23,7 +23,6 @@ import {
 import { isQuizGenerationLimitReached } from '@/features/quiz-generation-event/services';
 import { QUIZ_GENERATION_RATE_LIMIT, QUIZ_GENERATION_RATE_LIMIT_WINDOW_MS } from '@/lib/constants';
 import { prisma } from '@/lib/prisma';
-
 import {
   disconnectDb,
   resetDb,
