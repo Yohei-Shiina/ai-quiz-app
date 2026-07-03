@@ -51,7 +51,7 @@ export const seedGenerationEvent = ({
       userId,
       quizSessionId,
       status,
-      aiModel: 'gpt-4o-mini',
+      aiModel: 'gpt-5.4-mini',
       ...(createdAt ? { createdAt } : {}),
     },
   });
