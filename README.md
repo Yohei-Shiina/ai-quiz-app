@@ -1,5 +1,7 @@
 <h1 align="center">Quriosity</h1>
 
+<p align="center"><strong>日本語</strong> ・ <a href="./README.en.md">English</a></p>
+
 <a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo（デモアプリを試す）</a>
 
 <p align="center">
