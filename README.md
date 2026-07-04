@@ -1,19 +1,18 @@
-# Quriosity
+<h1 align="center">Quriosity</h1>
+
+<p align="center">
+  <a href="https://ai-quiz-app-omega.vercel.app/login"><strong>🔗 Live Demo</strong></a>
+</p>
+
+<p align="center">
+  <img width="800" alt="Quriosity クイズ画面" src="https://github.com/user-attachments/assets/5c1cf52a-031f-4734-a51d-b28a0a34512d" />
+</p>
+
+---
 
 「せっかく学んだのに、気づいたら忘れている」—— そんな課題を解決するために、気になる内容からクイズを作成し繰り返し復習できるようにした学習ツールです。
 
 任意のトピックを入力すると AI がクイズを生成し、**回答 → 即時フィードバック → 結果 → 復習**まで一気通貫で学習できる Web アプリ。
-
-**① トピックを入力 → クイズ生成 → 回答**
-
-https://github.com/user-attachments/assets/e2fd4081-aac2-4349-b576-dc2dac389825
-
-**② 結果 → 復習**
-
-https://github.com/user-attachments/assets/dc826dde-1263-43d4-acb9-e48ea1d50337
-
-**🔗 Live Demo:** https://ai-quiz-app-omega.vercel.app/login
-（トップページの **デモログイン** ボタンからワンクリックでお試しいただけます。）
 
 ---
 
