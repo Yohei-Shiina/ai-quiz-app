@@ -2,7 +2,7 @@
 
 <p align="center"><a href="./README.md">日本語</a> ・ <strong>English</strong></p>
 
-<a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo (try the demo app)</a>
+<p align="center"><a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo (try the demo app)</a></p>
 
 <p align="center">
   <img width="800" alt="Quriosity quiz screen" src="https://github.com/user-attachments/assets/5c1cf52a-031f-4734-a51d-b28a0a34512d" />
@@ -10,7 +10,7 @@
 
 ---
 
-**_"You studied hard, yet before you know it, it's gone."_** Quriosity is a learning web app built to fix exactly that — turn anything you're curious about into a quiz and review it until it sticks.
+**_"You learn something, then forget it before you know it."_** Quriosity is a learning web app built to fix exactly that — turn anything you're curious about into a quiz and review it until it sticks.
 
 Enter any topic and the AI generates a quiz: **answer → instant feedback → results → review**, an end-to-end learning flow.
 
@@ -34,14 +34,14 @@ Enter any topic and the AI generates a quiz: **answer → instant feedback → r
 
 ## Tech Stack
 
-| Area      | Technology                                              |
-| --------- | ------------------------------------------------------- |
-| Framework | Next.js 16 (App Router) / React 19 / TypeScript         |
-| DB / ORM  | PostgreSQL (Supabase) / Prisma 7                        |
-| Auth      | Auth.js v5 (Google OAuth, JWT sessions)                 |
-| AI        | OpenAI (Vercel AI SDK, structured output + streaming)   |
-| UI        | Tailwind CSS v4 / shadcn/ui                             |
-| Deploy    | Vercel                                                  |
+| Area      | Technology                                            |
+| --------- | ----------------------------------------------------- |
+| Framework | Next.js 16 (App Router) / React 19 / TypeScript       |
+| DB / ORM  | PostgreSQL (Supabase) / Prisma 7                      |
+| Auth      | Auth.js v5 (Google OAuth, JWT sessions)               |
+| AI        | OpenAI (Vercel AI SDK, structured output + streaming) |
+| UI        | Tailwind CSS v4 / shadcn/ui                           |
+| Deploy    | Vercel                                                |
 
 <br>
 

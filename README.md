@@ -2,7 +2,7 @@
 
 <p align="center"><strong>日本語</strong> ・ <a href="./README.en.md">English</a></p>
 
-<a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo（デモアプリを試す）</a>
+<p align="center"><a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo（デモアプリを試す）</a></p>
 
 <p align="center">
   <img width="800" alt="Quriosity クイズ画面" src="https://github.com/user-attachments/assets/5c1cf52a-031f-4734-a51d-b28a0a34512d" />
