@@ -23,9 +23,12 @@ export const resetDb = async () => {
   await prisma.$executeRawUnsafe('TRUNCATE TABLE "users" RESTART IDENTITY CASCADE');
 };
 
-export const seedUser = async () =>
+export const seedUser = async (overrides?: { email?: string; name?: string }) =>
   prisma.user.create({
-    data: { email: `test-${randomUUID()}@test.local`, name: 'Test User' },
+    data: {
+      email: overrides?.email ?? `test-${randomUUID()}@test.local`,
+      name: overrides?.name ?? 'Test User',
+    },
   });
 
 export const seedQuizSession = async (userId: string) => {

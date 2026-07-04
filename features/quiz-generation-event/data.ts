@@ -4,7 +4,11 @@ import {
   type QuizSession,
 } from '@/app/generated/prisma/client';
 import { requireAuth } from '@/features/auth/services';
-import { QUIZ_GENERATION_RATE_LIMIT_WINDOW_MS } from '@/lib/constants';
+import {
+  DEMO_QUIZ_GENERATION_GLOBAL_WINDOW_MS,
+  DEMO_USER,
+  QUIZ_GENERATION_RATE_LIMIT_WINDOW_MS,
+} from '@/lib/constants';
 import { prisma } from '@/lib/prisma';
 
 export const createQuizGenerationEvent = async ({
@@ -41,6 +45,35 @@ export const countActiveQuizGenerationEventsInWindow = async () => {
       userId: user.id,
       status: { not: QuizGenerationEventStatus.failed },
       createdAt: { gte: since },
+    },
+  });
+};
+
+export const countActiveQuizGenerationEventsForUser = async () => {
+  const user = await requireAuth();
+  return prisma.quizGenerationEvent.count({
+    where: {
+      userId: user.id,
+      status: { not: QuizGenerationEventStatus.failed },
+    },
+  });
+};
+
+// Demo global cap: count non-failed events from all demo users within the trailing
+// window. The relation filter also excludes events whose user was nulled by the
+// cleanup script (onDelete: SetNull), which are old by definition.
+export const countActiveDemoQuizGenerationEventsInWindow = async () => {
+  const since = new Date(Date.now() - DEMO_QUIZ_GENERATION_GLOBAL_WINDOW_MS);
+  return prisma.quizGenerationEvent.count({
+    where: {
+      status: { not: QuizGenerationEventStatus.failed },
+      createdAt: { gte: since },
+      user: {
+        email: {
+          startsWith: DEMO_USER.emailPrefix,
+          endsWith: `@${DEMO_USER.emailDomain}`,
+        },
+      },
     },
   });
 };
