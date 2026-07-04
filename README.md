@@ -1,33 +1,36 @@
-# Quriosity
+<h1 align="center">Quriosity</h1>
 
-「せっかく学んだのに、気づいたら忘れている」—— そんな課題を解決するために、気になる内容からクイズを作成し繰り返し復習できるようにした学習ツールです。
+<p align="center"><strong>日本語</strong> ・ <a href="./README.en.md">English</a></p>
 
-任意のトピックを入力すると AI がクイズを生成し、**回答 → 即時フィードバック → 結果 → 復習**まで一気通貫で学習できる Web アプリ。
+<p align="center"><a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo（デモアプリを試す）</a></p>
 
-**① トピックを入力 → クイズ生成 → 回答**
+<p align="center">
+  <img width="800" alt="Quriosity クイズ画面" src="https://github.com/user-attachments/assets/5c1cf52a-031f-4734-a51d-b28a0a34512d" />
+</p>
 
-https://github.com/user-attachments/assets/e2fd4081-aac2-4349-b576-dc2dac389825
+---
 
-**② 結果 → 復習**
+**_「せっかく学んだのに、気づいたら忘れている」_** そんな課題を解決するために、気になる内容からクイズを作成し繰り返し復習できるようにした学習 Web アプリ。
 
-https://github.com/user-attachments/assets/dc826dde-1263-43d4-acb9-e48ea1d50337
-
-**🔗 Live Demo:** https://ai-quiz-app-omega.vercel.app/login
-（トップページの **デモログイン** ボタンからワンクリックでお試しいただけます。）
+AI がクイズを生成 → 回答 → 即時フィードバック → 結果 → 復習 まで一気通貫で学習できます。
 
 ---
 
 ## 主な機能
 
-- **AI クイズ生成** — トピックを入力すると AI が問題・選択肢・解説を生成（入力した言語に合わせて生成）
-- **ストリーミング表示** — 全ての問題の生成完了を待たず、準備ができた問題から順次表示
-- **1問ずつ回答 → 誤答時に即フィードバック** — 各問の正誤をその場で確認
+- **クイズ生成** — トピックを入力すると AI が問題・選択肢・解説を生成
+- **ストリーミング表示** — 全問完成を待たず、生成された問題からすぐ表示
+- **回答** → 誤答時に即フィードバックし、各問の正誤をその場で確認
 - **結果サマリ** — 完了後にスコアと間違えた問題を表示
-- **復習** — 間違えた問題を後から復習セッションで解き直し（簡易版 Spaced Repetition を導入）
-- **EN / JA 切替** — UI の表示言語を切り替え（クイズの生成言語は入力テキストに追従）
+- **復習** — 分散学習機能による復習で長期記憶を補助
+- **EN / JA 切替** — UI の表示言語を切り替え（クイズの生成言語は入力テキストから判断）
 - **認証** — Google ログイン ＋ ポートフォリオ用 Demo ログイン
 
----
+<p align="center">
+  <img width="800" alt="誤答時の即時フィードバックと解説" src="https://github.com/user-attachments/assets/b9e5e9fe-b95e-4d46-b748-6ab7c37e061a" />
+</p>
+
+<br>
 
 ## 技術スタック
 
@@ -37,20 +40,34 @@ https://github.com/user-attachments/assets/dc826dde-1263-43d4-acb9-e48ea1d50337
 | DB / ORM  | PostgreSQL（Supabase）/ Prisma 7                     |
 | 認証      | Auth.js v5（Google OAuth・JWT セッション）           |
 | AI        | OpenAI（Vercel AI SDK・構造化出力 + ストリーミング） |
-| UI        | Tailwind CSS 4 / shadcn/ui                           |
+| UI        | Tailwind CSS v4 / shadcn/ui                          |
 | Deploy    | Vercel                                               |
 
----
+<br>
 
 ## プロジェクト構成
 
-`features/<domain>/` 配下を `data.ts`（DB アクセス）/ `services.ts`（ドメインロジック）/ `actions.ts`（Server Actions）/ `validations.ts` / `schemas.ts` に分離する Feature-sliced 構成。
+ドメインごとに責務を分離する Feature-sliced 構成。`features/<domain>/` 内をさらに役割で分割している（下は `quiz` を展開。他ドメインも同じ型）。
 
 ```
-app/          … ルーティング（App Router）・各ページの view
-features/     … ドメインごとのロジック（quiz / topic / review-session / auth ...）
-lib/          … 横断ユーティリティ（prisma / openai / i18n ...）
-prisma/       … スキーマ・マイグレーション
+ai-quiz-app/
+├── app/                     ← App Router：ルーティング＋各画面の Client Component を近接配置
+│   ├── quiz/[sessionId]/    ← 出題〜結果（画面ごとに colocation）
+│   └── api/.../generate/    ← OpenAI を呼ぶ SSE Route Handler
+│
+├── features/                ← ドメイン別に責務を分離
+│   ├── quiz/                ← 1 ドメインの内訳（他も同じ型）
+│   │   ├── actions.ts       ← Server Actions（入口）
+│   │   ├── services.ts      ← ドメインロジック
+│   │   ├── data.ts          ← 認証・認可＋Prisma（DB アクセス）
+│   │   ├── validations.ts   ← 入力の Zod スキーマ
+│   │   └── schemas.ts       ← 生成結果スキーマ
+│   └── ...                  ← topic / user / review-session / auth ほか
+│
+├── components/              ← ui（shadcn）/ shared（共通 UI）
+├── lib/                     ← prisma / openai / i18n / constants ...
+├── prisma/                  ← schema・migrations
+└── auth.ts / proxy.ts       ← Auth.js 設定・認証ガード
 ```
 
 処理の流れ（トピック入力 → 生成 → 回答 → 復習）：
@@ -70,7 +87,7 @@ flowchart LR
     DB -->|誤答を後日| RV[復習セッション]
 ```
 
----
+<br>
 
 ## 技術的に工夫した点
 
@@ -133,7 +150,7 @@ sequenceDiagram
 >
 > ⚖️ **Tradeoff** — コストは約 3 倍。ただし 1 回のクイズ生成あたりの単価は小さいため許容した。
 
----
+<br>
 
 ## テスト
 
@@ -142,15 +159,14 @@ Vitest による 2 層構成。
 - **ユニットテスト**：スキーマ検証・入力バリデーション・復習スケジュールの計算・選択肢のシャッフルなど、純粋なロジックを対象。
 - **統合テスト**：実際の PostgreSQL（Docker）に対して実行。上記の排他制御について、同時に来た 10 件の生成リクエストのうち **実際に生成するのは 1 件だけ** になることを確認。
 
----
+<br>
 
 ## セットアップ
 
-ポートフォリオ用の公開のため、ローカル環境構築の手順は省略しています。動作は **Live Demo** からご確認ください。
+ポートフォリオ用の公開のため、ローカル環境構築の手順は省略しています。
+
+動作は **Live Demo** からご確認ください。
 
 **🔗 Live Demo:** https://ai-quiz-app-omega.vercel.app/login
-（トップページの **デモログイン** ボタンからワンクリックでお試しいただけます。）
-
----
 
 <!-- EN 版は JP 確定後に追加予定 -->
