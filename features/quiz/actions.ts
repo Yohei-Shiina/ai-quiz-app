@@ -80,9 +80,7 @@ export const submitSessionAnswerAction = async ({
 // status='failed' blocks the CAS lock from being re-acquired). Creates a fresh
 // QuizGenerationEvent in `pending` so the next SSE call can CAS-acquire it
 // and resume from the committed-so-far position.
-export const retryQuizGenerationAction = async (
-  quizSessionId: string,
-): Promise<ActionResult> => {
+export const retryQuizGenerationAction = async (quizSessionId: string): Promise<ActionResult> => {
   const t = await getDict();
   const limitError = await getQuizGenerationLimitError(t);
   if (limitError) return { success: false, error: limitError };

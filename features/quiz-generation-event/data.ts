@@ -49,8 +49,6 @@ export const countActiveQuizGenerationEventsInWindow = async () => {
   });
 };
 
-// Demo per-account cap: count the current user's non-failed events over its whole
-// lifetime (no time window), since a demo account is ephemeral and short-lived.
 export const countActiveQuizGenerationEventsForUser = async () => {
   const user = await requireAuth();
   return prisma.quizGenerationEvent.count({
