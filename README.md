@@ -1,7 +1,6 @@
-<h1 align="center">
-  Quriosity<br>
-  <sub><a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo（実際に動くアプリを試す）</a></sub>
-</h1>
+<h1 align="center">Quriosity</h1>
+
+<a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo（デモアプリを試す）</a>
 
 <p align="center">
   <img width="800" alt="Quriosity クイズ画面" src="https://github.com/user-attachments/assets/5c1cf52a-031f-4734-a51d-b28a0a34512d" />
@@ -162,7 +161,9 @@ Vitest による 2 層構成。
 
 ## セットアップ
 
-ポートフォリオ用の公開のため、ローカル環境構築の手順は省略しています。動作は **Live Demo** からご確認ください。
+ポートフォリオ用の公開のため、ローカル環境構築の手順は省略しています。
+
+動作は **Live Demo** からご確認ください。
 
 **🔗 Live Demo:** https://ai-quiz-app-omega.vercel.app/login
 
