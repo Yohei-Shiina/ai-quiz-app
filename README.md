@@ -1,6 +1,6 @@
 <h1 align="center">
   Quriosity<br>
-  <sub><a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo</a></sub>
+  <sub><a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo（実際に動くアプリを試す）</a></sub>
 </h1>
 
 <p align="center">
@@ -25,6 +25,12 @@ AI がクイズを生成 → 回答 → 即時フィードバック → 結果 �
 - **EN / JA 切替** — UI の表示言語を切り替え（クイズの生成言語は入力テキストから判断）
 - **認証** — Google ログイン ＋ ポートフォリオ用 Demo ログイン
 
+<p align="center">
+  <img width="800" alt="誤答時の即時フィードバックと解説" src="https://github.com/user-attachments/assets/b9e5e9fe-b95e-4d46-b748-6ab7c37e061a" />
+</p>
+
+<br>
+
 ## 技術スタック
 
 | 領域      | 採用技術                                             |
@@ -35,6 +41,8 @@ AI がクイズを生成 → 回答 → 即時フィードバック → 結果 �
 | AI        | OpenAI（Vercel AI SDK・構造化出力 + ストリーミング） |
 | UI        | Tailwind CSS v4 / shadcn/ui                          |
 | Deploy    | Vercel                                               |
+
+<br>
 
 ## プロジェクト構成
 
@@ -77,6 +85,8 @@ flowchart LR
     SA2 --> DB
     DB -->|誤答を後日| RV[復習セッション]
 ```
+
+<br>
 
 ## 技術的に工夫した点
 
@@ -139,12 +149,16 @@ sequenceDiagram
 >
 > ⚖️ **Tradeoff** — コストは約 3 倍。ただし 1 回のクイズ生成あたりの単価は小さいため許容した。
 
+<br>
+
 ## テスト
 
 Vitest による 2 層構成。
 
 - **ユニットテスト**：スキーマ検証・入力バリデーション・復習スケジュールの計算・選択肢のシャッフルなど、純粋なロジックを対象。
 - **統合テスト**：実際の PostgreSQL（Docker）に対して実行。上記の排他制御について、同時に来た 10 件の生成リクエストのうち **実際に生成するのは 1 件だけ** になることを確認。
+
+<br>
 
 ## セットアップ
 
