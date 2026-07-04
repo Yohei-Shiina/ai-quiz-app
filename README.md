@@ -1,36 +1,156 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Quriosity
 
-## Getting Started
+「せっかく学んだのに、気づいたら忘れている」—— そんな課題を解決するために、気になる内容からクイズを作成し繰り返し復習できるようにした学習ツールです。
 
-First, run the development server:
+任意のトピックを入力すると AI がクイズを生成し、**回答 → 即時フィードバック → 結果 → 復習**まで一気通貫で学習できる Web アプリ。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+**① トピックを入力 → クイズ生成 → 回答**
+
+https://github.com/user-attachments/assets/e2fd4081-aac2-4349-b576-dc2dac389825
+
+**② 結果 → 復習**
+
+https://github.com/user-attachments/assets/dc826dde-1263-43d4-acb9-e48ea1d50337
+
+**🔗 Live Demo:** https://ai-quiz-app-omega.vercel.app/login
+（トップページの **デモログイン** ボタンからワンクリックでお試しいただけます。）
+
+---
+
+## 主な機能
+
+- **AI クイズ生成** — トピックを入力すると AI が問題・選択肢・解説を生成（入力した言語に合わせて生成）
+- **ストリーミング表示** — 全ての問題の生成完了を待たず、準備ができた問題から順次表示
+- **1問ずつ回答 → 誤答時に即フィードバック** — 各問の正誤をその場で確認
+- **結果サマリ** — 完了後にスコアと間違えた問題を表示
+- **復習** — 間違えた問題を後から復習セッションで解き直し（簡易版 Spaced Repetition を導入）
+- **EN / JA 切替** — UI の表示言語を切り替え（クイズの生成言語は入力テキストに追従）
+- **認証** — Google ログイン ＋ ポートフォリオ用 Demo ログイン
+
+---
+
+## 技術スタック
+
+| 領域      | 採用技術                                             |
+| --------- | ---------------------------------------------------- |
+| Framework | Next.js 16（App Router）/ React 19 / TypeScript      |
+| DB / ORM  | PostgreSQL（Supabase）/ Prisma 7                     |
+| 認証      | Auth.js v5（Google OAuth・JWT セッション）           |
+| AI        | OpenAI（Vercel AI SDK・構造化出力 + ストリーミング） |
+| UI        | Tailwind CSS 4 / shadcn/ui                           |
+| Deploy    | Vercel                                               |
+
+---
+
+## プロジェクト構成
+
+`features/<domain>/` 配下を `data.ts`（DB アクセス）/ `services.ts`（ドメインロジック）/ `actions.ts`（Server Actions）/ `validations.ts` / `schemas.ts` に分離する Feature-sliced 構成。
+
+```
+app/          … ルーティング（App Router）・各ページの view
+features/     … ドメインごとのロジック（quiz / topic / review-session / auth ...）
+lib/          … 横断ユーティリティ（prisma / openai / i18n ...）
+prisma/       … スキーマ・マイグレーション
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+処理の流れ（トピック入力 → 生成 → 回答 → 復習）：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```mermaid
+flowchart LR
+    U[ユーザー] -->|トピック入力| SA[Server Action]
+    SA -->|Topic / Session / 生成イベントを作成| DB[(PostgreSQL)]
+    SA --> Q[クイズ画面]
+    Q -->|生成をリクエスト（SSE）| API[API Route]
+    API --> LLM[OpenAI]
+    LLM -->|1 問ずつ| API
+    API -->|1 問ずつ保存| DB
+    API -->|SSE で順次表示| Q
+    Q -->|回答を送信| SA2[Server Action]
+    SA2 --> DB
+    DB -->|誤答を後日| RV[復習セッション]
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 技術的に工夫した点
 
-To learn more about Next.js, take a look at the following resources:
+### ⚡ 生成した問題から順次表示（ストリーミング）
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> [!NOTE]
+> 🔻 **Problem** — 全問（5 問）の生成完了を待つと、最初の 1 問に回答できるまでユーザーを長く待たせる。
+>
+> 🔧 **Decision** — 完成した問題から 1 問ずつ確定し、全問の完成を待たずに順次画面へ表示（サーバーから SSE でストリーミング）。
+>
+> ⚖️ **Tradeoff** — 全問を一括で扱う場合より実装が複雑になる（1 問ずつの確定・表示・状態管理が必要）。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🔒 クイズの二重生成を防ぐ排他制御
 
-## Deploy on Vercel
+> [!NOTE]
+> 🔻 **Problem** — 生成中のページリロードや複数タブ操作で生成処理が重複して走り、似た問題が余分に生成され、想定した問題数を超えて保存される。
+>
+> 🔧 **Decision** — 1 回の生成につき最初のリクエストだけが担当するようデータベースで排他制御する。
+>
+> ⚖️ **Tradeoff** — 同じクイズを別タブなどで同時に 2 つ開くと、生成を担当しない側の画面には、その時点で保存済みの問題までしか表示されない。残りは再読み込みで取得する（発生頻度が低いため割り切り）。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+<details>
+<summary>技術的な詳細を見る</summary>
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```mermaid
+sequenceDiagram
+    participant B as タブ B（生成リクエスト）
+    participant A as タブ A（生成リクエスト）
+    participant DB as PostgreSQL
+    participant LLM as OpenAI
+
+    A->>DB: 状態: 未処理 → 処理中
+    DB-->>A: 1 行更新 = 担当獲得
+    B->>DB: 状態: 未処理 → 処理中
+    DB-->>B: 0 行更新 = 獲得失敗（保存済みを表示）
+    A->>LLM: クイズ生成をリクエスト
+    loop 1 問完成するごと
+        LLM-->>A: 問題（ストリーミング）
+        A->>DB: 保存（すぐ他から見える）
+        A-->>A: 画面へ送信（SSE）
+    end
+```
+
+ここに至るまでにいくつか試した。
+
+- **不採用案 1**：生成対象の行に排他ロック（`SELECT ... FOR UPDATE`）をかける方式。行ロックはトランザクション内でしか使えず、その長いトランザクションが終わるまで問題が確定（コミット）されない。すると先に画面へ送った問題への回答の保存が、まだコミットされていない問題の ID を参照してデータベースエラー（外部キー違反）になった。
+- **不採用案 2**：接続をまたげる汎用ロック（`pg_advisory_lock`）。ただし接続に紐づく仕組みで、トランザクションごとに接続を返す Supabase の transaction pooler では次の処理が別接続になり効かない（維持するには接続を占有する session pooler が要るが、サーバレスでは接続を枯渇させる）ため見送り。
+- **採用案**：長いトランザクションをやめ、問題を 1 問ずつ小さなトランザクションで確定（＝すぐ他から見える）。重複の排他は、生成を管理する 1 行を「未処理 → 処理中」へ更新できたリクエストだけが担当する条件付きの更新で実現。この更新は Prisma の更新 API が 1 命令で原子的に行うため、専用のロック機構を自作せずに排他が成立する。
+
+</details>
+
+🔗 実装の差分 → **[PR #150](https://github.com/Yohei-Shiina/ai-quiz-app/pull/150)**（同時実行の排他制御と再試行への対応）。背景の要件は [Issue #109](https://github.com/Yohei-Shiina/ai-quiz-app/issues/109)。
+
+### 🎯 クイズ品質の改善
+
+> [!NOTE]
+> 🔻 **Problem** — コスト削減のために下位モデル（gpt-5.4-nano）を選んだが、期待する質を出すにはプロンプトを大幅に増やす必要があり、それでもモデル能力の限界で目的を達成できなかった。
+>
+> 🔧 **Decision** — 上位モデル（gpt-5.4-mini）へ昇格し、素の能力で質を大幅に改善。さらにその出力をより上位のモデルに渡し、分析と改善プロンプトの生成・追加を数回繰り返して質を高めた。
+>
+> ⚖️ **Tradeoff** — コストは約 3 倍。ただし 1 回のクイズ生成あたりの単価は小さいため許容した。
+
+---
+
+## テスト
+
+Vitest による 2 層構成。
+
+- **ユニットテスト**：スキーマ検証・入力バリデーション・復習スケジュールの計算・選択肢のシャッフルなど、純粋なロジックを対象。
+- **統合テスト**：実際の PostgreSQL（Docker）に対して実行。上記の排他制御について、同時に来た 10 件の生成リクエストのうち **実際に生成するのは 1 件だけ** になることを確認。
+
+---
+
+## セットアップ
+
+ポートフォリオ用の公開のため、ローカル環境構築の手順は省略しています。動作は **Live Demo** からご確認ください。
+
+**🔗 Live Demo:** https://ai-quiz-app-omega.vercel.app/login
+（トップページの **デモログイン** ボタンからワンクリックでお試しいただけます。）
+
+---
+
+<!-- EN 版は JP 確定後に追加予定 -->
