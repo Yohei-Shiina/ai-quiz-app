@@ -5,7 +5,7 @@
 <p align="center"><a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo (try the demo app)</a></p>
 
 <p align="center">
-  <img width="800" alt="Quriosity quiz screen" src="https://github.com/user-attachments/assets/5c1cf52a-031f-4734-a51d-b28a0a34512d" />
+  <img width="800" alt="Quriosity quiz screen" src="https://github.com/user-attachments/assets/d2f35d82-5bd9-4a2c-854b-6b5b88f62f3b" />
 </p>
 
 ---
@@ -27,7 +27,7 @@ Enter any topic and the AI generates a quiz: **answer → instant feedback → r
 - **Auth** — Google login plus a portfolio Demo login
 
 <p align="center">
-  <img width="800" alt="Instant feedback and explanation on a wrong answer" src="https://github.com/user-attachments/assets/b9e5e9fe-b95e-4d46-b748-6ab7c37e061a" />
+  <img width="800" alt="Instant feedback and explanation on a wrong answer" src="https://github.com/user-attachments/assets/95c78ac5-8766-480c-93ce-be4cc7563b87" />
 </p>
 
 <br>
