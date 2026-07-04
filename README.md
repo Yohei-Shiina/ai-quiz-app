@@ -1,16 +1,19 @@
-<h1 align="center">Quriosity</h1>
-
-<p align="center">
-  <a href="https://ai-quiz-app-omega.vercel.app/login"><strong>🔗 Live Demo</strong></a>
-</p>
+<h1 align="center">
+  Quriosity<br>
+  <sub><a href="https://ai-quiz-app-omega.vercel.app/login">🔗 Live Demo</a></sub>
+</h1>
 
 <p align="center">
   <img width="800" alt="Quriosity クイズ画面" src="https://github.com/user-attachments/assets/5c1cf52a-031f-4734-a51d-b28a0a34512d" />
 </p>
 
-「せっかく学んだのに、気づいたら忘れている」—— そんな課題を解決するために、気になる内容からクイズを作成し繰り返し復習できるようにした学習ツールです。
+---
 
-**AI がクイズを生成 → 回答 → 即時フィードバック → 結果 → 復習** まで一気通貫で学習できる Web アプリ。
+**_「せっかく学んだのに、気づいたら忘れている」_** そんな課題を解決するために、気になる内容からクイズを作成し繰り返し復習できるようにした学習 Web アプリ。
+
+AI がクイズを生成 → 回答 → 即時フィードバック → 結果 → 復習 まで一気通貫で学習できます。
+
+---
 
 ## 主な機能
 
@@ -22,8 +25,6 @@
 - **EN / JA 切替** — UI の表示言語を切り替え（クイズの生成言語は入力テキストから判断）
 - **認証** — Google ログイン ＋ ポートフォリオ用 Demo ログイン
 
----
-
 ## 技術スタック
 
 | 領域      | 採用技術                                             |
@@ -34,8 +35,6 @@
 | AI        | OpenAI（Vercel AI SDK・構造化出力 + ストリーミング） |
 | UI        | Tailwind CSS v4 / shadcn/ui                          |
 | Deploy    | Vercel                                               |
-
----
 
 ## プロジェクト構成
 
@@ -78,8 +77,6 @@ flowchart LR
     SA2 --> DB
     DB -->|誤答を後日| RV[復習セッション]
 ```
-
----
 
 ## 技術的に工夫した点
 
