@@ -33,7 +33,6 @@ const en = {
     prompt: 'Sign in with Google to continue',
     signIn: 'Sign in with Google',
     orDivider: 'or',
-    demoLabel: 'Demo login',
     demoSignIn: 'Continue as a demo user',
   },
   error: {
@@ -137,7 +136,6 @@ const ja: Dictionary = {
     prompt: 'Googleでサインインして続ける',
     signIn: 'Googleでサインイン',
     orDivider: 'または',
-    demoLabel: 'デモログイン',
     demoSignIn: 'デモユーザーとして続ける',
   },
   error: {

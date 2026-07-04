@@ -57,7 +57,6 @@ export default async function LoginPage() {
         <Card className="py-6">
           <CardHeader className="px-6">
             <CardTitle>{t.login.welcome}</CardTitle>
-            <CardDescription>{t.login.prompt}</CardDescription>
           </CardHeader>
           <CardContent className="px-6 flex flex-col gap-6">
             <form action={handleSignIn}>
@@ -74,7 +73,6 @@ export default async function LoginPage() {
             </div>
 
             <form action={handleDemoSignIn} className="flex flex-col gap-2.5">
-              <p className="text-sm font-medium text-foreground">{t.login.demoLabel}</p>
               <Button type="submit" size="lg" variant="secondary" className="w-full">
                 {t.login.demoSignIn}
               </Button>
