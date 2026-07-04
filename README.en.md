@@ -77,7 +77,7 @@ flowchart LR
     U[User] -->|Enter topic| SA[Server Action]
     SA -->|Create Topic / Session / generation event| DB[(PostgreSQL)]
     SA --> Q[Quiz screen]
-    Q -->|Request generation (SSE)| API[API Route]
+    Q -->|Request generation via SSE| API[API Route]
     API --> LLM[OpenAI]
     LLM -->|One question at a time| API
     API -->|Save one at a time| DB
