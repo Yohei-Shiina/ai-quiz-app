@@ -33,11 +33,7 @@ const en = {
     prompt: 'Sign in with Google to continue',
     signIn: 'Sign in with Google',
     orDivider: 'or',
-    demoLabel: 'Demo login',
-    idLabel: 'ID',
-    passwordLabel: 'Password',
-    credentialsSignIn: 'Sign in',
-    invalidCredentials: 'Invalid ID or password',
+    demoSignIn: 'Continue as a demo user',
   },
   error: {
     title: 'Something went wrong!',
@@ -98,6 +94,10 @@ const en = {
     topicRequired: 'Topic is required',
     rateLimit: (limit: number) =>
       `You've reached your limit of ${limit} new quizzes per 24 hours. Please try again later.`,
+    demoAccountLimit: (limit: number) =>
+      `This demo account has reached its limit of ${limit} quizzes.`,
+    demoGlobalLimit: (limit: number) =>
+      `The demo has reached its limit of ${limit} quizzes in the last 24 hours. Please try again later.`,
   },
 };
 
@@ -136,11 +136,7 @@ const ja: Dictionary = {
     prompt: 'Googleでサインインして続ける',
     signIn: 'Googleでサインイン',
     orDivider: 'または',
-    demoLabel: 'デモログイン',
-    idLabel: 'ID',
-    passwordLabel: 'パスワード',
-    credentialsSignIn: 'サインイン',
-    invalidCredentials: 'IDまたはパスワードが正しくありません',
+    demoSignIn: 'デモユーザーとして続ける',
   },
   error: {
     title: '問題が発生しました',
@@ -201,6 +197,10 @@ const ja: Dictionary = {
     topicRequired: 'トピックを入力してください',
     rateLimit: (limit: number) =>
       `24時間あたりの新規クイズ作成の上限（${limit}件）に達しました。しばらくしてからお試しください。`,
+    demoAccountLimit: (limit: number) =>
+      `このデモアカウントで作成できるクイズは${limit}件までです。`,
+    demoGlobalLimit: (limit: number) =>
+      `デモ全体の生成上限（24時間で${limit}件）に達しました。しばらくしてからお試しください。`,
   },
 };
 

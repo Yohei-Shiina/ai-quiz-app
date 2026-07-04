@@ -10,7 +10,7 @@ All rules in this file apply regardless of the conversation language.
 - Auth.js v5 (next-auth 5.0.0-beta.30, Google OAuth, JWT sessions)
 - Prisma 7.5.0 ORM + Supabase PostgreSQL (`@prisma/adapter-pg` 7.7.0)
 - shadcn 4.0.8 / Tailwind CSS 4
-- OpenAI GPT-4o mini (`@ai-sdk/openai` 3.0.65, `ai` 6.0.191) for quiz generation
+- OpenAI `gpt-5.4-mini` (`@ai-sdk/openai` 3.0.65, `ai` 6.0.191) for quiz generation (see `lib/openai.ts` `DEFAULT_QUIZ_MODEL`)
 
 # Absolute rules to follow
 - Prepend 📝 to every reply, in addition to any other required emoji, to show you are following the rules.
