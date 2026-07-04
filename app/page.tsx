@@ -12,7 +12,7 @@ export default async function Home() {
     <div className="min-h-screen">
       <SiteHeader />
       <div className="max-w-md sm:max-w-lg lg:max-w-4xl mx-auto px-4">
-        <main className="flex flex-col gap-4 pb-24">
+        <main className="flex flex-col gap-4 pt-6 pb-24">
           <CollectionView topics={topics} reviewDueCount={reviewDueCount} />
         </main>
       </div>
