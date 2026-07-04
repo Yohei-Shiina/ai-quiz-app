@@ -8,11 +8,33 @@ import {
   createQuizGenerationEvent,
   hasPendingQuizGenerationEventBySession,
 } from '@/features/quiz-generation-event/data';
-import { isQuizGenerationLimitReached } from '@/features/quiz-generation-event/services';
-import { QUIZ_GENERATION_RATE_LIMIT } from '@/lib/constants';
+import { getQuizGenerationLimit } from '@/features/quiz-generation-event/services';
+import {
+  DEMO_QUIZ_GENERATION_GLOBAL_LIMIT,
+  DEMO_QUIZ_GENERATION_PER_ACCOUNT_LIMIT,
+  QUIZ_GENERATION_RATE_LIMIT,
+} from '@/lib/constants';
 import { getDict } from '@/lib/i18n/server';
 import { quizModelId } from '@/lib/openai';
 import { ActionResult } from '@/lib/types';
+
+// Resolves the active quiz-generation limit to a user-facing message, or null when
+// generation is allowed. Keeps the per-limit copy in one place for both actions.
+const getQuizGenerationLimitError = async (
+  t: Awaited<ReturnType<typeof getDict>>,
+): Promise<string | null> => {
+  const limit = await getQuizGenerationLimit();
+  switch (limit) {
+    case 'none':
+      return null;
+    case 'user_window':
+      return t.validation.rateLimit(QUIZ_GENERATION_RATE_LIMIT);
+    case 'demo_account':
+      return t.validation.demoAccountLimit(DEMO_QUIZ_GENERATION_PER_ACCOUNT_LIMIT);
+    case 'demo_global':
+      return t.validation.demoGlobalLimit(DEMO_QUIZ_GENERATION_GLOBAL_LIMIT);
+  }
+};
 
 export const startQuizAction = async (
   _prevState: ActionResult | null,
@@ -21,8 +43,8 @@ export const startQuizAction = async (
   const result = validateTitleTopic(formData);
   const t = await getDict();
   if (result.error) return { success: false, error: t.validation.topicRequired };
-  if (await isQuizGenerationLimitReached())
-    return { success: false, error: t.validation.rateLimit(QUIZ_GENERATION_RATE_LIMIT) };
+  const limitError = await getQuizGenerationLimitError(t);
+  if (limitError) return { success: false, error: limitError };
   const session = await createTopicAndSession(result.data!.title);
   redirect(`/quiz/${session.id}`);
 };
@@ -62,8 +84,8 @@ export const retryQuizGenerationAction = async (
   quizSessionId: string,
 ): Promise<ActionResult> => {
   const t = await getDict();
-  if (await isQuizGenerationLimitReached())
-    return { success: false, error: t.validation.rateLimit(QUIZ_GENERATION_RATE_LIMIT) };
+  const limitError = await getQuizGenerationLimitError(t);
+  if (limitError) return { success: false, error: limitError };
   // Problem: multi-tab / API parallel retry creates multiple pending events, making
   //          tryAcquireGenerationLockBySession see count > 1 and lock the session
   //          into a permanent CAS dead-end (no /generate can ever acquire).
